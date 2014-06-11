@@ -3,7 +3,7 @@ Summary:    The OpenGLES Canvas Core Demo
 Version:    0.9.13
 Release:    1
 Group:      System/Libraries
-License:    Flora
+License:    Apache
 URL:        https://review.tizen.org/git/?p=platform/core/uifw/dali-demo.git;a=summary
 Source0:    %{name}-%{version}.tar.gz
 
