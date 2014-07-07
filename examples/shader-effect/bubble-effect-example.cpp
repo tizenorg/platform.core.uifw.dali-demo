@@ -34,7 +34,6 @@ const char* BACKGROUND_IMAGES[]=
   DALI_IMAGE_DIR "background-2.jpg",
   DALI_IMAGE_DIR "background-3.jpg",
   DALI_IMAGE_DIR "background-4.jpg",
-  DALI_IMAGE_DIR "background-5.jpg",
 };
 const unsigned int NUM_BACKGROUND_IMAGES( sizeof( BACKGROUND_IMAGES ) / sizeof( BACKGROUND_IMAGES[0] ) );
 
