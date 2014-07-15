@@ -1,0 +1,88 @@
+//
+// Copyright (c) 2014 Samsung Electronics Co., Ltd.
+//
+// Licensed under the Flora License, Version 1.0 (the License);
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://floralicense.org/license/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an AS IS BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+{
+  "styles":
+  {
+    "menu-item-dim":
+    {
+      "actors":
+      {
+        "background":
+        {
+          "color-alpha":"0"
+        },
+        "icon":
+        {
+          "color":[ 0.27, 0.56, 1, 0.2 ],
+          "image":{ "filename":"{IMAGE_DIR}icon_play_small.png" }
+        },
+        "label":
+        {
+          "color-alpha":"0.2",
+          "text":"<font size='21' weight='medium'>LIVE TV</font>"
+        }
+      }
+    }
+  },
+  "templates":
+  {
+    "menu-item":
+    {
+      "name":"root",
+      "type":"Actor",
+      "parent-origin":"TOP_CENTER",
+      "anchor-point":"TOP_CENTER",
+      "size":"{DEFAULT_MENU_ITEM_SIZE}",
+      "color-mode":"USE_OWN_COLOR",
+      "actors":
+      [
+        {
+          "name":"background",
+          "type":"ImageActor",
+          "parent-origin":"CENTER",
+          "anchor-point":"CENTER",
+          "size":"{DEFAULT_MENU_ITEM_SIZE}",
+          "color-mode":"USE_OWN_COLOR"
+        },
+        {
+          "name":"icon",
+          "type":"ImageActor",
+          "parent-origin":"TOP_LEFT",
+          "anchor-point":"TOP_LEFT",
+          "position":[99,26,0],
+          "size":[72,72,1]
+        },
+        {
+          "type":"Actor",
+          "parent-origin":"BOTTOM_LEFT",
+          "anchor-point":"BOTTOM_LEFT",
+          "position":[20,8,0],
+          "size":[230,44,1],
+          "actors":
+          [
+            {
+              "name":"label",
+              "type":"TextView",
+              "parent-origin":"CENTER",
+              "anchor-point":"CENTER",
+              "markup-enabled":true
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

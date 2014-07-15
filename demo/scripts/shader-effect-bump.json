@@ -1,0 +1,88 @@
+{
+  // library of animations
+  "animations":
+  {
+    "bump":
+    {
+      "duration": 5.0,
+      "loop": true,
+      "end-action":"DISCARD",
+      "properties":
+      [
+        {
+          "actor":"bump-image",  // referenced actors must exist on stage
+          "property":"uLightPosition",
+          "value":[-0.8, 0.0, 1.5],
+          "alpha-function": "BOUNCE",
+          "time-period": { "duration": 2.5 }
+        },
+        {
+          "actor":"bump-image",  // referenced actors must exist on stage
+          "property":"uLightPosition",
+          "value":[0.8, 0.0, 1.5],
+          "alpha-function": "BOUNCE",
+          "time-period": {"delay": 2.5, "duration": 2.5 }
+        }
+      ]
+    }
+  },
+  // ShaderEffect instances
+  "shader-effects":
+  {
+    "bump":
+    {
+      "image":
+      {
+        "filename":"{DALI_IMAGE_DIR}panel-n-256.png"
+      },
+      "program":
+      {
+        "vertex-filename": "{DALI_SCRIPT_DIR}bump.vert",
+        "fragment-filename": "{DALI_SCRIPT_DIR}bump.frag"
+      },
+      "uLightPosition": [0.0, 0.0, -1.5],
+      "uAmbientLight":  0.3
+    }
+  },
+  // a tree of actors
+  "stage":
+  [
+    {
+      "name":"camera",
+      "type":"CameraActor",
+      "parent-origin":[0.5,0.5,0.5],
+      "field-of-view":0.785,
+      "near-plane-distance":1.0,
+      "far-plane-distance":20.0,
+      "position":[0,0,2],
+      "aspect-ratio": 0.6 // 75 // stage.width / stage.height
+    },
+    {
+      "name":"bump-image",
+      "type":"ImageActor",
+      "parent-origin":[0.5,0.5,0.5],
+      "size": [0.9, 0.9, 1],
+      "position":[0.0,0.0,0.0],
+      "image":
+      {
+        "filename":"{DALI_IMAGE_DIR}panel-d-256.png"
+      },
+      "effect": "bump",
+      "signals" :
+      [
+        { "name" : "on-stage", "action": "play", "animation": "bump" }
+      ]
+    }
+  ],
+  // RenderTask sets
+  "render-tasks":
+  {
+    "stage": // RenderTask set called 'stage' is added automatically when 'stage' actor tree is added
+    [
+      {
+        "source-actor":"bump-image",      // by name, must exist already on the stage
+        "camera-actor":"camera"
+      }
+    ]
+  }
+}

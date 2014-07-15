@@ -1,0 +1,126 @@
+{
+  "constants":
+  {
+    "CONFIG_SCRIPT_LOG_LEVEL": "Verbose"
+  },
+  "stage":
+  [
+    // First Button
+    {
+      "type":"PushButton",
+      "parent-origin": "TOP_CENTER",
+      "anchor-point": "TOP_CENTER",
+      "position":[0,0,0],
+      "size":[0,200,0],
+      "normal-state-actor":
+      {
+        "type":"ImageActor",
+        "image" :
+        {
+          "filename":"{DALI_IMAGE_DIR}button-normal.png"
+        }
+      },
+      "pressed-state-actor":
+      {
+        "type":"ImageActor",
+        "image" :
+        {
+          "filename":"{DALI_IMAGE_DIR}button-pressed.png"
+        }
+      },
+      "label-actor":
+      {
+        "type":"TextView",
+        "text":"Normal"
+      }
+    },
+
+    // Second Button
+    {
+      "type":"PushButton",
+      "parent-origin": "CENTER",
+      "anchor-point": "CENTER",
+      "position":[0,0,0],
+      "size":[0,200,0],
+      "label-actor":
+      {
+        "type":"TextView",
+        "text":"Dimmed"
+      },
+      "dimmed":true,
+      "normal-state-actor":
+      {
+        "type":"ImageActor",
+        "image" :
+        {
+          "filename":"{DALI_IMAGE_DIR}button-normal.png"
+        }
+      },
+      "pressed-state-actor":
+      {
+        "type":"ImageActor",
+        "image" :
+        {
+          "filename":"{DALI_IMAGE_DIR}button-pressed.png"
+        }
+      },
+      "dimmed-state-actor":
+      {
+        "type":"ImageActor",
+        "image" :
+        {
+          "filename":"{DALI_IMAGE_DIR}button-dimmed.png"
+        }
+      }
+    },
+
+    // Third Button
+    {
+      "type":"PushButton",
+      "name":"toggle-button",
+      "parent-origin": "BOTTOM_CENTER",
+      "anchor-point": "BOTTOM_CENTER",
+      "position":[0,0,0],
+      "size":[0,200,0],
+      "label-actor":
+      {
+        "type":"TextView",
+        "text":"Toggle"
+      },
+      "togglable":true,
+      "normal-state-actor":
+      {
+        "type":"ImageActor",
+        "style":"STYLE_NINE_PATCH",
+        "border":[26,24,26,23],
+        "image" :
+        {
+          "filename":"{DALI_IMAGE_DIR}button-toggle-up.png"
+        }
+      },
+      "pressed-state-actor":
+      {
+        "type":"ImageActor",
+        "style":"STYLE_NINE_PATCH",
+        "border":[26,24,26,23],
+        "image" :
+        {
+          "filename":"{DALI_IMAGE_DIR}button-toggle-down.png"
+        }
+      },
+      "signals" :
+      [
+        { "name" : "toggled",
+          "action" : "set",
+          "actor" : "toggle-button",
+          "property" : "label-actor",
+          "value" :
+          {
+            "type":"TextView",
+            "text":"Using a 9-patch image"
+          }
+        }
+      ]
+    }
+  ]
+}

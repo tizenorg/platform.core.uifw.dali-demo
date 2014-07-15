@@ -1,0 +1,97 @@
+// Made for a 480x800 screen
+{
+  "stage":
+  [
+    {
+      "name":"background-image-actor",
+      "type":"ImageActor",
+      "image":
+      {
+        "filename": "{DALI_IMAGE_DIR}background.png"
+      },
+      "size": [480.0, 800.0, 0.0],
+      "position": [0.0, 0.0, -0.1],
+      "anchor-point":"CENTER",
+      "parent-origin":"CENTER"
+    },
+    {
+      "name":"title",
+      "type":"TextView",
+      "text":"Hello World",
+      "position": [0.0, 0.0, 1.0],
+      "font":"Freesans",
+      "parent-origin":"TOP_CENTER",
+      "anchor-point":"TOP_CENTER"
+    },
+    {
+      "name":"image-magazine-0",
+      "type":"ImageActor",
+      "image":
+      {
+        "filename": "{DALI_IMAGE_DIR}magazine_0.jpg"
+      },
+      "position": [0.0, 50.0, 0.0],
+      "size": [200.0, 200.0, 0.0],
+      "anchor-point":"TOP_LEFT",
+      "parent-origin":"TOP_LEFT"
+    },
+    {
+      "name":"image-magazine-1",
+      "type":"ImageActor",
+      "image":
+      {
+        "filename": "{DALI_IMAGE_DIR}magazine_1.jpg"
+      },
+      "position": [0.0, 50.0, 0.0],
+      "size": [200.0, 200.0, 0.0],
+      "anchor-point":"TOP_RIGHT",
+      "parent-origin":"TOP_RIGHT"
+    },
+    {
+      "name":"image-magazine-2",
+      "type":"ImageActor",
+      "image":
+      {
+        "filename": "{DALI_IMAGE_DIR}magazine_2.jpg"
+      },
+      "position": [-100.0, 250.0, 0.0],
+      "size": [150.0, 150.0, 0.0],
+      "anchor-point":"TOP_RIGHT",
+      "parent-origin":"TOP_RIGHT"
+    },
+    {
+      "name":"image-magazine-3",
+      "type":"ImageActor",
+      "image":
+      {
+        "filename": "{DALI_IMAGE_DIR}magazine_3.jpg"
+      },
+      "size": [300.0, 300.0, 0.0],
+      "anchor-point":"TOP_CENTER",
+      "parent-origin":"CENTER"
+    },
+    {
+      "name":"image-magazine-4",
+      "type":"ImageActor",
+      "image":
+      {
+        "filename": "{DALI_IMAGE_DIR}magazine_4.jpg"
+      },
+      "size": [100.0, 100.0, 0.0],
+      "anchor-point":"BOTTOM_LEFT",
+      "parent-origin":"CENTER_LEFT"
+    },
+    {
+      "name":"image-magazine-5",
+      "type":"ImageActor",
+      "image":
+      {
+        "filename": "{DALI_IMAGE_DIR}magazine_5.jpg"
+      },
+      "size": [100.0, 100.0, 0.0],
+      "anchor-point":"BOTTOM_RIGHT",
+      "parent-origin":"BOTTOM_RIGHT"
+    }
+  ]
+}
+

@@ -1,0 +1,42 @@
+{
+  // a tree of actors
+  "stage":
+  [
+    {
+      "type":"Actor",
+      "size":[400,400,1],
+      "parent-origin": "CENTER",
+      "actors":
+      [
+        {
+          "type":"TextView",
+          "size":[400,400,1],
+          "text":"<font size='16>Text with<br>\n<b>'markup-enabled':true</b></font>",
+          "markup-enabled":true,
+          "multiline-policy": "SplitByNewLineChar",
+          "horizontal-alignment": "HorizontalCenter",
+          "vertical-alignment": "VerticalBottom",
+          "width-exceed-policy": "Fade",
+          "line-justification": "Center",
+          "fade-boundary": [ 50, 50, 0, 0],
+          "line-height-offset": 25.0,
+          "parent-origin": "TOP_CENTER"
+        },
+        {
+          "type":"TextView",
+          "size":[400,400,1],
+          "text":"<font size='16'>Text with\n<b>'markup-enabled':false</b></font>",
+          "markup-enabled":false,
+          "multiline-policy": "SplitByWord",
+          "horizontal-alignment": "HorizontalLeft",
+          "vertical-alignment": "VerticalTop",
+          "width-exceed-policy": "ShrinkToFit",
+          "height-exceed-policy": "Original",
+          "line-justification": "Right",
+          "line-height-offset": 5.0,
+          "parent-origin": "BOTTOM_CENTER"
+        }
+      ]
+    }
+  ]
+}
