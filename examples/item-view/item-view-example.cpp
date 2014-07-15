@@ -269,17 +269,23 @@ public:
     SetLayoutTitle();
 
     // Create an edit mode button. (left of toolbar)
-    Toolkit::PushButton editButton = Toolkit::PushButton::New();
-    editButton.SetBackgroundImage( Image::New( EDIT_IMAGE ) );
-    editButton.ClickedSignal().Connect( this, &ItemViewExample::OnModeButtonClicked);
-    editButton.SetLeaveRequired( true );
+    ImageActor editButton = ImageActor::New( Image::New( EDIT_IMAGE ) );
+    Toolkit::PushButton button = Toolkit::PushButton::New();
+    button.ClickedSignal().Connect( this, &ItemViewExample::OnModeButtonClicked);
+    button.SetSize( DemoHelper::DEFAULT_VIEW_STYLE.mToolBarHeight, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarHeight );
+    button.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    button.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    editButton.Add( button );
     mToolBar.AddControl( editButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
 
     // Create a layout toggle button. (right of toolbar)
-    mLayoutButton = Toolkit::PushButton::New();
-    mLayoutButton.SetBackgroundImage( Image::New( SPIRAL_LAYOUT_IMAGE ) );
-    mLayoutButton.ClickedSignal().Connect( this, &ItemViewExample::OnLayoutButtonClicked);
-    mLayoutButton.SetLeaveRequired( true );
+    mLayoutButton = ImageActor::New( Image::New( SPIRAL_LAYOUT_IMAGE ) );
+    button = Toolkit::PushButton::New();
+    button.ClickedSignal().Connect( this, &ItemViewExample::OnLayoutButtonClicked);
+    button.SetSize( DemoHelper::DEFAULT_VIEW_STYLE.mToolBarHeight, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarHeight );
+    button.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    button.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    mLayoutButton.Add( button );
     mToolBar.AddControl( mLayoutButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
     SetLayoutImage();
 
@@ -851,19 +857,19 @@ public:
       {
         case SPIRAL_LAYOUT:
         {
-          mLayoutButton.SetBackgroundImage( Image::New( SPIRAL_LAYOUT_IMAGE ) );
+          mLayoutButton.SetImage( Image::New( SPIRAL_LAYOUT_IMAGE ) );
           break;
         }
 
         case GRID_LAYOUT:
         {
-          mLayoutButton.SetBackgroundImage( Image::New( GRID_LAYOUT_IMAGE ) );
+          mLayoutButton.SetImage( Image::New( GRID_LAYOUT_IMAGE ) );
           break;
         }
 
         case DEPTH_LAYOUT:
         {
-          mLayoutButton.SetBackgroundImage( Image::New( DEPTH_LAYOUT_IMAGE ) );
+          mLayoutButton.SetImage( Image::New( DEPTH_LAYOUT_IMAGE ) );
           break;
         }
 
@@ -1134,7 +1140,7 @@ private:
   Toolkit::Popup mMenu;
 
   TapGestureDetector mTapDetector;
-  Toolkit::PushButton mLayoutButton;
+  ImageActor mLayoutButton;
   Toolkit::PushButton mDeleteButton;
   Toolkit::PushButton mInsertButton;
   Toolkit::PushButton mReplaceButton;
