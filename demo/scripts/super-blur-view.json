@@ -1,0 +1,91 @@
+{
+  "constants":
+  {
+    "TEXT_VIEW_SIZE": [200,150,1]
+  },
+  "animations":
+  {
+    "blur":
+    {
+      "duration":1,
+      "properties":
+      [
+        {
+          "actor":"super-blur",
+          "property":"blur-strength",
+          "value":1,
+          "time-period": { "delay": 0, "duration": 1 }
+        }
+      ]
+    },
+    "clear":
+    {
+      "duration":1,
+      "properties":
+      [
+        {
+          "actor":"super-blur",
+          "property":"blur-strength",
+          "value":0,
+          "time-period": { "delay": 0, "duration": 1 }
+        }
+      ]
+    }
+  },
+  "stage":
+  [
+    // SuperBlurView
+    {
+      "type":"SuperBlurView",
+      "name":"super-blur",
+      "parent-origin": "TOP_CENTER",
+      "anchor-point": "TOP_CENTER",
+      "position":[0,10,0],
+      "size":[460,600,0],
+      "image" :
+      {
+        "filename":"{DALI_IMAGE_DIR}lockscreenTemp2.jpg"
+      }
+    },
+
+    // Button to blur/clear
+    {
+      "type":"PushButton",
+      "name":"toggle-button",
+      "parent-origin": "BOTTOM_CENTER",
+      "anchor-point": "BOTTOM_CENTER",
+      "position":[0,0,0],
+      "size":[0,100,0],
+      "label-actor":
+      {
+        "type":"TextView",
+        "text":"Blur"
+      },
+      "normal-state-actor":
+      {
+        "type":"ImageActor",
+        "style":"STYLE_NINE_PATCH",
+        "border":[26,24,26,23],
+        "image" :
+        {
+          "filename":"{DALI_IMAGE_DIR}button-toggle-up.png"
+        }
+      },
+      "pressed-state-actor":
+      {
+        "type":"ImageActor",
+        "style":"STYLE_NINE_PATCH",
+        "border":[26,24,26,23],
+        "image" :
+        {
+          "filename":"{DALI_IMAGE_DIR}button-toggle-down.png"
+        }
+      },
+      "signals" :
+      [
+        { "name" : "pressed",  "action": "play", "animation": "blur"  },
+        { "name" : "released", "action": "play", "animation": "clear" }
+      ]
+    }
+  ]
+}

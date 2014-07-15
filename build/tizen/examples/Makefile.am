@@ -29,14 +29,23 @@ bin_PROGRAMS = \
                page-turn-view.example \
                radial-menu.example \
                scroll-view.example \
-               shadow-bone-lighting.example
+               shadow-bone-lighting.example \
+               dali-builder.example \
+               builder-examples.example
+
 
 daliimagedir = $(appdatadir)/images/
 dalimodeldir = $(appdatadir)/models/
+daliscriptdir = $(appdatadir)/scripts/
+dalishaderdir = $(appdatadir)/shaders/
+dalisounddir = $(appdatadir)/sounds/
 
 BASE_CXXFLAGS = -I../../../examples \
                    -DDALI_IMAGE_DIR="\"${daliimagedir}\"" \
                    -DDALI_MODEL_DIR="\"${dalimodeldir}\"" \
+                   -DDALI_SCRIPT_DIR="\"${daliscriptdir}\"" \
+                   -DDALI_SHADER_DIR="\"${dalishaderdir}\"" \
+                   -DDALI_SOUND_DIR="\"${dalisounddir}\"" \
                    $(DALIDEMO_CFLAGS) \
                    $(ECORE_X_CFLAGS) \
                    $(CAPI_MEDIA_PLAYER_CFLAGS) \
@@ -125,3 +134,13 @@ shadow_bone_lighting_example_SOURCES = $(examples_src_dir)/shadows/shadow-bone-l
 shadow_bone_lighting_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 shadow_bone_lighting_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 shadow_bone_lighting_example_LDADD = $(EXAMPLE_LDADD)
+
+dali_builder_example_SOURCES = $(examples_src_dir)/builder/dali-builder.cpp
+dali_builder_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+dali_builder_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+dali_builder_example_LDADD = $(EXAMPLE_LDADD)
+
+builder_examples_example_SOURCES = $(examples_src_dir)/builder/examples.cpp
+builder_examples_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+builder_examples_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+builder_examples_example_LDADD = $(EXAMPLE_LDADD)
