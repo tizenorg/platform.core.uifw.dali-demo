@@ -207,9 +207,14 @@ public:
     mEffectIcon[ SpiralEffect ]    = Image::New( EFFECT_SPIRAL_IMAGE );
 
     // Create a effect change button. (right of toolbar)
-    mEffectChangeButton = Toolkit::PushButton::New();
-    mEffectChangeButton.ClickedSignal().Connect( this, &ExampleController::OnEffectTouched );
-    mToolBar.AddControl( mEffectChangeButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
+    mEffectChangeIcon = ImageActor::New();
+    Toolkit::PushButton button = Toolkit::PushButton::New();
+    button.ClickedSignal().Connect( this, &ExampleController::OnEffectTouched );
+    button.SetSize( DemoHelper::DEFAULT_VIEW_STYLE.mToolBarHeight, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarHeight );
+    button.SetParentOrigin( ParentOrigin::TOP_RIGHT );
+    button.SetAnchorPoint( AnchorPoint::TOP_RIGHT );
+    mEffectChangeIcon.Add( button );
+    mToolBar.AddControl( mEffectChangeIcon, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
 
     // Create the content layer.
     AddContentLayer();
@@ -268,7 +273,7 @@ private:
     ss << APPLICATION_TITLE << ": " << EFFECT_MODE_NAME[mEffectMode];
     SetTitle(ss.str());
 
-    mEffectChangeButton.SetBackgroundImage( mEffectIcon[ mEffectMode ] );
+    mEffectChangeIcon.SetImage( mEffectIcon[ mEffectMode ] );
 
     // remove old Effect if exists.
     if(mScrollViewEffect)
@@ -726,7 +731,7 @@ private:
   EffectMode mEffectMode;                               ///< Current Effect mode
 
   Image mEffectIcon[Total];                             ///< Icons for the effect button
-  Toolkit::PushButton mEffectChangeButton;              ///< Effect Change Button
+  ImageActor mEffectChangeIcon;                         ///< Effect Change icon
 };
 
 int main(int argc, char **argv)
