@@ -61,4 +61,7 @@
 	<ui-application appid="image-scaling-irregular-grid.example" exec="/opt/apps/com.samsung.dali-demo/bin/image-scaling-irregular-grid.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Image Scaling Modes</label>
 	</ui-application>
+	<ui-application appid="image-sampler.example" exec="/opt/apps/com.samsung.dali-demo/bin/image-sampler.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Image Sampling</label>
+	</ui-application>
 </manifest>
