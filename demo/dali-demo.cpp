@@ -40,6 +40,7 @@ int main(int argc, char **argv)
   demo.AddExample(Example("shadow-bone-lighting.example", "Lights and shadows"));
   demo.AddExample(Example("builder.example", "Script Based UI"));
   demo.AddExample(Example("image-scaling-irregular-grid.example", "Image Scaling Modes"));
+  demo.AddExample(Example("image-sampler.example", "Image Sampling"));
   app.MainLoop();
 
   return 0;
