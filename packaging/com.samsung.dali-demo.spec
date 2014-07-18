@@ -114,9 +114,11 @@ exit 0
 %manifest com.samsung.dali-demo.manifest
 %defattr(-,root,root,-)
 %{dali_app_exe_dir}/dali-demo
+%{dali_app_exe_dir}/dali-builder
 %{dali_app_exe_dir}/*.example
 %{dali_app_ro_dir}/images/*
 %{dali_app_ro_dir}/models/*
+%{dali_app_ro_dir}/scripts/*
 %{dali_xml_file_dir}/%{name}.xml
 %{dali_icon_dir}/*
 %if !%{with wayland}
