@@ -146,7 +146,8 @@ void RadialMenuExample::OnInit(Application& app)
                       DemoHelper::DEFAULT_PLAY_PADDING );
 
   Vector2 imgSize = Image::GetImageSize(TEST_OUTER_RING_FILENAME);
-  float scale = Stage::GetCurrent().GetSize().width / imgSize.width;
+  float stageSize = std::min(Stage::GetCurrent().GetSize().width, Stage::GetCurrent().GetSize().height);
+  float scale = stageSize / imgSize.width;
 
   mRadialSweepView1 = CreateSweepView( TEST_OUTER_RING_FILENAME, Degree(-90.0f), Degree(-90.0f));
   mRadialSweepView2 = CreateSweepView( TEST_INNER_RING_FILENAME, Degree(90.0f),  Degree(0.0f));
