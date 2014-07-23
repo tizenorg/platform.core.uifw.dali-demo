@@ -43,7 +43,7 @@ struct ViewStyle
   float mToolBarPadding;          ///< The tool bar padding between controls for the given dpi above.
 };
 
-const ViewStyle DEFAULT_VIEW_STYLE( 0.1f, 0.7f, 315.f, 80.f, 4.f );
+const ViewStyle DEFAULT_VIEW_STYLE( 0.1f, 0.7f, 300.f, 65.f, 4.f );
 
 const char*                   DEFAULT_TEXT_STYLE_FONT_FAMILY("HelveticaNue");
 const char*                   DEFAULT_TEXT_STYLE_FONT_STYLE("Regular");
@@ -57,13 +57,21 @@ const Dali::Toolkit::Alignment::Padding DEFAULT_MODE_SWITCH_PADDING(8.0f, 8.0f, 
 static Dali::TextStyle defaultTextStyle;
 static bool textStyleSet=false;
 
+float ScalePointSize(int pointSize)
+{
+  Dali::Stage stage = Dali::Stage::GetCurrent();
+  Dali::Vector2 dpi = stage.GetDpi();
+  float meanDpi = (dpi.height + dpi.width) * 0.5f;
+  return (pointSize * 220.0f) / meanDpi;
+}
+
 Dali::TextStyle& GetDefaultTextStyle()
 {
   if(!textStyleSet)
   {
     defaultTextStyle.SetFontName(DEFAULT_TEXT_STYLE_FONT_FAMILY);
     defaultTextStyle.SetFontStyle(DEFAULT_TEXT_STYLE_FONT_STYLE);
-    defaultTextStyle.SetFontPointSize(DEFAULT_TEXT_STYLE_POINT_SIZE);
+    defaultTextStyle.SetFontPointSize(Dali::PointSize(ScalePointSize(DEFAULT_TEXT_STYLE_POINT_SIZE)));
     defaultTextStyle.SetWeight(DEFAULT_TEXT_STYLE_WEIGHT);
     defaultTextStyle.SetTextColor(DEFAULT_TEXT_STYLE_COLOR);
     textStyleSet = true;
