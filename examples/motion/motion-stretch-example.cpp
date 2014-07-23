@@ -129,12 +129,15 @@ public:
 
     // Creates a default view with a default tool bar.
     // The view is added to the stage.
+    DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+    style.mDpi = Stage::GetCurrent().GetDpi().y;
     mContentLayer = DemoHelper::CreateView( mApplication,
                                             mView,
                                             mToolBar,
                                             BACKGROUND_IMAGE_PATH,
                                             TOOLBAR_IMAGE,
-                                            APPLICATION_TITLE);
+                                            APPLICATION_TITLE,
+                                            style );
 
     //Add an slideshow icon on the right of the title
     mIconEffectsOff = Image::New( EFFECTS_OFF_ICON );
