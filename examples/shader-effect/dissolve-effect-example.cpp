@@ -189,7 +189,9 @@ void DissolveEffectApp::OnInit( Application& application )
   Stage::GetCurrent().KeyEventSignal().Connect(this, &DissolveEffectApp::OnKeyEvent);
 
   // Creates a default view with a default tool bar, the view is added to the stage.
-  mContent = DemoHelper::CreateView( application, mView,mToolBar, "", TOOLBAR_IMAGE, "" );
+  DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+  style.mDpi = Stage::GetCurrent().GetDpi().y;
+  mContent = DemoHelper::CreateView( application, mView,mToolBar, "", TOOLBAR_IMAGE, "", style );
 
   // Add an effect-changing button on the right of the tool bar.
   mIconHighP = Image::New( EFFECT_HIGHP_IMAGE );

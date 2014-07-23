@@ -494,12 +494,15 @@ public:
 
     // Creates a default view with a default tool bar.
     // The view is added to the stage.
+    DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+    style.mDpi = Stage::GetCurrent().GetDpi().y;
     mContentLayer = DemoHelper::CreateView( application,
                                             mView,
                                             mToolBar,
                                             BACKGROUND_IMAGE,
                                             TOOLBAR_IMAGE,
-                                            "" );
+                                            "",
+                                            style);
 
     // Create a effect toggle button. (right of toolbar)
     mLayoutButtonImages[ NO_EFFECT ] = Image::New( LAYOUT_NONE_IMAGE );
