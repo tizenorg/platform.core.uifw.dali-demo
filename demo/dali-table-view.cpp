@@ -73,7 +73,7 @@ const float SCALE_SPEED_SIN = 0.1f;
 
 const unsigned int BACKGROUND_ANIMATION_DURATION = 15000; // 15 secs
 
-const float BACKGROUND_Z = -1000.0f;
+const float BACKGROUND_Z = -1350.0f;
 const float BACKGROUND_SIZE_SCALE = 2.0f;
 const Vector4 BACKGROUND_COLOR( 1.0f, 1.0f, 1.0f, 1.0f );
 
@@ -90,12 +90,20 @@ const Dali::PointSize         TABLE_TEXT_STYLE_POINT_SIZE( 8.0f );
 const Dali::TextStyle::Weight TABLE_TEXT_STYLE_WEIGHT(Dali::TextStyle::LIGHT);
 const Dali::Vector4           TABLE_TEXT_STYLE_COLOR(0.0f, 0.0f, 0.0f, 1.0f);
 
+float ScalePointSize(int pointSize)
+{
+  Stage stage = Stage::GetCurrent();
+  Vector2 dpi = stage.GetDpi();
+  float meanDpi = (dpi.height + dpi.width) * 0.5f;
+  return (pointSize * 220.0f) / meanDpi;
+}
+
 TextStyle GetDefaultTextStyle()
 {
   TextStyle textStyle;
   textStyle.SetFontName(DEFAULT_TEXT_STYLE_FONT_FAMILY);
   textStyle.SetFontStyle(DEFAULT_TEXT_STYLE_FONT_STYLE);
-  textStyle.SetFontPointSize(DEFAULT_TEXT_STYLE_POINT_SIZE);
+  textStyle.SetFontPointSize( Dali::PointSize(ScalePointSize(DEFAULT_TEXT_STYLE_POINT_SIZE)));
   textStyle.SetWeight(DEFAULT_TEXT_STYLE_WEIGHT);
   textStyle.SetTextColor(DEFAULT_TEXT_STYLE_COLOR);
   textStyle.SetShadow( true );
@@ -107,7 +115,7 @@ TextStyle GetTableTextStyle()
   TextStyle textStyle;
   textStyle.SetFontName(TABLE_TEXT_STYLE_FONT_FAMILY);
   textStyle.SetFontStyle(TABLE_TEXT_STYLE_FONT_STYLE);
-  textStyle.SetFontPointSize(TABLE_TEXT_STYLE_POINT_SIZE);
+  textStyle.SetFontPointSize( Dali::PointSize(ScalePointSize(TABLE_TEXT_STYLE_POINT_SIZE)));
   textStyle.SetWeight(TABLE_TEXT_STYLE_WEIGHT);
   textStyle.SetTextColor(TABLE_TEXT_STYLE_COLOR);
   return textStyle;
@@ -285,7 +293,9 @@ void DaliTableView::Initialize( Application& application )
   Stage::GetCurrent().Add( mRootActor );
 
   // Toolbar at top
-  CreateToolbar( mRootActor, DEFAULT_TOOLBAR_TEXT, DEFAULT_TOOLBAR_IMAGE_PATH );
+  ViewStyle style(DEFAULT_VIEW_STYLE);
+  style.mDpi = Stage::GetCurrent().GetDpi().y;
+  CreateToolbar( mRootActor, DEFAULT_TOOLBAR_TEXT, DEFAULT_TOOLBAR_IMAGE_PATH, style );
 
   // Add logo
   mLogo = CreateLogo( LOGO_PATH );

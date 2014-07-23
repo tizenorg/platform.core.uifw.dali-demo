@@ -140,12 +140,15 @@ public:
     // Creates a default view with a default tool bar.
     // The view is added to the stage.
     Toolkit::ToolBar toolBar;
+    DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+    style.mDpi = Stage::GetCurrent().GetDpi().y;
     mContents = DemoHelper::CreateView( app,
                                         mView,
                                         toolBar,
                                         BACKGROUND_IMAGE,
                                         TOOLBAR_IMAGE,
-                                        "" );
+                                        "",
+                                        style );
 
     // Add an effect-changing button on the right of the tool bar.
     Image imageChangeEffect = Image::New( CHANGE_EFFECT_IMAGE );

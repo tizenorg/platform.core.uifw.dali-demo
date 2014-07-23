@@ -126,12 +126,15 @@ void RadialMenuExample::OnInit(Application& app)
 
   // Create toolbar & view
   Toolkit::ToolBar toolBar;
+  DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+  style.mDpi = Stage::GetCurrent().GetDpi().y;
   mContents = DemoHelper::CreateView( mApplication,
                                       mView,
                                       toolBar,
                                       "",
                                       TOOLBAR_IMAGE,
-                                      APPLICATION_TITLE );
+                                      APPLICATION_TITLE,
+                                      style );
 
   mIconPlay = Image::New( PLAY_ICON );
   mIconStop = Image::New( STOP_ICON );
@@ -146,7 +149,8 @@ void RadialMenuExample::OnInit(Application& app)
                       DemoHelper::DEFAULT_PLAY_PADDING );
 
   Vector2 imgSize = Image::GetImageSize(TEST_OUTER_RING_FILENAME);
-  float scale = Stage::GetCurrent().GetSize().width / imgSize.width;
+  float stageSize = std::min(Stage::GetCurrent().GetSize().width, Stage::GetCurrent().GetSize().height);
+  float scale = stageSize / imgSize.width;
 
   mRadialSweepView1 = CreateSweepView( TEST_OUTER_RING_FILENAME, Degree(-90.0f), Degree(-90.0f));
   mRadialSweepView2 = CreateSweepView( TEST_INNER_RING_FILENAME, Degree(90.0f),  Degree(0.0f));
