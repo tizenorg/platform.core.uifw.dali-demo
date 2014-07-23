@@ -297,12 +297,15 @@ public:
     // Creates a default view with a default tool bar.
     // The view is added to the stage.
     Toolkit::ToolBar toolBar;
+    DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+    style.mDpiVertical = Stage::GetCurrent().GetDpi().y;
     mContentLayer = DemoHelper::CreateView( application,
                                             mView,
                                             toolBar,
                                             BACKGROUND_IMAGE,
                                             TOOLBAR_IMAGE,
-                                            APPLICATION_TITLE );
+                                            APPLICATION_TITLE,
+                                            style );
 
     // Add an extra space on the right to center the title text.
     toolBar.AddControl( Actor::New(), DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight );
