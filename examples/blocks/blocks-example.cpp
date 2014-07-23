@@ -302,7 +302,7 @@ public:
                                             toolBar,
                                             BACKGROUND_IMAGE,
                                             TOOLBAR_IMAGE,
-                                            APPLICATION_TITLE );
+                                            APPLICATION_TITLE);
 
     // Add an extra space on the right to center the title text.
     toolBar.AddControl( Actor::New(), DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight );

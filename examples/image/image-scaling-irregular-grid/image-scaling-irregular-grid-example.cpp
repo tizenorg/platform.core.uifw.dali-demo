@@ -299,11 +299,11 @@ public:
 
     // Create a default view with a default tool bar:
     mContentLayer = DemoHelper::CreateView( mApplication,
-                                            mView,
-                                            mToolBar,
-                                            BACKGROUND_IMAGE,
-                                            TOOLBAR_IMAGE,
-                                            "" );
+                                                 mView,
+                                                 mToolBar,
+                                                 BACKGROUND_IMAGE,
+                                                 TOOLBAR_IMAGE,
+                                                 "" );
 
     // Create an image scaling toggle button. (right of toolbar)
     Image toggleScalingImage = Image::New( TOGGLE_SCALING_IMAGE );
