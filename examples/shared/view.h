@@ -31,14 +31,14 @@ struct ViewStyle
   ViewStyle( float toolBarButtonPercentage, float toolBarTitlePercentage, float dpi, float toolBarHeight, float toolBarPadding )
   : mToolBarButtonPercentage( toolBarButtonPercentage ),
     mToolBarTitlePercentage( toolBarTitlePercentage ),
-    mDpi( dpi ),
+    mDpiVertical( dpi ),
     mToolBarHeight( toolBarHeight ),
     mToolBarPadding( toolBarPadding )
   {}
 
   float mToolBarButtonPercentage; ///< The tool bar button width is a percentage of the tool bar width.
   float mToolBarTitlePercentage;  ///< The tool bar title width is a percentage of the tool bar width.
-  float mDpi;                     ///< This style is indented for the given dpi.
+  float mDpiVertical;                     ///< This style is indented for the given dpi.
   float mToolBarHeight;           ///< The tool bar height for the given dpi above.
   float mToolBarPadding;          ///< The tool bar padding between controls for the given dpi above.
 };
@@ -57,13 +57,21 @@ const Dali::Toolkit::Alignment::Padding DEFAULT_MODE_SWITCH_PADDING(8.0f, 8.0f, 
 static Dali::TextStyle defaultTextStyle;
 static bool textStyleSet=false;
 
+float ScalePointSize(int pointSize)
+{
+  Dali::Stage stage = Dali::Stage::GetCurrent();
+  Dali::Vector2 dpi = stage.GetDpi();
+  float meanDpi = (dpi.height + dpi.width) * 0.5f;
+  return (pointSize * 220.0f) / meanDpi;
+}
+
 Dali::TextStyle& GetDefaultTextStyle()
 {
   if(!textStyleSet)
   {
     defaultTextStyle.SetFontName(DEFAULT_TEXT_STYLE_FONT_FAMILY);
     defaultTextStyle.SetFontStyle(DEFAULT_TEXT_STYLE_FONT_STYLE);
-    defaultTextStyle.SetFontPointSize(DEFAULT_TEXT_STYLE_POINT_SIZE);
+    defaultTextStyle.SetFontPointSize(Dali::PointSize(ScalePointSize(DEFAULT_TEXT_STYLE_POINT_SIZE)));
     defaultTextStyle.SetWeight(DEFAULT_TEXT_STYLE_WEIGHT);
     defaultTextStyle.SetTextColor(DEFAULT_TEXT_STYLE_COLOR);
     textStyleSet = true;
@@ -109,8 +117,8 @@ Dali::Layer CreateView( Dali::Application& application,
   Dali::Layer toolBarLayer = Dali::Layer::New();
   toolBarLayer.SetAnchorPoint( Dali::AnchorPoint::TOP_CENTER );
   toolBarLayer.SetParentOrigin( Dali::ParentOrigin::TOP_CENTER );
-  toolBarLayer.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::SourceWidthFixedHeight( style.mToolBarHeight * dpi.y / style.mDpi ) ) );
-  toolBarLayer.SetSize( 0.0f, style.mToolBarHeight * dpi.y / style.mDpi );
+  toolBarLayer.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::SourceWidthFixedHeight( style.mToolBarHeight * dpi.y / style.mDpiVertical ) ) );
+  toolBarLayer.SetSize( 0.0f, style.mToolBarHeight * dpi.y / style.mDpiVertical );
 
   // Add tool bar layer to the view.
   view.AddContentLayer( toolBarLayer );
@@ -126,7 +134,7 @@ Dali::Layer CreateView( Dali::Application& application,
   toolBar.SetParentOrigin( Dali::ParentOrigin::TOP_CENTER );
   toolBar.SetAnchorPoint( Dali::AnchorPoint::TOP_CENTER );
   toolBar.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::EqualToConstraint() ) );
-  toolBar.SetSize( 0.0f, style.mToolBarHeight * dpi.y / style.mDpi );
+  toolBar.SetSize( 0.0f, style.mToolBarHeight * dpi.y / style.mDpiVertical );
   toolBarBackground.SetSortModifier(1.0f);
 
   // Add the tool bar to the too bar layer.
@@ -144,7 +152,7 @@ Dali::Layer CreateView( Dali::Application& application,
     titleActor.SetStyleToCurrentText(textStyle);
 
     // Add title to the tool bar.
-    const float padding( style.mToolBarPadding * dpi.x / style.mDpi );
+    const float padding( style.mToolBarPadding * dpi.x / style.mDpiVertical );
     toolBar.AddControl( titleActor, style.mToolBarTitlePercentage, Dali::Toolkit::Alignment::HorizontalCenter, Dali::Toolkit::Alignment::Padding( padding, padding, padding, padding ) );
   }
 

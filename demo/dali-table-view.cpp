@@ -17,6 +17,7 @@
 
 // CLASS HEADER
 #include "dali-table-view.h"
+#include "examples/shared/view.h"
 
 // EXTERNAL INCLUDES
 #include <algorithm>
@@ -90,12 +91,13 @@ const Dali::PointSize         TABLE_TEXT_STYLE_POINT_SIZE( 8.0f );
 const Dali::TextStyle::Weight TABLE_TEXT_STYLE_WEIGHT(Dali::TextStyle::LIGHT);
 const Dali::Vector4           TABLE_TEXT_STYLE_COLOR(0.0f, 0.0f, 0.0f, 1.0f);
 
+
 TextStyle GetDefaultTextStyle()
 {
   TextStyle textStyle;
   textStyle.SetFontName(DEFAULT_TEXT_STYLE_FONT_FAMILY);
   textStyle.SetFontStyle(DEFAULT_TEXT_STYLE_FONT_STYLE);
-  textStyle.SetFontPointSize(DEFAULT_TEXT_STYLE_POINT_SIZE);
+  textStyle.SetFontPointSize( Dali::PointSize(DemoHelper::ScalePointSize(DEFAULT_TEXT_STYLE_POINT_SIZE)));
   textStyle.SetWeight(DEFAULT_TEXT_STYLE_WEIGHT);
   textStyle.SetTextColor(DEFAULT_TEXT_STYLE_COLOR);
   textStyle.SetShadow( true );
@@ -107,7 +109,7 @@ TextStyle GetTableTextStyle()
   TextStyle textStyle;
   textStyle.SetFontName(TABLE_TEXT_STYLE_FONT_FAMILY);
   textStyle.SetFontStyle(TABLE_TEXT_STYLE_FONT_STYLE);
-  textStyle.SetFontPointSize(TABLE_TEXT_STYLE_POINT_SIZE);
+  textStyle.SetFontPointSize( Dali::PointSize(DemoHelper::ScalePointSize(TABLE_TEXT_STYLE_POINT_SIZE)));
   textStyle.SetWeight(TABLE_TEXT_STYLE_WEIGHT);
   textStyle.SetTextColor(TABLE_TEXT_STYLE_COLOR);
   return textStyle;
@@ -285,6 +287,7 @@ void DaliTableView::Initialize( Application& application )
   Stage::GetCurrent().Add( mRootActor );
 
   // Toolbar at top
+
   CreateToolbar( mRootActor, DEFAULT_TOOLBAR_TEXT, DEFAULT_TOOLBAR_IMAGE_PATH );
 
   // Add logo
@@ -364,10 +367,13 @@ void DaliTableView::Initialize( Application& application )
   KeyboardFocusManager::Get().FocusedActorActivatedSignal().Connect( this, &DaliTableView::OnFocusedActorActivated );
 }
 
-void DaliTableView::CreateToolbar( TableView root, const std::string& title, const std::string& toolbarImagePath,
-                              const ViewStyle& style )
+void DaliTableView::CreateToolbar( TableView root, const std::string& title, const std::string& toolbarImagePath )
 {
   // Create default ToolBar
+
+  DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+  style.mDpiVertical = Stage::GetCurrent().GetDpi().y;
+
   Dali::Stage stage = Dali::Stage::GetCurrent();
   Dali::Vector2 dpi = stage.GetDpi();
 
@@ -375,8 +381,8 @@ void DaliTableView::CreateToolbar( TableView root, const std::string& title, con
   Dali::Layer toolBarLayer = Dali::Layer::New();
   toolBarLayer.SetAnchorPoint( Dali::AnchorPoint::TOP_CENTER );
   toolBarLayer.SetParentOrigin( Dali::ParentOrigin::TOP_CENTER );
-  toolBarLayer.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::SourceWidthFixedHeight( style.mToolBarHeight * dpi.y / style.mDpi ) ) );
-  float toolBarLayerHeight = style.mToolBarHeight * dpi.y / style.mDpi;
+  toolBarLayer.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::SourceWidthFixedHeight( style.mToolBarHeight * dpi.y / style.mDpiVertical ) ) );
+  float toolBarLayerHeight = style.mToolBarHeight * dpi.y / style.mDpiVertical;
   toolBarLayer.SetSize( 0.0f, toolBarLayerHeight );
 
   // Add tool bar layer to the view.
@@ -394,7 +400,7 @@ void DaliTableView::CreateToolbar( TableView root, const std::string& title, con
   toolBar.SetParentOrigin( Dali::ParentOrigin::TOP_CENTER );
   toolBar.SetAnchorPoint( Dali::AnchorPoint::TOP_CENTER );
   toolBar.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::EqualToConstraint() ) );
-  toolBar.SetSize( 0.0f, style.mToolBarHeight * dpi.y / style.mDpi );
+  toolBar.SetSize( 0.0f, style.mToolBarHeight * dpi.y / style.mDpiVertical );
   toolBarBackground.SetZ( -1.0f );
 
   // Add the tool bar to the too bar layer.
@@ -413,7 +419,7 @@ void DaliTableView::CreateToolbar( TableView root, const std::string& title, con
     titleActor.SetZ( 1.0f );
 
     // Add title to the tool bar.
-    const float padding( style.mToolBarPadding * dpi.x / style.mDpi );
+    const float padding( style.mToolBarPadding * dpi.x / style.mDpiVertical );
     toolBar.AddControl( titleActor, style.mToolBarTitlePercentage, Dali::Toolkit::Alignment::HorizontalCenter,
                         Dali::Toolkit::Alignment::Padding( padding, padding, padding, padding ) );
   }
@@ -898,7 +904,7 @@ void DaliTableView::AddBackgroundActors( Actor layer, int count, BitmapImage dis
         Random::Range( -size.y * 0.5f - randSize, size.y * 0.5f + randSize ),
         Random::Range(-1.0f, 0.0f) );
     dfActor.SetPosition( actorPos );
-    dfActor.SetSortModifier(size.x * 0.7f);
+    //dfActor.SetSortModifier(size.x * 0.7f);
 
     Constraint movementConstraint = Constraint::New < Vector3 > ( Actor::POSITION,
         LocalSource( Actor::SIZE ),

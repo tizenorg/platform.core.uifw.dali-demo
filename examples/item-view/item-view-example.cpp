@@ -246,9 +246,9 @@ public:
    */
   void OnInit(Application& app)
   {
-    Stage::GetCurrent().KeyEventSignal().Connect(this, &ItemViewExample::OnKeyEvent);
-
     Stage stage = Dali::Stage::GetCurrent();
+    stage.KeyEventSignal().Connect(this, &ItemViewExample::OnKeyEvent);
+
     Vector2 stageSize = Stage::GetCurrent().GetSize();
 
     // Create a border image shared by all the item actors
@@ -256,32 +256,31 @@ public:
 
     // Creates a default view with a default tool bar.
     // The view is added to the stage.
+    DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+    style.mDpiVertical = stage.GetDpi().y;
     Layer contents = DemoHelper::CreateView( mApplication,
                                              mView,
                                              mToolBar,
                                              BACKGROUND_IMAGE,
                                              TOOLBAR_IMAGE,
-                                             "" );
+                                             "",
+                                             style);
 
     mView.OrientationAnimationStartedSignal().Connect( this, &ItemViewExample::OnOrientationChanged );
-
-    // Set the title to the current layout
-    SetLayoutTitle();
 
     // Create an edit mode button. (left of toolbar)
     Toolkit::PushButton editButton = Toolkit::PushButton::New();
     editButton.SetBackgroundImage( Image::New( EDIT_IMAGE ) );
     editButton.ClickedSignal().Connect( this, &ItemViewExample::OnModeButtonClicked);
     editButton.SetLeaveRequired( true );
-    mToolBar.AddControl( editButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
+    mToolBar.AddControl( editButton, style.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
 
     // Create a layout toggle button. (right of toolbar)
     mLayoutButton = Toolkit::PushButton::New();
     mLayoutButton.SetBackgroundImage( Image::New( SPIRAL_LAYOUT_IMAGE ) );
     mLayoutButton.ClickedSignal().Connect( this, &ItemViewExample::OnLayoutButtonClicked);
     mLayoutButton.SetLeaveRequired( true );
-    mToolBar.AddControl( mLayoutButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
-    SetLayoutImage();
+    mToolBar.AddControl( mLayoutButton, style.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
 
     // Create a delete button (bottom right of screen)
     mDeleteButton = Toolkit::PushButton::New();
@@ -347,10 +346,13 @@ public:
     mItemView.SetMinimumSwipeSpeed(MIN_SWIPE_SPEED);
 
     // Activate the spiral layout
-    Vector3 size(stage.GetSize());
-    mItemView.ActivateLayout(mCurrentLayout, size, 0.0f/*immediate*/);
+    UseLayout(mCurrentLayout, 0.0f);
     mItemView.SetKeyboardFocusable( true );
     KeyboardFocusManager::Get().PreFocusChangeSignal().Connect( this, &ItemViewExample::OnKeyboardPreFocusChange );
+
+    // Set the title and icon to the current layout
+    SetLayoutTitle();
+    SetLayoutImage();
   }
 
   Actor OnKeyboardPreFocusChange( Actor current, Actor proposed, Control::KeyboardFocusNavigationDirection direction )
@@ -366,7 +368,7 @@ public:
   /**
    * Switch to a different item view layout
    */
-  void UseLayout(int layoutId)
+  void UseLayout(int layoutId, float duration)
   {
     // Set the new orientation to the layout
     mItemView.GetLayout(layoutId)->SetOrientation(static_cast<ControlOrientation::Type>(mOrientation / 90));
@@ -384,6 +386,8 @@ public:
       {
         mSpiralLayout->SetRevolutionDistance(stageSize.x / SPIRAL_LAYOUT_REVOLUTION_NUMBER_LANDSCAPE);
       }
+
+      mSpiralLayout->SetRevolutionDistance(stageSize.height / Stage::GetCurrent().GetDpi().y * 45.0f);
     }
 
     if(layoutId == GRID_LAYOUT)
@@ -422,7 +426,7 @@ public:
     mItemView.SetAnchoring(layoutId == DEPTH_LAYOUT);
 
     // Activate the layout
-    mItemView.ActivateLayout(layoutId, Vector3(stageSize.x, stageSize.y, stageSize.x), mDurationSeconds);
+    mItemView.ActivateLayout(layoutId, Vector3(stageSize.x, stageSize.y, stageSize.x), duration);
   }
 
   /**
@@ -439,7 +443,7 @@ public:
       // Remember orientation
       mOrientation = angle;
 
-      UseLayout(mCurrentLayout);
+      UseLayout(mCurrentLayout, mDurationSeconds);
     }
   }
 
@@ -448,7 +452,7 @@ public:
     // Switch to the next layout
     mCurrentLayout = (mCurrentLayout + 1) % mItemView.GetLayoutCount();
 
-    UseLayout(mCurrentLayout);
+    UseLayout(mCurrentLayout, mDurationSeconds);
 
     SetLayoutTitle();
     SetLayoutImage();

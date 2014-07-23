@@ -298,12 +298,15 @@ public:
     mApplication.GetWindow().ShowIndicator(false);
 
     // Create a default view with a default tool bar:
+    DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+    style.mDpiVertical = stage.GetDpi().y;
     mContentLayer = DemoHelper::CreateView( mApplication,
-                                            mView,
-                                            mToolBar,
-                                            BACKGROUND_IMAGE,
-                                            TOOLBAR_IMAGE,
-                                            "" );
+                                                 mView,
+                                                 mToolBar,
+                                                 BACKGROUND_IMAGE,
+                                                 TOOLBAR_IMAGE,
+                                                 "",
+                                                 style);
 
     // Create an image scaling toggle button. (right of toolbar)
     Image toggleScalingImage = Image::New( TOGGLE_SCALING_IMAGE );

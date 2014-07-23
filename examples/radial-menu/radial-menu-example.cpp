@@ -121,17 +121,22 @@ RadialMenuExample::~RadialMenuExample()
 
 void RadialMenuExample::OnInit(Application& app)
 {
+  Stage stage = Dali::Stage::GetCurrent();
+
   // The Init signal is received once (only) during the Application lifetime
-  Stage::GetCurrent().KeyEventSignal().Connect(this, &RadialMenuExample::OnKeyEvent);
+  stage.KeyEventSignal().Connect(this, &RadialMenuExample::OnKeyEvent);
 
   // Create toolbar & view
   Toolkit::ToolBar toolBar;
+  DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+  style.mDpiVertical = stage.GetDpi().y;
   mContents = DemoHelper::CreateView( mApplication,
                                       mView,
                                       toolBar,
                                       "",
                                       TOOLBAR_IMAGE,
-                                      APPLICATION_TITLE );
+                                      APPLICATION_TITLE,
+                                      style );
 
   mIconPlay = Image::New( PLAY_ICON );
   mIconStop = Image::New( STOP_ICON );
@@ -146,7 +151,14 @@ void RadialMenuExample::OnInit(Application& app)
                       DemoHelper::DEFAULT_PLAY_PADDING );
 
   Vector2 imgSize = Image::GetImageSize(TEST_OUTER_RING_FILENAME);
-  float scale = Stage::GetCurrent().GetSize().width / imgSize.width;
+  Vector2 stageSize = stage.GetSize();
+  float minStageSize = std::min(stageSize.width, stageSize.height);
+  float toolBarHeight = style.mToolBarHeight * stage.GetDpi().y / style.mDpiVertical;
+  if(stageSize.height <= stageSize.width)
+  {
+    minStageSize -= toolBarHeight * 2.0f;
+  }
+  float scale = minStageSize / imgSize.width;
 
   mRadialSweepView1 = CreateSweepView( TEST_OUTER_RING_FILENAME, Degree(-90.0f), Degree(-90.0f));
   mRadialSweepView2 = CreateSweepView( TEST_INNER_RING_FILENAME, Degree(90.0f),  Degree(0.0f));
@@ -162,7 +174,7 @@ void RadialMenuExample::OnInit(Application& app)
 
   dialLayer.Add(mDialActor);
   dialLayer.SetPositionInheritanceMode(USE_PARENT_POSITION);
-  dialLayer.SetSize(Stage::GetCurrent().GetSize());
+  dialLayer.SetSize(stage.GetSize());
   mContents.Add(dialLayer);
 
   mRadialSweepView1.SetScale(scale);
