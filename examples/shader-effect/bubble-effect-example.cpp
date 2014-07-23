@@ -85,12 +85,15 @@ private:
     // The view is added to the stage.
     Toolkit::ToolBar toolBar;
     Toolkit::View    view;
+    DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+    style.mDpi = stage.GetDpi().y;
     Layer content = DemoHelper::CreateView( app,
                                             view,
                                             toolBar,
                                             "",
                                             TOOLBAR_IMAGE,
-                                            APPLICATION_TITLE );
+                                            APPLICATION_TITLE,
+                                            style);
 
     // Add a button to change background. (right of toolbar)
     mChangeBackgroundButton = Toolkit::PushButton::New();

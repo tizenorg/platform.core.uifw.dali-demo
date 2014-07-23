@@ -511,12 +511,15 @@ public:
 
     Stage::GetCurrent().KeyEventSignal().Connect(this, &ExampleApp::OnKeyEvent);
 
+    DemoHelper::ViewStyle style(DemoHelper::DEFAULT_VIEW_STYLE);
+    style.mDpi = Stage::GetCurrent().GetDpi().y;
     Layer contents = DemoHelper::CreateView( app,
                                              mView,
                                              mToolBar,
                                              BACKGROUND_IMAGE,
                                              TOOLBAR_IMAGE,
-                                             "" );
+                                             "",
+                                             style );
 
     SetTitle("Builder");
 
