@@ -39,6 +39,7 @@ int main(int argc, char **argv)
   demo.AddExample(Example("scroll-view.example", "Scroll View"));
   demo.AddExample(Example("shadow-bone-lighting.example", "Lights and shadows"));
   demo.AddExample(Example("builder.example", "Script Based UI"));
+  demo.AddExample(Example("image-scaling-scale-to-fill.example", "Image Scaling: ScaleToFill"));
   app.MainLoop();
 
   return 0;
