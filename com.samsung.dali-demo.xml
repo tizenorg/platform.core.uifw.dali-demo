@@ -58,4 +58,7 @@
 	<ui-application appid="builder.example" exec="/opt/apps/com.samsung.dali-demo/bin/builder.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Script Based UI</label>
 	</ui-application>
+	<ui-application appid="image-scaling-scale-to-fill.example" exec="/opt/apps/com.samsung.dali-demo/bin/image-scaling-scale-to-fill.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Image ScaleToFill</label>
+	</ui-application>
 </manifest>

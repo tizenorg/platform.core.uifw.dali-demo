@@ -31,7 +31,8 @@ bin_PROGRAMS = \
                scroll-view.example \
                shadow-bone-lighting.example \
                dali-builder \
-               builder.example
+               builder.example \
+               image-scaling-scale-to-fill.example
 
 
 daliimagedir = $(appdatadir)/images/
@@ -140,3 +141,8 @@ builder_example_SOURCES = $(examples_src_dir)/builder/examples.cpp
 builder_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 builder_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 builder_example_LDADD = $(EXAMPLE_LDADD)
+
+image_scaling_scale_to_fill_example_SOURCES = $(examples_src_dir)/image/image-scaling-scale-to-fill-example.cpp
+image_scaling_scale_to_fill_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+image_scaling_scale_to_fill_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+image_scaling_scale_to_fill_example_LDADD = $(EXAMPLE_LDADD)
