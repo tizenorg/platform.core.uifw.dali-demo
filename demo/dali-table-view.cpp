@@ -21,7 +21,6 @@
 // EXTERNAL INCLUDES
 #include <algorithm>
 #include <sstream>
-#include <aul.h>
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -710,7 +709,7 @@ void DaliTableView::OnPressedAnimationFinished( Dali::Animation& source )
     else
     {
       const Example& example( iter->second );
-      aul_open_app( example.name.c_str() );
+      system( example.name.c_str() );
     }
     mPressedActor.Reset();
   }
