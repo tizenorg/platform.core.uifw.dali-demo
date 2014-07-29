@@ -30,18 +30,14 @@ bin_PROGRAMS = \
                radial-menu.example \
                scroll-view.example \
                shadow-bone-lighting.example \
-               dali-builder \
-               builder.example
-
+               image-actor-culling.example
 
 daliimagedir = $(appdatadir)/images/
 dalimodeldir = $(appdatadir)/models/
-daliscriptdir = $(appdatadir)/scripts/
 
 BASE_CXXFLAGS = -I../../../examples \
                    -DDALI_IMAGE_DIR="\"${daliimagedir}\"" \
                    -DDALI_MODEL_DIR="\"${dalimodeldir}\"" \
-                   -DDALI_SCRIPT_DIR="\"${daliscriptdir}\"" \
                    $(DALIDEMO_CFLAGS) \
                    $(ECORE_X_CFLAGS) \
                    $(CAPI_MEDIA_PLAYER_CFLAGS) \
@@ -89,6 +85,11 @@ hello_world_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 hello_world_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 hello_world_example_LDADD = $(EXAMPLE_LDADD)
 
+image_actor_culling_example_SOURCES = $(examples_src_dir)/image-actor/image-actor-culling-example.cpp
+image_actor_culling_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+image_actor_culling_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+image_actor_culling_example_LDADD = $(EXAMPLE_LDADD)
+
 item_view_example_SOURCES = $(examples_src_dir)/item-view/item-view-example.cpp
 item_view_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 item_view_example_DEPENDENCIES = $(EXAMPLE_DEPS)
@@ -130,13 +131,3 @@ shadow_bone_lighting_example_SOURCES = $(examples_src_dir)/shadows/shadow-bone-l
 shadow_bone_lighting_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 shadow_bone_lighting_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 shadow_bone_lighting_example_LDADD = $(EXAMPLE_LDADD)
-
-dali_builder_SOURCES = $(examples_src_dir)/builder/dali-builder.cpp
-dali_builder_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
-dali_builder_DEPENDENCIES = $(EXAMPLE_DEPS)
-dali_builder_LDADD = $(EXAMPLE_LDADD)
-
-builder_example_SOURCES = $(examples_src_dir)/builder/examples.cpp
-builder_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
-builder_example_DEPENDENCIES = $(EXAMPLE_DEPS)
-builder_example_LDADD = $(EXAMPLE_LDADD)
