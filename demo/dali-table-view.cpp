@@ -21,7 +21,10 @@
 // EXTERNAL INCLUDES
 #include <algorithm>
 #include <sstream>
+
+#ifdef USE_AUL
 #include <aul.h>
+#endif // USE_AUL
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -710,7 +713,11 @@ void DaliTableView::OnPressedAnimationFinished( Dali::Animation& source )
     else
     {
       const Example& example( iter->second );
+#ifdef USE_AUL
       aul_open_app( example.name.c_str() );
+#else // USE_AUL
+      system( example.name.c_str() );
+#endif // USE_AUL
     }
     mPressedActor.Reset();
   }
