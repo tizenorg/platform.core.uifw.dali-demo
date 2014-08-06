@@ -32,7 +32,8 @@ bin_PROGRAMS = \
                shadow-bone-lighting.example \
                dali-builder \
                builder.example \
-               image-scaling-irregular-grid.example
+               image-scaling-irregular-grid.example \
+               clock.example
 
 
 daliimagedir = $(appdatadir)/images/
@@ -146,3 +147,8 @@ image_scaling_irregular_grid_example_SOURCES = $(examples_src_dir)/image/image-s
 image_scaling_irregular_grid_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 image_scaling_irregular_grid_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 image_scaling_irregular_grid_example_LDADD = $(EXAMPLE_LDADD)
+
+clock_example_SOURCES = $(examples_src_dir)/clock/clock-example.cpp
+clock_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+clock_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+clock_example_LDADD = $(EXAMPLE_LDADD)
