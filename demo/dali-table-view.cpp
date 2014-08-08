@@ -408,7 +408,7 @@ void DaliTableView::CreateToolbar( TableView root, const std::string& title, con
     Dali::Toolkit::TextView titleActor = Dali::Toolkit::TextView::New();
     titleActor.SetName( "ToolbarTitle" );
     titleActor.SetText( title );
-    titleActor.SetSize( font.MeasureText( title ) );
+    titleActor.SetSize( font.MeasureText( Dali::Text(title) ) );
     titleActor.SetStyleToCurrentText( GetDefaultTextStyle() );
     titleActor.SetZ( 1.0f );
 
