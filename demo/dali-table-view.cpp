@@ -352,7 +352,7 @@ void DaliTableView::Initialize( Application& application )
   Dali::Orientation orientation = winHandle.GetOrientation();
   orientation.ChangedSignal().Connect( this, &DaliTableView::OrientationChanged );
 
-  winHandle.ShowIndicator( false );
+  winHandle.ShowIndicator( Window::INVISIBLE );
 
   //
   mAnimationTimer = Timer::New( BACKGROUND_ANIMATION_DURATION );
