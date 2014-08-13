@@ -1,4 +1,4 @@
-SUBDIRS = examples demo
+SUBDIRS = apps examples demo
 
 MAINTAINERCLEANFILES = \
     aclocal.m4 \
