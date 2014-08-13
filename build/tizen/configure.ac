@@ -28,7 +28,9 @@ DALI_VERSION=dali_version
 AC_SUBST(DALI_VERSION)
 
 PKG_CHECK_MODULES(DALI, dali)
+PKG_CHECK_MODULES(DLOG, dlog)
 PKG_CHECK_MODULES(DALI_TOOLKIT, dali-toolkit)
+PKG_CHECK_MODULES(OPENGLES20, opengl-es-20)
 
 DALIDEMO_CFLAGS=-DPLATFORM_SLP
 
@@ -63,6 +65,7 @@ AC_SUBST(debian_prefix)
 
 AC_CONFIG_FILES([
   Makefile
+  apps/Makefile
   demo/Makefile
   examples/Makefile
 ])
