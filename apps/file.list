@@ -1,0 +1,29 @@
+# Add local source files here
+
+#common_src_files = \
+#  $(apps_src_dir)/filename
+
+# Add files to build here
+
+super_blur_generator_src_dir = $(apps_src_dir)/super-blur-generator
+
+super_blur_generator_src_files = \
+  $(super_blur_generator_src_dir)/main.cpp \
+  $(super_blur_generator_src_dir)/super-blur-generator.cpp \
+  $(super_blur_generator_src_dir)/option-parser.cpp \
+  $(super_blur_generator_src_dir)/context.cpp \
+  $(super_blur_generator_src_dir)/render-surface.cpp \
+  $(super_blur_generator_src_dir)/program.cpp \
+  $(super_blur_generator_src_dir)/texture.cpp \
+  $(super_blur_generator_src_dir)/textured-quad-renderer.cpp \
+  $(super_blur_generator_src_dir)/opengl-impl/opengl-context.cpp \
+  $(super_blur_generator_src_dir)/opengl-impl/opengl-program.cpp \
+  $(super_blur_generator_src_dir)/opengl-impl/opengl-render-surface.cpp \
+  $(super_blur_generator_src_dir)/opengl-impl/opengl-texture.cpp \
+  $(super_blur_generator_src_dir)/opengl-impl/opengl-textured-quad-renderer.cpp
+
+# Add files to install here
+
+super_blur_generator_resource_files = \
+    $(apps_src_dir)/super-blur-generator/resources/gaussian-blur.frag \
+    $(apps_src_dir)/super-blur-generator/resources/gaussian-blur.vert
