@@ -1,29 +1,28 @@
 /*
-Copyright (c) 2000-2013 Samsung Electronics Co., Ltd All Rights Reserved
-
-This file is part of Dali Adaptor
-
-PROPRIETARY/CONFIDENTIAL
-
-This software is the confidential and proprietary information of
-SAMSUNG ELECTRONICS ("Confidential Information"). You shall not
-disclose such Confidential Information and shall use it only in
-accordance with the terms of the license agreement you entered
-into with SAMSUNG ELECTRONICS.
-
-SAMSUNG make no representations or warranties about the suitability
-of the software, either express or implied, including but not limited
-to the implied warranties of merchantability, fitness for a particular
-purpose, or non-infringement. SAMSUNG shall not be liable for any
-damages suffered by licensee as a result of using, modifying or
-distributing this software or its derivatives.
-*/
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "super-blur-generator.h"
 
 #include <string>
+#include <sstream>
+#include <dali/dali.h>
 
 #include "context.h"
+#include "framebuffer.h"
+#include "gaussian-blur-kernel.h"
 #include "render-surface.h"
 #include "texture.h"
 #include "textured-quad-renderer.h"
@@ -32,42 +31,100 @@ distributing this software or its derivatives.
 
 namespace
 {
-const std::string VERT_SOURCE( RESOURCES_DIR "gaussian-blur.vert" );
-const std::string FRAG_SOURCE( RESOURCES_DIR "gaussian-blur.frag" );
+const std::string VERT_SOURCE( RESOURCES_DIR "textured-quad.vert" );
+const std::string BLUR_FRAG_SOURCE( RESOURCES_DIR "gaussian-blur.frag" );
+const std::string PLAIN_FRAG_SOURCE( RESOURCES_DIR "plain-texture.frag" );
 
+const int NUM_SAMPLES(16);
+const float GAUSSIAN_BLUR_BLUR_BELL_CURVE_WIDTH = 1.5f;
+const std::string PREFIX("#define NUM_SAMPLES 16\n;");
 }
 
 class SuperBlurGeneratorImpl
 {
 public:
-  SuperBlurGeneratorImpl( const Dali::BitmapLoader& inputImage, const std::string& outputFolder )
-  : mContext(),
-    mRenderSurface( mContext, inputImage.GetImageHeight(), inputImage.GetImageWidth() ),
+  SuperBlurGeneratorImpl( const Dali::BitmapLoader& inputImage, const std::string& outputFolder, const std::string& outputFileName )
+  : mWidth(inputImage.GetImageWidth()),
+    mHeight(inputImage.GetImageHeight()),
+    mContext(),
+    mRenderSurface( mContext, mHeight, mWidth ),
     mTexture( mContext, inputImage ),
-    mProgram( mContext, VERT_SOURCE, FRAG_SOURCE )
+    mBlurProgram( mContext, PREFIX, VERT_SOURCE, BLUR_FRAG_SOURCE ),
+    mKernel( NUM_SAMPLES, GAUSSIAN_BLUR_BLUR_BELL_CURVE_WIDTH, mWidth, mHeight ),
+    mNumSamples( NUM_SAMPLES ),
+    mOutputPath( outputFolder + "/" + outputFileName )
   {
   }
 
   void Generate( float level )
   {
-    mProgram.Activate();
-    mProgram.SetFloatUniform( "uLevel", level );
-    TexturedQuadRenderer renderer( mContext, mProgram, mTexture );
+    mContext.Prepare(mWidth, mHeight);
+    // Draw to a smaller frame buffer to get some free blurring from GL
+    Framebuffer fb1( mWidth*0.5f, mHeight*0.5f );
+    {
+      fb1.Prepare();
+      mBlurProgram.Activate();
+      SetKernelUniforms(mBlurProgram, SuperBlurGenerator::HORIZONTAL);
+      TexturedQuadRenderer renderer( mContext, mBlurProgram, mTexture );
+    }
 
-    // Save output to a file...
+    // Render to main render surface
+    mContext.Prepare(mWidth, mHeight);
+    SetKernelUniforms(mBlurProgram, SuperBlurGenerator::VERTICAL);
+    TexturedQuadRenderer renderer( mContext, mBlurProgram, fb1 );
+
+    unsigned char* buffer = mRenderSurface.ReadPixelData();
+    if( buffer != NULL )
+    {
+      Dali::EncodeToFile( buffer, mOutputPath.c_str(), Dali::Pixel::RGBA8888, mWidth, mHeight );
+      delete[] buffer;
+    }
+  }
+
+  void SetKernelUniforms(Program& program, SuperBlurGenerator::Direction direction)
+  {
+    Vector2 axis(1.0f, 0.0f);
+    if( direction == SuperBlurGenerator::VERTICAL )
+    {
+      axis = Vector2(0.0f, 1.0f);
+    }
+
+    for (int i = 0; i < mNumSamples; ++i )
+    {
+      float xValue = mKernel.GetOffset(i).x * axis.x;
+      float yValue = mKernel.GetOffset(i).y * axis.y;
+      float weight = mKernel.GetWeight(i);
+
+      {
+        std::ostringstream oss;
+        oss << "uSampleOffsets[" << i << "]";
+        program.SetVector2Uniform( oss.str(), xValue, yValue );
+      }
+      {
+        std::ostringstream oss;
+        oss << "uSampleWeights[" << i << "]";
+        program.SetFloatUniform( oss.str(), weight );
+      }
+    }
   }
 
 private:
+  std::size_t mWidth;
+  std::size_t mHeight;
   Context mContext;  // Order is relevant!
   RenderSurface mRenderSurface;
   Texture mTexture;
-  Program mProgram;
+  Program mBlurProgram;
+  GaussianBlurKernel mKernel;
+  int mNumSamples;
+  std::string mOutputPath;
 };
 
 SuperBlurGenerator::SuperBlurGenerator(
   const Dali::BitmapLoader& inputImage,
-  const std::string& outputFolder )
-: mImpl( new SuperBlurGeneratorImpl( inputImage, outputFolder ) )
+  const std::string& outputFolder,
+  const std::string& outputFileName)
+: mImpl( new SuperBlurGeneratorImpl( inputImage, outputFolder, outputFileName ) )
 {
 }
 

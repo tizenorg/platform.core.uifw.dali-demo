@@ -1,6 +1,3 @@
-#ifndef SUPER_BLUR_GENERATOR_UNORDERED_MAP_H_
-#define SUPER_BLUR_GENERATOR_UNORDERED_MAP_H_
-
 /*
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -17,31 +14,24 @@
  * limitations under the License.
  */
 
-#ifndef __GXX_EXPERIMENTAL_CXX0X__
-#if ! ( __cplusplus > 199711L )
+#include "framebuffer.h"
+#include "opengl-impl/opengl-framebuffer.h"
 
-#include<tr1/unordered_map>
-
-template<typename Key, typename Value>
-struct UnorderedMap
+Framebuffer::Framebuffer(int width, int height)
+: mImpl( new OpenGLFramebuffer( width, height ) )
 {
-  typedef std::tr1::unordered_map<Key, Value> Type;
-};
-#define UNORDERED_MAP_DEFINED
+}
 
-#endif
-#endif
-
-#ifndef UNORDERED_MAP_DEFINED
-
-#include<unordered_map>
-template<typename Key, typename Value>
-struct UnorderedMap
+Framebuffer::~Framebuffer()
 {
-  typedef std::unordered_map<Key, Value> Type;
-};
-typedef std::unordered_map UnorderedMap;
+}
 
-#endif
+bool Framebuffer::Prepare()
+{
+  return mImpl->Prepare();
+}
 
-#endif // SUPER_BLUR_GENERATOR_UNORDERED_MAP_H_
+void Framebuffer::Bind()
+{
+  mImpl->Bind();
+}

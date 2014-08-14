@@ -1,5 +1,5 @@
-#ifndef SUPER_BLUR_GENERATOR_UNORDERED_MAP_H_
-#define SUPER_BLUR_GENERATOR_UNORDERED_MAP_H_
+#ifndef OPENGL_FRAMEBUFFER_H
+#define OPENGL_FRAMEBUFFER_H
 
 /*
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
@@ -17,31 +17,25 @@
  * limitations under the License.
  */
 
-#ifndef __GXX_EXPERIMENTAL_CXX0X__
-#if ! ( __cplusplus > 199711L )
+#include "opengl-texture.h"
 
-#include<tr1/unordered_map>
-
-template<typename Key, typename Value>
-struct UnorderedMap
+class OpenGLFramebuffer : public OpenGLTexture
 {
-  typedef std::tr1::unordered_map<Key, Value> Type;
+public:
+  OpenGLFramebuffer(int width, int height);
+  ~OpenGLFramebuffer();
+
+  /**
+   * Prepare the frame buffer for rendering
+   */
+  bool Prepare();
+
+  void Invalidate();
+
+private:
+  int mWidth;
+  int mHeight;
+  GLuint mFrameBufferName;
 };
-#define UNORDERED_MAP_DEFINED
 
-#endif
-#endif
-
-#ifndef UNORDERED_MAP_DEFINED
-
-#include<unordered_map>
-template<typename Key, typename Value>
-struct UnorderedMap
-{
-  typedef std::unordered_map<Key, Value> Type;
-};
-typedef std::unordered_map UnorderedMap;
-
-#endif
-
-#endif // SUPER_BLUR_GENERATOR_UNORDERED_MAP_H_
+#endif // OPENGL_FRAMEBUFFER_H

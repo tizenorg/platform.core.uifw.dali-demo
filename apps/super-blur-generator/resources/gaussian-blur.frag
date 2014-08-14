@@ -1,4 +1,3 @@
-#define NUM_SAMPLES 16
 
 precision mediump float;
 
@@ -8,6 +7,7 @@ uniform vec2 uSampleOffsets[NUM_SAMPLES];
 uniform float uSampleWeights[NUM_SAMPLES];
 
 varying vec2 vTexCoord;
+varying vec2 vPos;
 
 void main()
 {
