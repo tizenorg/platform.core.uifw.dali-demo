@@ -30,6 +30,7 @@ bin_PROGRAMS = \
                radial-menu.example \
                scroll-view.example \
                shadow-bone-lighting.example \
+               stereoscopic-rendering.example \
                dali-builder \
                builder.example \
                image-scaling-irregular-grid.example
@@ -131,6 +132,11 @@ shadow_bone_lighting_example_SOURCES = $(examples_src_dir)/shadows/shadow-bone-l
 shadow_bone_lighting_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 shadow_bone_lighting_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 shadow_bone_lighting_example_LDADD = $(EXAMPLE_LDADD)
+
+stereoscopic_rendering_example_SOURCES = $(examples_src_dir)/stereoscopic-rendering/stereoscopic-rendering-example.cpp
+stereoscopic_rendering_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+stereoscopic_rendering_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+stereoscopic_rendering_example_LDADD = $(EXAMPLE_LDADD)
 
 dali_builder_SOURCES = $(examples_src_dir)/builder/dali-builder.cpp
 dali_builder_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
