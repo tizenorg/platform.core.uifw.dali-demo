@@ -52,6 +52,9 @@
 	<ui-application appid="shadow-bone-lighting.example" exec="/usr/apps/com.samsung.dali-demo/bin/shadow-bone-lighting.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Shadows and Lights</label>
 	</ui-application>
+	<ui-application appid="stereoscopic-rendering.example" exec="/usr/apps/com.samsung.dali-demo/bin/stereoscopic-rendering.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Stereoscopic Rendering</label>
+	</ui-application>
 	<ui-application appid="dali-builder" exec="/usr/apps/com.samsung.dali-demo/bin/dali-builder" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Builder</label>
 	</ui-application>
