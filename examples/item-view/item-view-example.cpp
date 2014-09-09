@@ -157,6 +157,9 @@ const float BUTTON_BORDER = -10.0f;
 const float MENU_OPTION_HEIGHT(140.0f);
 const float LABEL_TEXT_SIZE_Y = 20.0f;
 
+const float SCROLL_BAR_WIDTH( 18.0f );
+const float SCROLL_BAR_CONTRACT_DELAY( 1000.0f ); // Milliseconds
+
 const char*             DEFAULT_TEXT_STYLE_FONT_FAMILY("HelveticaNue");
 const char*             DEFAULT_TEXT_STYLE_FONT_STYLE("Regular");
 const PointSize         DEFAULT_TEXT_STYLE_POINT_SIZE( 5.0f );
@@ -235,6 +238,7 @@ public:
     mOrientation( 0 ),
     mCurrentLayout( SPIRAL_LAYOUT ),
     mDurationSeconds( 1.0f ),
+    mDragMode( false ),
     mAlphaFuncIndex( 0u )
   {
     // Connect to the Application's Init signal
@@ -329,6 +333,17 @@ public:
     // Display item view on the stage
     stage.Add( mItemView );
 
+    // Create the scroll indicator
+    mScrollBar = ScrollBar::New();
+    mScrollBar.SetParentOrigin(ParentOrigin::TOP_RIGHT);
+    mScrollBar.SetAnchorPoint(AnchorPoint::TOP_RIGHT);
+    mScrollBar.SetSize(SCROLL_BAR_WIDTH, stage.GetSize().height, 0.0f);
+    mScrollBar.SetIndicatorHeightPolicy(Toolkit::ScrollBar::Fixed);
+    mScrollBar.SetIndicatorFixedHeight(60.0f);
+    mScrollBar.SetIndicatorShowDuration(5.0f);
+    mScrollBar.SetIndicatorHideDuration(5.0f);
+    mItemView.Add(mScrollBar);
+
     // Create the layouts
     mSpiralLayout = SpiralLayout::New();
     mDepthLayout = DepthLayout::New();
@@ -350,6 +365,13 @@ public:
     // Set the title and icon to the current layout
     SetLayoutTitle();
     SetLayoutImage();
+
+    mItemView.ScrollStartedSignal().Connect( this, &ItemViewExample::OnScrollStarted );
+    mItemView.ScrollCompletedSignal().Connect( this, &ItemViewExample::OnScrollCompleted );
+
+    // Show the scroll indicator
+    mScrollBar.Show();
+    WaitingContractDelay();
   }
 
   Actor OnKeyboardPreFocusChange( Actor current, Actor proposed, Control::KeyboardFocusNavigationDirection direction )
@@ -1101,6 +1123,63 @@ private:
     }
   }
 
+  bool OnContractDelayExpired()
+  {
+    if ( !mDragMode )
+    {
+      mScrollBar.Hide();
+    }
+
+    DestructTimer();
+
+    return true;
+  }
+
+  void CreateTimer()
+  {
+    if( !mScrollBarContractTimer )
+    {
+      // Create timer for contract delay
+      mScrollBarContractTimer = Timer::New( SCROLL_BAR_CONTRACT_DELAY );
+      mScrollBarContractTimer.TickSignal().Connect( this, &ItemViewExample::OnContractDelayExpired );
+    }
+  }
+
+  void DestructTimer()
+  {
+    if( mScrollBarContractTimer )
+    {
+      mScrollBarContractTimer.Stop();
+      mScrollBarContractTimer.TickSignal().Disconnect( this, &ItemViewExample::OnContractDelayExpired );
+      mScrollBarContractTimer.Reset();
+    }
+  }
+
+  void WaitingContractDelay()
+  {
+    CreateTimer();
+    mScrollBarContractTimer.Start();
+  }
+
+  void OnScrollStarted(const Vector3& position)
+  {
+    if(!mDragMode)
+    {
+      mDragMode = true;
+      mScrollBar.Show();
+    }
+  }
+
+  void OnScrollCompleted(const Vector3& position)
+  {
+    if( mDragMode )
+    {
+      mDragMode = false;
+
+      WaitingContractDelay();
+    }
+  }
+
 private:
 
   Application& mApplication;
@@ -1121,6 +1200,10 @@ private:
   SpiralLayoutPtr mSpiralLayout;
   DepthLayoutPtr mDepthLayout;
   GridLayoutPtr mGridLayout;
+
+  ScrollBar mScrollBar;
+  bool mDragMode;                       ///< Flag indicating whether currently dragging or not.
+  Timer mScrollBarContractTimer;        ///< Timer guarantee contract delay time.
 
   Toolkit::Popup mMenu;
 
