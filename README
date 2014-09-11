@@ -8,7 +8,15 @@ T.O.C.
  2.1. Minimum Requirements
  2.2. Building the Repository
 
-
+The dali-demo project contains examples using the the Dali API.
+Within the directory structure, "examples" holds individual Dali example
+programs, each one aimed at showing a particular API feature, and "demo"
+contains a launcher application that can open those demos.
+Additionally, the "stability" directory contains Dali applications
+intended to exercise the the Dali APIs in an aggressive fashion.
+They can be run by developers in automated builds to look for regressions,
+and under a tool such as Valgrind to flush out leaks, memory corruption
+and other errors 
 
 1. GBS Builds
 =============

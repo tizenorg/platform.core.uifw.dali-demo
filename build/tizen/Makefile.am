@@ -1,4 +1,4 @@
-SUBDIRS = examples demo
+SUBDIRS = examples demo stability
 
 MAINTAINERCLEANFILES = \
     aclocal.m4 \

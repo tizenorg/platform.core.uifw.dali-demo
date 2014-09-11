@@ -17,5 +17,4 @@
 /demo/performance.core
 /docs/dali.doxy
 /examples/*.demo
-/performance/dali-performance
-/performance/performance.*
+/stability/*.stability

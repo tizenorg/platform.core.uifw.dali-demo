@@ -65,6 +65,7 @@ AC_CONFIG_FILES([
   Makefile
   demo/Makefile
   examples/Makefile
+  stability/Makefile
 ])
 
 
