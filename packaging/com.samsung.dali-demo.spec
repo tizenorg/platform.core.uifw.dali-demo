@@ -43,7 +43,7 @@ of the capability of the toolkit.
 ##############################
 %build
 PREFIX="/usr"
-CXXFLAGS+=" -Wall -g -O2"
+CXXFLAGS+=" -Wall -g -O2 -Werror=unused-function"
 LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -fPIC"
 
 %if 0%{?sec_build_binary_debug_enable}
