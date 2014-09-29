@@ -37,6 +37,8 @@
 	<ui-application appid="magnifier.example" exec="/usr/apps/com.samsung.dali-demo/bin/magnifier.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Magnifier</label>
 	</ui-application>
+	<ui-application appid="message-editor.example" exec="/usr/apps/com.samsung.dali-demo/bin/message-editor.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+	</ui-application>
 	<ui-application appid="motion-blur.example" exec="/usr/apps/com.samsung.dali-demo/bin/motion-blur.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Motion Blur</label>
 	</ui-application>

@@ -24,6 +24,7 @@ bin_PROGRAMS = \
                hello-world.example \
                item-view.example \
                magnifier.example \
+               message-editor.example \
                motion-blur.example \
                motion-stretch.example \
                page-turn-view.example \
@@ -100,6 +101,11 @@ magnifier_example_SOURCES = $(examples_src_dir)/magnifier/magnifier-example.cpp
 magnifier_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 magnifier_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 magnifier_example_LDADD = $(EXAMPLE_LDADD)
+
+message_editor_example_SOURCES = $(examples_src_dir)/message-editor/message-editor-example.cpp
+message_editor_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+message_editor_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+message_editor_example_LDADD = $(EXAMPLE_LDADD)
 
 motion_blur_example_SOURCES = $(examples_src_dir)/motion/motion-blur-example.cpp
 motion_blur_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
