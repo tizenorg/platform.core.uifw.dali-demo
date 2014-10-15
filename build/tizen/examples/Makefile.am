@@ -34,7 +34,8 @@ bin_PROGRAMS = \
                builder.example \
                image-scaling-irregular-grid.example \
                buttons.example \
-               text-view.example
+               text-view.example \
+               size-negotiation.example
 
 
 daliimagedir = $(appdatadir)/images/
@@ -158,3 +159,8 @@ text_view_example_SOURCES = $(examples_src_dir)/text-view/text-view-example.cpp
 text_view_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 text_view_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 text_view_example_LDADD = $(EXAMPLE_LDADD)
+
+size_negotiation_example_SOURCES = $(examples_src_dir)/size-negotiation/size-negotiation-example.cpp
+size_negotiation_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+size_negotiation_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+size_negotiation_example_LDADD = $(EXAMPLE_LDADD)

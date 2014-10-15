@@ -41,7 +41,7 @@ struct ViewStyle
   float mToolBarPadding;          ///< The tool bar padding (in pixels)..
 };
 
-const ViewStyle DEFAULT_VIEW_STYLE( 0.1f, 0.7f, 80.f, 4.f );
+const ViewStyle DEFAULT_VIEW_STYLE( 0.1f, 0.7f, 62.0f, 4.0f );
 
 const char*                   DEFAULT_TEXT_STYLE_FONT_FAMILY("HelveticaNue");
 const char*                   DEFAULT_TEXT_STYLE_FONT_STYLE("Regular");
@@ -84,10 +84,11 @@ Dali::Layer CreateToolbar( Dali::Toolkit::ToolBar& toolBar,
                            const Dali::TextStyle& textStyle )
 {
   Dali::Layer toolBarLayer = Dali::Layer::New();
+  toolBarLayer.SetName( "TOOLBAR_LAYER" );
   toolBarLayer.SetAnchorPoint( Dali::AnchorPoint::TOP_CENTER );
   toolBarLayer.SetParentOrigin( Dali::ParentOrigin::TOP_CENTER );
-  toolBarLayer.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::SourceWidthFixedHeight( style.mToolBarHeight  ) ) );
-  toolBarLayer.SetSize( 0.0f, style.mToolBarHeight );
+  toolBarLayer.SetResizePolicy( Dali::Actor::FillToParent, Dali::Actor::Fixed );
+  toolBarLayer.SetSize( 0.0f, ScalePointSize( style.mToolBarHeight ) );
 
   // Raise tool bar layer to the top.
   toolBarLayer.RaiseToTop();
@@ -95,12 +96,13 @@ Dali::Layer CreateToolbar( Dali::Toolkit::ToolBar& toolBar,
   // Tool bar
   Dali::Image image = Dali::Image::New( toolbarImagePath );
   Dali::ImageActor toolBarBackground = Dali::ImageActor::New( image );
+  toolBarBackground.SetName( "TOOLBAR_BACKGROUND" );
   toolBar = Dali::Toolkit::ToolBar::New();
+  toolBar.SetName( "TOOLBAR" );
   toolBar.SetBackground( toolBarBackground );
   toolBar.SetParentOrigin( Dali::ParentOrigin::TOP_CENTER );
   toolBar.SetAnchorPoint( Dali::AnchorPoint::TOP_CENTER );
-  toolBar.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::EqualToConstraint() ) );
-  toolBar.SetSize( 0.0f, style.mToolBarHeight );
+  toolBar.SetResizePolicy( Dali::Actor::FillToParent, Dali::Actor::FillToParent );
   toolBarBackground.SetSortModifier(1.0f);
 
   // Add the tool bar to the too bar layer.
@@ -112,7 +114,7 @@ Dali::Layer CreateToolbar( Dali::Toolkit::ToolBar& toolBar,
   if( !title.empty() )
   {
     Dali::Toolkit::TextView titleActor = Dali::Toolkit::TextView::New();
-    titleActor.SetName( "ToolbarTitle" );
+    titleActor.SetName( "TOOLBAR_TITLE" );
     titleActor.SetText( title );
     titleActor.SetSize( font.MeasureText( title ) );
     titleActor.SetStyleToCurrentText(textStyle);
@@ -138,6 +140,8 @@ Dali::Layer CreateView( Dali::Application& application,
 
   // Create default View.
   view = Dali::Toolkit::View::New();
+  view.SetName( "VIEW" );
+  view.SetResizePolicy( Dali::Actor::FillToParent, Dali::Actor::FillToParent );
 
   // Add the view to the stage before setting the background.
   stage.Add( view );
@@ -147,6 +151,7 @@ Dali::Layer CreateView( Dali::Application& application,
   {
     Dali::Image backgroundImage = Dali::Image::New( backgroundImagePath );
     Dali::ImageActor backgroundImageActor = Dali::ImageActor::New( backgroundImage );
+    backgroundImageActor.SetName( "BACKGROUND_IMAGE_ACTOR" );
     view.SetBackground( backgroundImageActor );
   }
 
@@ -164,9 +169,11 @@ Dali::Layer CreateView( Dali::Application& application,
 
   // Create a content layer.
   Dali::Layer contentLayer = Dali::Layer::New();
+  contentLayer.SetName( "CONTENT_LAYER" );
   contentLayer.SetAnchorPoint( Dali::AnchorPoint::CENTER );
   contentLayer.SetParentOrigin( Dali::ParentOrigin::CENTER );
-  contentLayer.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::EqualToConstraint() ) );
+  contentLayer.SetResizePolicy( Dali::Actor::FillToParent, Dali::Actor::FillToParent );
+//  contentLayer.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::EqualToConstraint() ) );
   view.AddContentLayer( contentLayer );
   contentLayer.LowerBelow( toolBarLayer );
 
