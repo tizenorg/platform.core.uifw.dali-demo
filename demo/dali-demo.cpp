@@ -25,6 +25,7 @@ int main(int argc, char **argv)
 
   DaliTableView demo(app);
 
+  demo.AddExample(Example("hello-world.example", "Hello"));
   demo.AddExample(Example("bubble-effect.example", "Bubbles"));
   demo.AddExample(Example("blocks.example", "Blocks"));
   demo.AddExample(Example("cluster.example", "Cluster control"));

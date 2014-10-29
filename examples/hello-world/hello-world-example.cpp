@@ -50,6 +50,15 @@ public:
     // Reposition the actor
     textActor.SetParentOrigin( ParentOrigin::CENTER );
 
+    // works well
+    //textActor.RotateBy(Degree(30), Vector3(0,0,1));
+    //textActor.SetRotation(Degree(30), Vector3(0,0,1));
+
+    // camera?
+    CameraActor cameraActor = Stage::GetCurrent().GetRenderTaskList().GetTask(0).GetCameraActor();
+    //cameraActor.RotateBy(Degree(30), Vector3(0,0,1));   // why same direction as textActor rotation?
+    cameraActor.SetRotation(Degree(30), Vector3(0,0,1));  // where the camera look at?
+
     // Get a handle to the stage
     Stage stage = Stage::GetCurrent();
 
