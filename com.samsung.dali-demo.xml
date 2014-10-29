@@ -67,4 +67,7 @@
 	<ui-application appid="text-view.example" exec="/usr/apps/com.samsung.dali-demo/bin/text-view.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Text View</label>
 	</ui-application>
+	<ui-application appid="glyphy-text.example" exec="/usr/apps/com.samsung.dali-demo/bin/glyphy-text.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Glyphy Text</label>
+	</ui-application>
 </manifest>
