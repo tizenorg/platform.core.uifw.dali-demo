@@ -27,7 +27,6 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include "../shared/view.h"
 
-using namespace std;
 using namespace Dali;
 using namespace Dali::Toolkit;
 using namespace DemoHelper;
