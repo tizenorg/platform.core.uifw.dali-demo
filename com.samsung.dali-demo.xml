@@ -76,4 +76,10 @@
 	<ui-application appid="logging.example" exec="/usr/apps/com.samsung.dali-demo/bin/logging.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Logging</label>
 	</ui-application>
+	<ui-application appid="glyphy-text.example" exec="/usr/apps/com.samsung.dali-demo/bin/glyphy-text.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Glyphy Text</label>
+	</ui-application>
+	<ui-application appid="glyphy-svg.example" exec="/usr/apps/com.samsung.dali-demo/bin/glyphy-svg.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Glyphy SVG</label>
+	</ui-application>
 </manifest>
