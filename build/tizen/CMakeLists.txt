@@ -67,7 +67,8 @@ ENDFOREACH(flag)
 INSTALL(FILES ${LOCAL_STYLE_DIR}/demo-theme.json DESTINATION ${STYLE_DIR})
 
 SET(PKG_LIST dali
-             dali-toolkit)
+             dali-toolkit
+             freetype2)
 
 INCLUDE(FindPkgConfig)
 pkg_check_modules(REQUIRED_PKGS REQUIRED ${PKG_LIST})
