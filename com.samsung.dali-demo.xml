@@ -88,9 +88,6 @@
 	<ui-application appid="text-field.example" exec="/usr/apps/com.samsung.dali-demo/bin/text-field.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Text Field</label>
 	</ui-application>
-  <ui-application appid="text-fonts.example" exec="/usr/apps/com.samsung.dali-demo/bin/text-fonts.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
-    <label>Text Fonts</label>
-  </ui-application>
 	<ui-application appid="text-message-field.example" exec="/usr/apps/com.samsung.dali-demo/bin/text-message-field.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Text Label</label>
 	</ui-application>
@@ -117,5 +114,7 @@
 	</ui-application>
 	<ui-application appid="image-view.example" exec="/usr/apps/com.samsung.dali-demo/bin/image-view.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Image View</label>
+	<ui-application appid="glyphy-text.example" exec="/usr/apps/com.samsung.dali-demo/bin/glyphy-text.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Glyphy Text</label>
 	</ui-application>
 </manifest>
