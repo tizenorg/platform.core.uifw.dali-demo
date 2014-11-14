@@ -18,13 +18,10 @@
  */
 #include <dali/dali.h>
 
-namespace Dali
-{
-namespace Demo
-{
 namespace
 {
-const bool DEBUG_PRINT_GRID_DIAGNOSTICS = false;
+/** Controls the output of application logging. */
+//#define DEBUG_PRINT_GRID_DIAGNOSTICS;
 
 inline unsigned min( unsigned a, unsigned b )
 {
@@ -38,6 +35,10 @@ inline unsigned max( unsigned a, unsigned b )
 
 }
 
+namespace Dali
+{
+namespace Demo
+{
 /**
  * @brief A 2D grid of booleans, settable and gettable via integer (x,y) coordinates.
  * */
@@ -49,10 +50,9 @@ public:
    */
   GridFlags( unsigned width, unsigned height ) :  mCells( width * height ), mWidth( width ), mHeight( height ), mHighestUsedRow( 0 )
   {
-    if( DEBUG_PRINT_GRID_DIAGNOSTICS )
-    {
+#ifdef DEBUG_PRINT_GRID_DIAGNOSTICS
       fprintf(stderr, "Grid created with dimensions: (%u, %u).\n", mWidth, mHeight );
-    }
+#endif
   }
 
   void Set( const unsigned x, const unsigned y )
@@ -86,10 +86,9 @@ public:
   {
     const unsigned regionWidth = (region.x + 0.5f);
     const unsigned regionHeight = (region.y + 0.5f);
-    if( DEBUG_PRINT_GRID_DIAGNOSTICS )
-    {
+#ifdef DEBUG_PRINT_GRID_DIAGNOSTICS
       fprintf( stderr, "Allocation requested for region (%u, %u). Result: ", regionWidth, regionHeight );
-    }
+#endif
     unsigned bestRegionWidth = 0;
     unsigned bestRegionHeight = 0;
     unsigned bestCellX = 0;
@@ -156,18 +155,16 @@ whole_region_not_found:
 
     if( bestRegionWidth == 0 || bestRegionHeight == 0 )
     {
-      if( DEBUG_PRINT_GRID_DIAGNOSTICS )
-      {
+#ifdef DEBUG_PRINT_GRID_DIAGNOSTICS
         fputs( "false.\n", stderr );
-      }
+#endif
       return false;
     }
 
     // Allocate the found region:
-    if( DEBUG_PRINT_GRID_DIAGNOSTICS )
-    {
+#ifdef DEBUG_PRINT_GRID_DIAGNOSTICS
       fprintf( stderr, " - bestCellX = %u, bestCellY = %u, bestRegionWidth = %u, bestRegionHeight = %u - ", bestCellX, bestCellY, bestRegionWidth, bestRegionHeight );
-    }
+#endif
     for( unsigned y = bestCellY; y < bestCellY + bestRegionHeight; ++y )
     {
       for( unsigned x = bestCellX; x < bestCellX + bestRegionWidth; ++x )
@@ -179,10 +176,9 @@ whole_region_not_found:
     outCellX = bestCellX;
     outCellY = bestCellY;
     outRegion = Vector2( bestRegionWidth, bestRegionHeight );
-    if( DEBUG_PRINT_GRID_DIAGNOSTICS )
-    {
+#ifdef DEBUG_PRINT_GRID_DIAGNOSTICS
       fputs( "true.\n", stderr );
-    }
+#endif
     return true;
   }
 
