@@ -16,6 +16,9 @@
 examples_src_dir = ../../../examples
 
 bin_PROGRAMS = \
+               radial-demo1.example \
+               radial-demo2.example \
+               radial-test2.example \
                blocks.example \
                bubble-effect.example \
                cluster.example \
@@ -129,6 +132,23 @@ radial_menu_example_SOURCES = $(examples_src_dir)/radial-menu/radial-menu-exampl
 radial_menu_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 radial_menu_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 radial_menu_example_LDADD = $(EXAMPLE_LDADD)
+
+radial_test2_example_SOURCES = $(examples_src_dir)/radial-test2/radial-test2-example.cpp \
+                              $(examples_src_dir)/radial-menu/radial-sweep-view.cpp \
+                              $(examples_src_dir)/radial-menu/radial-sweep-view-impl.cpp
+radial_test2_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+radial_test2_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+radial_test2_example_LDADD = $(EXAMPLE_LDADD)
+
+radial_demo1_example_SOURCES = $(examples_src_dir)/radial-demo1/radial-demo1-example.cpp
+radial_demo1_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+radial_demo1_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+radial_demo1_example_LDADD = $(EXAMPLE_LDADD)
+
+radial_demo2_example_SOURCES = $(examples_src_dir)/radial-demo2/radial-demo2-example.cpp
+radial_demo2_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+radial_demo2_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+radial_demo2_example_LDADD = $(EXAMPLE_LDADD)
 
 scroll_view_example_SOURCES = $(examples_src_dir)/scroll-view/scroll-view-example.cpp
 scroll_view_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)

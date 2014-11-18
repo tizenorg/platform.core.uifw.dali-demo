@@ -22,7 +22,7 @@
 #include "radial-sweep-view-impl.h"
 
 using namespace Dali;
-using namespace Dali::Toolkit;
+//using namespace Dali::Toolkit;
 
 namespace
 {
@@ -205,6 +205,7 @@ bool RadialMenuExample::OnButtonClicked( Toolkit::Button button )
     {
       mAnimation.Pause();
       mPlayStopButton.SetBackgroundImage( mIconPlay );
+	  mAnimationState = PAUSED;
     }
     break;
 
@@ -212,6 +213,7 @@ bool RadialMenuExample::OnButtonClicked( Toolkit::Button button )
     {
       mAnimation.Play();
       mPlayStopButton.SetBackgroundImage( mIconStop );
+	  mAnimationState = PLAYING;
     }
     break;
 
@@ -222,6 +224,7 @@ bool RadialMenuExample::OnButtonClicked( Toolkit::Button button )
       mRadialSweepView2.Deactivate();
       mRadialSweepView3.Deactivate();
       StartAnimation();
+	  mAnimationState = PLAYING;
     }
   }
   return false;
