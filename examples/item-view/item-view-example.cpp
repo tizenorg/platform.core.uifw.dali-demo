@@ -234,7 +234,8 @@ public:
     mOrientation( 0 ),
     mCurrentLayout( SPIRAL_LAYOUT ),
     mDurationSeconds( 1.0f ),
-    mAlphaFuncIndex( 0u )
+    mAlphaFuncIndex( 0u ),
+    mWhiteImage( 0 )
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect(this, &ItemViewExample::OnInit);
@@ -904,8 +905,11 @@ public: // From ItemFactory
     static_cast<ItemLayout&>(*mSpiralLayout).GetItemSize( 0u, Vector3( Stage::GetCurrent().GetSize() ), spiralItemSize );
 
     // Add a checkbox child actor; invisible until edit-mode is enabled
-
-    ImageActor checkbox = ImageActor::New( BitmapImage::WHITE() );
+    if( !mWhiteImage )
+    {
+      mWhiteImage = BitmapImage::WHITE();
+    }
+    ImageActor checkbox = ImageActor::New( mWhiteImage );
     checkbox.SetName( "CheckBox" );
     checkbox.SetColor( Vector4(0.0f,0.0f,0.0f,0.6f) );
     checkbox.SetParentOrigin( ParentOrigin::TOP_RIGHT );
@@ -1131,6 +1135,7 @@ private:
 
   unsigned int mAlphaFuncIndex;
   TextView mAlphaFunctionText;
+  BitmapImage mWhiteImage;
 };
 
 void RunTest(Application& app)
