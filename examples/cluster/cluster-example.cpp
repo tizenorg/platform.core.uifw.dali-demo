@@ -107,8 +107,10 @@ const char **IMAGE_GROUPS[] = {PEOPLE_IMAGE_PATHS,
                                MAGAZINE_IMAGE_PATHS,
                                NULL};
 
-const float CLUSTER_IMAGE_THUMBNAIL_WIDTH  = 256.0f;
-const float CLUSTER_IMAGE_THUMBNAIL_HEIGHT = 256.0f;
+const float CLUSTER_IMAGE_SHADOW_WIDTH  = 256.0f;
+const float CLUSTER_IMAGE_SHADOW_HEIGHT = 256.0f;
+const float CLUSTER_IMAGE_THUMBNAIL_WIDTH  = 8;
+const float CLUSTER_IMAGE_THUMBNAIL_HEIGHT = 8;
 
 const char* CLUSTER_SHADOW_IMAGE_PATH = DALI_IMAGE_DIR "cluster-image-shadow.png";
 const char* CLUSTER_BORDER_IMAGE_PATH = DALI_IMAGE_DIR "cluster-image-frame.png";
@@ -466,6 +468,8 @@ const Vector3 RELATIVE_POSITION (0.0f, 0.0f, -0.1f);
 const Vector3 SIZE_SCALE        (1.4f, 1.4f, 1.0f);
 }
 
+void OnIdle();
+
 // This example shows how to use Cluster UI control
 //
 class ClusterController : public ConnectionTracker
@@ -556,6 +560,8 @@ public:
     AddCluster( MAGAZINE, ClusterStyleStandard::New(ClusterStyleStandard::ClusterStyle3) );
 
     SetEffect(WOBBLE_EFFECT);
+
+    mApplication.AddIdle( OnIdle );
   }
 
   /**
@@ -606,7 +612,7 @@ public:
 
     // Load the thumbnail
     ImageAttributes attribs = ImageAttributes::New();
-    attribs.SetSize(CLUSTER_IMAGE_THUMBNAIL_WIDTH, CLUSTER_IMAGE_THUMBNAIL_HEIGHT);
+    attribs.SetSize( CLUSTER_IMAGE_SHADOW_WIDTH, CLUSTER_IMAGE_SHADOW_HEIGHT );
     attribs.SetScalingMode(Dali::ImageAttributes::ShrinkToFit);
     attribs.SetPixelFormat( Pixel::RGB888  );
 
@@ -625,12 +631,14 @@ public:
     actor.Add(shadowActor);
 
     // Add a picture image actor to actor.
+    attribs.SetSize( CLUSTER_IMAGE_THUMBNAIL_WIDTH, CLUSTER_IMAGE_THUMBNAIL_HEIGHT );
     Image image = Image::New( imagePath, attribs );
     ImageActor imageActor = ImageActor::New(image);
     imageActor.SetParentOrigin( ParentOrigin::CENTER );
     imageActor.SetAnchorPoint( AnchorPoint::CENTER );
     imageActor.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), EqualToConstraint() ) );
-    actor.Add(imageActor);
+    actor.Add( imageActor );
+    mClusterImageActors.push_back( imageActor );
 
     // Add a border image child actor
     ImageActor borderActor = ImageActor::New(mClusterBorderImage);
@@ -900,6 +908,28 @@ public:
     }
   }
 
+  /**
+   * Reload all images at the available screen area.
+   */
+  void RefreshImages()
+  {
+    // Reload all images at the right size to fit their screen area:
+    ImageAttributes fullAttributes = ImageAttributes::New();
+    fullAttributes.SetScalingMode(Dali::ImageAttributes::ShrinkToFit);
+    for( std::vector<ImageActor>::iterator i = mClusterImageActors.begin(), end = mClusterImageActors.end(); i != end; ++i )
+    {
+      const Vector3 size = i->GetCurrentSize();
+      if( size.x < 1.0f || size.y < 1.0f )
+      {
+        mApplication.AddIdle( OnIdle );
+        return;
+      }
+      fullAttributes.SetSize( size.x, size.y );
+      i->SetImage( Image::New( i->GetImage().GetFilename(), fullAttributes ) );
+    }
+    mClusterImageActors.clear();
+  }
+
 private:
 
   Application&               mApplication;                       ///< Application instance
@@ -919,11 +949,20 @@ private:
 
   Toolkit::PushButton        mLayoutButton;                      ///< The layout button
   Image                      mLayoutButtonImages[TOTAL_EFFECTS]; ///< Image when no layout
+  std::vector<ImageActor>    mClusterImageActors;                ///< List of all images displayed in clusters.
 };
+
+ClusterController* gClusterController = 0;
+
+void OnIdle()
+{
+  gClusterController->RefreshImages();
+}
 
 void RunTest(Application& app)
 {
   ClusterController test(app);
+  gClusterController = &test;
 
   app.MainLoop();
 }
