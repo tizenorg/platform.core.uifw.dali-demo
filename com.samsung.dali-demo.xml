@@ -67,10 +67,11 @@
 	<ui-application appid="buttons.example" exec="/usr/apps/com.samsung.dali-demo/bin/buttons.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Radio Buttons</label>
 	</ui-application>
-	<ui-application appid="text-view.example" exec="/usr/apps/com.samsung.dali-demo/bin/text-view.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+	<ui-application appid="video-play.example" exec="/usr/apps/com.samsung.dali-demo/bin/video-play.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Video Play</label>
+	</ui-application>
+        <ui-application appid="text-view.example" exec="/usr/apps/com.samsung.dali-demo/bin/text-view.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Text View</label>
 	</ui-application>
-	<ui-application appid="logging.example" exec="/usr/apps/com.samsung.dali-demo/bin/logging.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
-		<label>Logging</label>
-	</ui-application>
+
 </manifest>
