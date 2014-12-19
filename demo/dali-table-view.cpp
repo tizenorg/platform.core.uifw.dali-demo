@@ -56,8 +56,9 @@ const int EXAMPLES_PER_PAGE = EXAMPLES_PER_ROW * ROWS_PER_PAGE;
 const float TOP_ROW_HEIGHT = 35.0f;
 const float BOTTOM_ROW_HEIGHT = 35.0f;
 const int BOTTOM_PADDING_HEIGHT = 40;
-const int LOGO_BOTTOM_PADDING_HEIGHT = 30;
-const Vector3 TABLE_RELATIVE_SIZE(0.9f, 1.0f, 0.8f );          ///< TableView's relative size to the entire stage.
+const int LOGO_MARGIN = 100;
+const Vector3 SCROLLVIEW_RELATIVE_SIZE(0.9f, 1.0f, 0.8f );     ///< ScrollView's relative size to the entire stage.
+const Vector3 TABLE_RELATIVE_SIZE(0.9f, 0.5f, 0.8f );          ///< TableView's relative size to the entire stage.
 const float STENCIL_RELATIVE_SIZE = 1.0f;
 
 const float EFFECT_SNAP_DURATION = 0.66f;                       ///< Scroll Snap Duration for Effects
@@ -77,6 +78,10 @@ const float BACKGROUND_Z = -1000.0f;
 const float BACKGROUND_SIZE_SCALE = 2.0f;
 const Vector4 BACKGROUND_COLOR( 1.0f, 1.0f, 1.0f, 1.0f );
 
+// 3D Effect constants
+const Vector2 ANGLE_SWING_3DEFFECT(Math::PI_2 * 0.75, Math::PI_2 * 0.75f); ///< Angle Swing in radians
+const Vector2 POSITION_SWING_3DEFFECT(0.4f, 0.4f); ///< Position Swing relative to stage size.
+const Vector3 ANCHOR_3DEFFECT_STYLE0(-105.0f, 30.0f, -240.0f); ///< Rotation Anchor position for 3D Effect (Style 0)
 
 const std::string             DEFAULT_TEXT_STYLE_FONT_FAMILY("HelveticaNeue");
 const std::string             DEFAULT_TEXT_STYLE_FONT_STYLE("Regular");
@@ -277,7 +282,7 @@ void DaliTableView::Initialize( Application& application )
 
   // Add logo
   mLogo = CreateLogo( LOGO_PATH );
-  mRootActor.SetFixedHeight( 1, mLogo.GetImage().GetHeight() + LOGO_BOTTOM_PADDING_HEIGHT );
+  mRootActor.SetFixedHeight( 1, mLogo.GetImage().GetHeight() + LOGO_MARGIN );
 
   Alignment alignment = Alignment::New();
   alignment.Add(mLogo);
@@ -288,7 +293,8 @@ void DaliTableView::Initialize( Application& application )
 
   mScrollView.SetAnchorPoint( AnchorPoint::CENTER );
   mScrollView.SetParentOrigin( ParentOrigin::CENTER );
-  mScrollView.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::RelativeToConstraint( TABLE_RELATIVE_SIZE ) ) );
+  mScrollView.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ),
+                                                                     Dali::RelativeToConstraint( SCROLLVIEW_RELATIVE_SIZE ) ) );
   mScrollView.SetAxisAutoLock( true );
   mScrollView.ScrollCompletedSignal().Connect( this, &DaliTableView::OnScrollComplete );
   mScrollView.ScrollStartedSignal().Connect( this, &DaliTableView::OnScrollStart );
@@ -312,9 +318,9 @@ void DaliTableView::Initialize( Application& application )
   SetupBackground( mScrollView, stageSize );
 
   // 4) Remove constraints for inner cube effect
-  for( TableViewListIter pageIter = mTableViewList.begin(); pageIter != mTableViewList.end(); ++pageIter )
+  for( ActorIter pageIter = mPages.begin(); pageIter != mPages.end(); ++pageIter )
   {
-    TableView page = *pageIter;
+    Actor page = *pageIter;
 
     unsigned int numChildren = page.GetChildCount();
     Actor pageActor = page;
@@ -325,6 +331,8 @@ void DaliTableView::Initialize( Application& application )
       if( child )
       {
         child.RemoveConstraints();
+
+        ApplyCubeEffectToActor( child );
       }
     }
   }
@@ -358,8 +366,6 @@ void DaliTableView::Populate()
 {
   const Vector2 stageSize = Stage::GetCurrent().GetSize();
 
-  const Size demoTileSize( 0.25f * stageSize.width, 0.25f * stageSize.height );
-
   mTotalPages = ( mExampleList.size() + EXAMPLES_PER_PAGE - 1 ) / EXAMPLES_PER_PAGE;
 
   // Populate ScrollView.
@@ -372,41 +378,32 @@ void DaliTableView::Populate()
 
     unsigned int exampleCount = 0;
     ExampleListConstIter iter = mExampleList.begin();
+
     for( int t = 0; t < mTotalPages; t++ )
     {
       // Create Table. (contains up to 9 Examples)
-      TableView tableView = TableView::New( 4, 3 );
+      Actor page = Actor::New();
+
       // Add tableView to container.
-      mScrollView.Add( tableView );
-      ApplyEffectToPage( tableView, TABLE_RELATIVE_SIZE );
+      mScrollView.Add( page );
 
-      tableView.SetAnchorPoint( AnchorPoint::CENTER );
-      tableView.SetParentOrigin( ParentOrigin::CENTER );
-      // 2 pixels of padding
-      tableView.SetCellPadding( Size( 2.0f, 2.0f ) );
-
-      Constraint constraint = Constraint::New<Vector3>( Actor::SCALE,
-                                                        LocalSource( Actor::SIZE ),
-                                                        ParentSource( Actor::SIZE ),
-                                                        ScaleToFitConstraint() );
-      tableView.ApplyConstraint(constraint);
-
-      // Apply visibility constraint to table view
-      Constraint visibleConstraint = Constraint::New< bool >( Actor::VISIBLE,
-                                                              LocalSource( Actor::POSITION ),
-                                                              ParentSource( Actor::SIZE ),
-                                                              TableViewVisibilityConstraint() );
-      visibleConstraint.SetRemoveAction( Constraint::Discard );
-      tableView.ApplyConstraint( visibleConstraint );
+      page.SetAnchorPoint( AnchorPoint::CENTER );
+      page.SetParentOrigin( ParentOrigin::CENTER );
+      page.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), EqualToConstraint() ) );
 
       // add cells to table
-      for( int y = 0; y < ROWS_PER_PAGE; y++ )
+      const float margin = 10.0f;
+
+      // Calculate the number of images going across (columns) within a page, according to the screen resolution and dpi.
+      const Size tileSize((stageSize.x * TABLE_RELATIVE_SIZE.x / EXAMPLES_PER_ROW) - margin, (stageSize.y * TABLE_RELATIVE_SIZE.y / ROWS_PER_PAGE) - margin );
+
+      for(int row = 0; row < ROWS_PER_PAGE; row++)
       {
-        for( int x = 0; x < EXAMPLES_PER_ROW; x++ )
+        for(int column = 0; column < EXAMPLES_PER_ROW; column++)
         {
           const Example& example = ( *iter );
 
-          Actor tile = CreateTile( example.name, example.title, demoTileSize, true );
+          Actor tile = CreateTile( example.name, example.title, tileSize, true );
           FocusManager focusManager = FocusManager::Get();
           focusManager.SetFocusOrder( tile, ++exampleCount );
           focusManager.SetAccessibilityAttribute( tile, Dali::Toolkit::FocusManager::ACCESSIBILITY_LABEL,
@@ -415,7 +412,13 @@ void DaliTableView::Populate()
           focusManager.SetAccessibilityAttribute( tile, Dali::Toolkit::FocusManager::ACCESSIBILITY_HINT,
                                                   "You can run this example" );
 
-          tableView.AddChild( tile, TableView::CellPosition( y, x ) );
+          Vector3 position( margin * 0.5f + (tileSize.x + margin) * column - stageSize.width * TABLE_RELATIVE_SIZE.x * 0.5f,
+                           margin * 0.5f + (tileSize.y + margin) * row - stageSize.height * TABLE_RELATIVE_SIZE.y * 0.5f,
+                            0.0f);
+          tile.SetPosition( position + Vector3( tileSize.x, tileSize.y, 0.0f ) * 0.5f );
+          tile.SetSize( tileSize );
+          page.Add( tile );
+
           iter++;
 
           if( iter == mExampleList.end() )
@@ -423,31 +426,18 @@ void DaliTableView::Populate()
             break;
           }
         }
+
         if( iter == mExampleList.end() )
         {
           break;
         }
       }
 
-      // last row is thin.
-      tableView.SetFixedHeight( 3, BOTTOM_ROW_HEIGHT );
-
-      std::stringstream out;
-      out << ( t + 1 ) << " of " << mTotalPages;
-      Actor pageNumberText = CreateTile( "", out.str(), Size( 0.8f * stageSize.width, BOTTOM_ROW_HEIGHT ), false );
-
-      pageNumberText.ApplyConstraint( Constraint::New< Vector3 >( Actor::POSITION, Source( tableView, Actor::WORLD_POSITION),
-                                                                   TranslateLocalConstraint( Vector3( 0.0f, stageSize.y * 0.4f, 0.0f ) ) ) );
-      pageNumberText.ApplyConstraint( Constraint::New< Quaternion >( Actor::ROTATION, Source( tableView, Actor::WORLD_ROTATION ), EqualToConstraint() ) );
-      pageNumberText.ApplyConstraint( Constraint::New< Vector4 >( Actor::COLOR, Source( tableView, Actor::COLOR ), EqualToConstraint() ) );
-
-      //Stage::GetCurrent().Add( pageNumberText );
-
       // Set tableview position
-      Vector3 tableViewPos( stageSize.x * TABLE_RELATIVE_SIZE.x * t, 0.0f, 0.0f );
-      tableView.SetPosition( tableViewPos );
+      Vector3 pagePos( stageSize.x * TABLE_RELATIVE_SIZE.x * t, 0.0f, 0.0f );
+      page.SetPosition( pagePos );
 
-      mTableViewList.push_back( tableView );
+      mPages.push_back( page );
 
       if( iter == mExampleList.end() )
       {
@@ -499,9 +489,6 @@ Actor DaliTableView::CreateTile( const std::string& name, const std::string& tit
   tile.SetName( name );
   tile.SetAnchorPoint( AnchorPoint::CENTER );
   tile.SetParentOrigin( ParentOrigin::CENTER );
-
-  // make the tile 100% of parent
-  tile.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), EqualToConstraint() ) );
 
   Actor content = Actor::New();
   content.SetAnchorPoint( AnchorPoint::CENTER );
@@ -673,7 +660,7 @@ void DaliTableView::OnScrollComplete( const Dali::Vector3& position )
 
   // move focus to 1st item of new page
   FocusManager focusManager = FocusManager::Get();
-  focusManager.SetCurrentFocusActor(mTableViewList[mScrollView.GetCurrentPage()].GetChildAt(TableView::CellPosition(1, 0)) );
+  focusManager.SetCurrentFocusActor(mPages[mScrollView.GetCurrentPage()].GetChildAt(0) );
 
 }
 
@@ -705,36 +692,19 @@ void DaliTableView::ApplyScrollViewEffect()
 
 void DaliTableView::SetupInnerPageCubeEffect()
 {
-  ScrollViewCustomEffect customEffect;
-  mScrollViewEffect = customEffect = ScrollViewCustomEffect::New();
+  mScrollViewEffect = ScrollViewCubeEffect::New();
   mScrollView.SetScrollSnapDuration( EFFECT_SNAP_DURATION );
   mScrollView.SetScrollFlickDuration( EFFECT_FLICK_DURATION );
   mScrollView.RemoveConstraintsFromChildren();
-
-  customEffect.SetPageSpacing( Vector2( 30.0f, 30.0f ) );
-  customEffect.SetAngledOriginPageRotation( ANGLE_CUBE_PAGE_ROTATE );
-  customEffect.SetSwingAngle( ANGLE_CUBE_PAGE_ROTATE.x, Vector3( 0, -1, 0 ) );
-  customEffect.SetOpacityThreshold( 0.5f );   // Make fade out on edges
 }
 
-void DaliTableView::ApplyEffectToPage( Actor page, const Vector3& tableRelativeSize )
+void DaliTableView::ApplyCubeEffectToActor( Actor actor )
 {
-  page.RemoveConstraints();
-
-  Constraint constraint = Constraint::New<Vector3>( Actor::SCALE,
-                                                    LocalSource( Actor::SIZE ),
-                                                    ParentSource( Actor::SIZE ),
-                                                    ScaleToFitConstraint() );
-  page.ApplyConstraint(constraint);
-
-  ApplyCustomEffectToPage( page );
-}
-
-void DaliTableView::ApplyCustomEffectToPage( Actor page )
-{
-  ScrollViewCustomEffect customEffect = ScrollViewCustomEffect::DownCast( mScrollViewEffect );
-  Vector2 vStageSize( Stage::GetCurrent().GetSize() );
-  customEffect.ApplyToPage( page, Vector3( vStageSize.x, vStageSize.y, 1.0f ) );
+  ScrollViewCubeEffect cubeEffect = ScrollViewCubeEffect::DownCast(mScrollViewEffect);
+  cubeEffect.ApplyToActor( actor,
+                           ANCHOR_3DEFFECT_STYLE0,
+                           ANGLE_SWING_3DEFFECT,
+                           POSITION_SWING_3DEFFECT * Vector2(Stage::GetCurrent().GetSize()));
 }
 
 void DaliTableView::OnKeyEvent( const KeyEvent& event )
@@ -974,7 +944,7 @@ Dali::Actor DaliTableView::OnKeyboardPreFocusChange( Dali::Actor current, Dali::
   if ( !current && !proposed  )
   {
     // Set the initial focus to the first tile in the current page should be focused.
-    nextFocusActor = mTableViewList[mScrollView.GetCurrentPage()].GetChildAt(TableView::CellPosition(0, 0));
+    nextFocusActor = mPages[mScrollView.GetCurrentPage()].GetChildAt(0);
   }
   else if( !proposed || (proposed && proposed == mScrollViewLayer) )
   {
@@ -1014,12 +984,12 @@ Dali::Actor DaliTableView::OnKeyboardPreFocusChange( Dali::Actor current, Dali::
       int colPos = remainingExamples >= EXAMPLES_PER_PAGE ? EXAMPLES_PER_ROW - 1 : ( remainingExamples % EXAMPLES_PER_PAGE - rowPos * EXAMPLES_PER_ROW - 1 );
 
       // Move the focus to the last tile in the new page.
-      nextFocusActor = mTableViewList[newPage].GetChildAt(TableView::CellPosition(rowPos, colPos));
+      nextFocusActor = mPages[newPage].GetChildAt(colPos * EXAMPLES_PER_ROW + rowPos);
     }
     else
     {
       // Move the focus to the first tile in the new page.
-      nextFocusActor = mTableViewList[newPage].GetChildAt(TableView::CellPosition(0, 0));
+      nextFocusActor = mPages[newPage].GetChildAt(0);
     }
   }
 
