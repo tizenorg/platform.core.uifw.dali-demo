@@ -248,14 +248,9 @@ private: // Application callbacks & implementation
   void SetupInnerPageCubeEffect();
 
   /**
-   * Apply the scroll view effect to a page
+   * Apply the cube effect to an actor
    */
-  void ApplyEffectToPage(Dali::Actor page, const Dali::Vector3& tableRelativeSize);
-
-  /**
-   * Apply a custom effect scroll view effect to a page
-   */
-  void ApplyCustomEffectToPage(Dali::Actor page);
+  void ApplyCubeEffectToActor( Dali::Actor actor );
 
   /**
    * Apply a shader effect to a table tile
@@ -378,7 +373,7 @@ private:
   Dali::Toolkit::TableView        mButtons;             ///< Navigation buttons
   ExampleList                     mExampleList;         ///< List of examples.
   ExampleMap                      mExampleMap;          ///< Map LUT for examples.
-  TableViewList                   mTableViewList;       ///< List of tableviews
+  Dali::ActorContainer            mPages;               ///< List of pages.
   Dali::Actor                     mPressedActor;        ///< The currently pressed actor.
   int                             mTotalPages;          ///< Total pages within scrollview.
   std::string                     mBackgroundImagePath; ///< The path to the background image.
