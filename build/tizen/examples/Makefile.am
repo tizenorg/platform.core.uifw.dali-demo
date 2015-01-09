@@ -20,6 +20,7 @@ bin_PROGRAMS = \
                bubble-effect.example \
                cluster.example \
                cube-transition-effect.example \
+               diamond-effect.example \
                dissolve-effect.example \
                hello-world.example \
                item-view.example \
@@ -83,6 +84,11 @@ cube_transition_effect_example_SOURCES = $(examples_src_dir)/transition/cube-tra
 cube_transition_effect_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 cube_transition_effect_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 cube_transition_effect_example_LDADD = $(EXAMPLE_LDADD)
+
+diamond_effect_example_SOURCES = $(examples_src_dir)/shader-effect/diamond-effect-example.cpp
+diamond_effect_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+diamond_effect_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+diamond_effect_example_LDADD = $(EXAMPLE_LDADD)
 
 dissolve_effect_example_SOURCES = $(examples_src_dir)/shader-effect/dissolve-effect-example.cpp
 dissolve_effect_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
