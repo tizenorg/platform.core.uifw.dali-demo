@@ -1,0 +1,44 @@
+AppControl demo is a sample code to show how to use appControl API in dali application
+
+1. Creating project in TizenSDK
+==============================
+Create Two tizen native apps with below code respectively
+appcontrolfirst.cpp 
+appcontrolsecond.cpp
+
+ex)
+AppControlFirst.project
+├── Debug
+├── inc
+├── res
+├── src
+│   └── appcontrolfirst.cpp
+└── tizen-manifest.xml
+
+AppControlSecond.project
+├── Debug
+├── inc
+├── res
+├── src
+│   └── appcontrolsecond.cpp
+└── tizen-manifest.xml
+
+
+2. Add privilege
+==============================
+Add privilege into the tizen-manifest.xml of AppControlFirst.project
+This is required for 
+
+    <privileges>
+        <privilege>http://tizen.org/privilege/appmanager.launch</privilege>
+    </privileges>
+
+
+3. Install and Testing
+==============================
+Build and install two app in the device.
+launch appControlFirst app
+On selecting one option between VIEW and EDIT, then 
+appControlSecond will be launched and it will display its puropose from appControlFirst
+
+
