@@ -337,6 +337,7 @@ public:
 
     mScrollView.EnableScrollComponent( Scrollable::VerticalScrollBar );
     mScrollView.EnableScrollComponent( Scrollable::HorizontalScrollBar );
+    mScrollView.DisableScrollComponent( Scrollable::OvershootIndicator );
 
     mScrollView.SetAnchorPoint(AnchorPoint::CENTER);
     mScrollView.SetParentOrigin(ParentOrigin::CENTER);
