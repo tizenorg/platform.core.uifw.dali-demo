@@ -36,7 +36,8 @@ bin_PROGRAMS = \
                builder.example \
                image-scaling-irregular-grid.example \
                buttons.example \
-               logging.example
+               logging.example \
+               image-atlas.example
 
 daliimagedir = $(appdatadir)/images/
 dalimodeldir = $(appdatadir)/models/
@@ -169,3 +170,8 @@ logging_example_SOURCES = $(examples_src_dir)/logging/logging-example.cpp
 logging_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 logging_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 logging_example_LDADD = $(EXAMPLE_LDADD)
+
+image_atlas_example_SOURCES = $(examples_src_dir)/image/atlas/image-atlas-example.cpp
+image_atlas_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+image_atlas_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+image_atlas_example_LDADD = $(EXAMPLE_LDADD)
