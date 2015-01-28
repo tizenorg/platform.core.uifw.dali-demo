@@ -37,8 +37,8 @@ bin_PROGRAMS = \
                image-scaling-irregular-grid.example \
                buttons.example \
                text-view.example \
-               logging.example
-
+               logging.example \
+               effects-view.example
 
 daliimagedir = $(appdatadir)/images/
 dalimodeldir = $(appdatadir)/models/
@@ -176,3 +176,7 @@ logging_example_SOURCES = $(examples_src_dir)/logging/logging-example.cpp
 logging_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 logging_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 logging_example_LDADD = $(EXAMPLE_LDADD)
+effects_view_example_SOURCES = $(examples_src_dir)/effects-view/effects-view-example.cpp
+effects_view_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+effects_view_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+effects_view_example_LDADD = $(EXAMPLE_LDADD)
