@@ -107,9 +107,10 @@ public:
           gl_FragColor = texture2D( sTexture, vTexCoord ) * uColor;\n
         }\n
     );
-    ShaderEffect shaderEffect = ShaderEffect::New( vertexShader, fragmentShader,
-                                                   GeometryType( GEOMETRY_TYPE_TEXTURED_MESH),
-                                                   ShaderEffect::GeometryHints( ShaderEffect::HINT_NONE ) );
+    ShaderEffect shaderEffect = ShaderEffect::NewWithPrefix( "precision mediump float;\n", vertexShader,
+                                                             "precision mediump float;\n", fragmentShader,
+                                                             GeometryType( GEOMETRY_TYPE_TEXTURED_MESH),
+                                                             ShaderEffect::GeometryHints( ShaderEffect::HINT_NONE ) );
     NoEffect handle( shaderEffect );
     return handle;
   }
@@ -205,7 +206,7 @@ public:
       {\n
         vec3 normal = normalize( vNormal);\n
 
-        vec3 lightPosition = uLightPosition + vec3(uLightXYOffset+uLightSpinOffset, 0.f);\n
+        vec3 lightPosition = uLightPosition + vec3(uLightXYOffset+uLightSpinOffset, 0.0);\n
         mediump vec3 vecToLight = normalize( (lightPosition - vVertex.xyz) * 0.01 );\n
         mediump float spotEffect = pow( max(0.05, vecToLight.z ) - 0.05, 8.0);\n
 
@@ -219,9 +220,10 @@ public:
       }\n
     );
 
-    ShaderEffect shaderEffect = ShaderEffect::New( vertexShader, fragmentShader,
-                                                   GeometryType( GEOMETRY_TYPE_TEXTURED_MESH),
-                                                   ShaderEffect::GeometryHints( ShaderEffect::HINT_BLENDING ) );
+    ShaderEffect shaderEffect = ShaderEffect::NewWithPrefix( "precision mediump float;\n", vertexShader,
+                                                             "precision mediump float;\n", fragmentShader,
+                                                             GeometryType( GEOMETRY_TYPE_TEXTURED_MESH),
+                                                             ShaderEffect::GeometryHints( ShaderEffect::HINT_BLENDING ) );
     RefractionEffect handle( shaderEffect );
 
     Vector2 stageSize = Stage::GetCurrent().GetSize();
