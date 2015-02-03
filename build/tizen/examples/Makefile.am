@@ -37,7 +37,8 @@ bin_PROGRAMS = \
                image-scaling-irregular-grid.example \
                buttons.example \
                text-view.example \
-               logging.example
+               logging.example \
+               curve.example
 
 
 daliimagedir = $(appdatadir)/images/
@@ -176,3 +177,8 @@ logging_example_SOURCES = $(examples_src_dir)/logging/logging-example.cpp
 logging_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 logging_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 logging_example_LDADD = $(EXAMPLE_LDADD)
+
+curve_example_SOURCES = $(examples_src_dir)/curve/curve-example.cpp
+curve_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+curve_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+curve_example_LDADD = $(EXAMPLE_LDADD)
