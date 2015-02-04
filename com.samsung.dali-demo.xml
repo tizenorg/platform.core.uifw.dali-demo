@@ -76,4 +76,10 @@
 	<ui-application appid="logging.example" exec="/usr/apps/com.samsung.dali-demo/bin/logging.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Logging</label>
 	</ui-application>
+	<ui-application appid="masked-image-view.example" exec="/usr/apps/com.samsung.dali-demo/bin/masked-image-view.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Masked Image View</label>
+	</ui-application>
+	<ui-application appid="masked-image-view-story-album.example" exec="/usr/apps/com.samsung.dali-demo/bin/masked-image-view-story-album.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Story Album</label>
+	</ui-application>
 </manifest>
