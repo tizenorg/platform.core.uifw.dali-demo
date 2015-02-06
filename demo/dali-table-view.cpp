@@ -63,7 +63,7 @@ const float EFFECT_SNAP_DURATION = 0.66f;                       ///< Scroll Snap
 const float EFFECT_FLICK_DURATION = 0.5f;                       ///< Scroll Flick Duration for Effects
 const Vector3 ANGLE_CUBE_PAGE_ROTATE(Math::PI * 0.5f, Math::PI * 0.5f, 0.0f);
 
-const int NUM_BACKGROUND_IMAGES = 20;
+const int NUM_BACKGROUND_IMAGES = 18;
 const float BACKGROUND_SWIPE_SCALE = 0.025f;
 const float BACKGROUND_SPREAD_SCALE = 1.5f;
 const float SCALE_MOD = 1000.0f * Math::PI * 2.0f;
@@ -152,14 +152,14 @@ public:
   Vector3 operator()( const Vector3& current, const PropertyInput& scrollProperty, const PropertyInput& parentSize )
   {
     Vector3 pos( current );
-    
+
     // Wrap bubbles verically.
     if( pos.y + mShapeSize * 0.5f < -parentSize.GetVector3().y * 0.5f )
     {
       pos.y += parentSize.GetVector3().y + mShapeSize;
     }
 
-    // Bubbles X position moves parallax to horizontal 
+    // Bubbles X position moves parallax to horizontal
     // panning by a scale factor unique to each bubble.
     pos.x = mInitialX + ( scrollProperty.GetVector3().x * mScale );
     return pos;
