@@ -350,6 +350,13 @@ public:
     SetLayoutTitle();
     SetLayoutImage();
 
+    ScrollBar scrollBar = ScrollBar::New();
+    scrollBar.SetParentOrigin(ParentOrigin::TOP_RIGHT);
+    scrollBar.SetAnchorPoint(AnchorPoint::TOP_RIGHT);
+    scrollBar.SetSize(18.0f, stage.GetSize().height, 0.0f);
+    scrollBar.SetIndicatorHeightPolicy(ScrollBar::Variable);
+    mItemView.Add(scrollBar);
+
     // Store one 1x1 white image for multiple items to share for backgrounds:
     mWhiteImage = BitmapImage::WHITE();
   }
