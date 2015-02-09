@@ -36,7 +36,8 @@ bin_PROGRAMS = \
                builder.example \
                image-scaling-irregular-grid.example \
                buttons.example \
-               logging.example
+               logging.example \
+               glyphy-basic.example
 
 daliimagedir = $(appdatadir)/images/
 dalimodeldir = $(appdatadir)/models/
@@ -55,12 +56,12 @@ BASE_CXXFLAGS = -I../../../examples \
 
 EXAMPLE_CXXFLAGS      = $(DALI_CFLAGS) \
                         $(DALI_TOOLKIT_CFLAGS) \
-                        $(BASE_CXXFLAGS)
-
+                        $(BASE_CXXFLAGS) \
+                        $(FREETYPE_CFLAGS)
 
 EXAMPLE_DEPS =
 
-EXAMPLE_LDADD = $(DALI_LIBS) $(DALI_TOOLKIT_LIBS) $(ECORE_X_LIBS) $(CAPI_MEDIA_PLAYER_LIBS) $(CAPI_APPFW_APPLICATION_LIBS) -lrt -lEGL
+EXAMPLE_LDADD = $(DALI_LIBS) $(DALI_TOOLKIT_LIBS) $(FREETYPE_LIBS) $(ECORE_X_LIBS) $(CAPI_MEDIA_PLAYER_LIBS) $(CAPI_APPFW_APPLICATION_LIBS) -lrt -lEGL
 
 
 blocks_example_SOURCES = $(examples_src_dir)/blocks/blocks-example.cpp
@@ -169,3 +170,19 @@ logging_example_SOURCES = $(examples_src_dir)/logging/logging-example.cpp
 logging_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 logging_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 logging_example_LDADD = $(EXAMPLE_LDADD)
+
+glyphy_basic_example_SOURCES = $(examples_src_dir)/glyphy/glyphy-basic-example.cpp \
+                              $(examples_src_dir)/glyphy/glyphy-text-effect.cpp \
+                              $(examples_src_dir)/glyphy/glyphy-atlas.cpp \
+                              $(examples_src_dir)/glyphy/demo-svg.cc \
+                              $(examples_src_dir)/glyphy/glyphy-demo/demo-font.cc \
+                              $(examples_src_dir)/glyphy/glyphy-demo/demo-buffer.cc \
+                              $(examples_src_dir)/glyphy/glyphy-src/glyphy-arc.cc \
+                              $(examples_src_dir)/glyphy/glyphy-src/glyphy-arcs.cc \
+                              $(examples_src_dir)/glyphy/glyphy-src/glyphy-blob.cc \
+                              $(examples_src_dir)/glyphy/glyphy-src/glyphy-extents.cc \
+                              $(examples_src_dir)/glyphy/glyphy-src/glyphy-outline.cc \
+                              $(examples_src_dir)/glyphy/glyphy-src/glyphy-sdf.cc
+glyphy_basic_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+glyphy_basic_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+glyphy_basic_example_LDADD = $(EXAMPLE_LDADD)
