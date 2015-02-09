@@ -620,8 +620,9 @@ public:
     shadowActor.SetAnchorPoint(AnchorPoint::CENTER);
     shadowActor.SetPosition(Vector3(0.0f, 0.0f, -1.0f));
 
-    // Apply size constraint to the image shadow
-    shadowActor.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), RelativeToConstraint( ShadowProperty::SIZE_SCALE ) ) );
+    // Apply size-relative mode to auto-size the image shadow
+    shadowActor.SetSizeRelativeToParentMode( SIZE_RELATIVE_TO_PARENT );
+    shadowActor.SetSizeRelativeToParentFactor( ShadowProperty::SIZE_SCALE );
     actor.Add(shadowActor);
 
     // Add a picture image actor to actor.
@@ -629,7 +630,7 @@ public:
     ImageActor imageActor = ImageActor::New(image);
     imageActor.SetParentOrigin( ParentOrigin::CENTER );
     imageActor.SetAnchorPoint( AnchorPoint::CENTER );
-    imageActor.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), EqualToConstraint() ) );
+    imageActor.SetSizeRelativeToParentMode( SIZE_EQUAL_TO_PARENT );
     actor.Add(imageActor);
 
     // Add a border image child actor
