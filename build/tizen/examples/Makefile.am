@@ -37,9 +37,11 @@ bin_PROGRAMS = \
                image-scaling-irregular-grid.example \
                buttons.example \
                text-view.example \
-               logging.example
-
-
+               logging.example \
+               popup.example \
+               alignment.example \
+               tableview.example
+ 
 daliimagedir = $(appdatadir)/images/
 dalimodeldir = $(appdatadir)/models/
 daliscriptdir = $(appdatadir)/scripts/
@@ -176,3 +178,17 @@ logging_example_SOURCES = $(examples_src_dir)/logging/logging-example.cpp
 logging_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 logging_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 logging_example_LDADD = $(EXAMPLE_LDADD)
+popup_example_SOURCES = $(examples_src_dir)/popup/popup-example.cpp
+popup_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+popup_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+popup_example_LDADD = $(EXAMPLE_LDADD)
+
+alignment_example_SOURCES = $(examples_src_dir)/alignment/alignment-example.cpp
+alignment_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+alignment_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+alignment_example_LDADD = $(EXAMPLE_LDADD)
+
+tableview_example_SOURCES = $(examples_src_dir)/tableview/tableview-example.cpp
+tableview_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+tableview_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+tableview_example_LDADD = $(EXAMPLE_LDADD)

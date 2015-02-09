@@ -76,4 +76,13 @@
 	<ui-application appid="logging.example" exec="/usr/apps/com.samsung.dali-demo/bin/logging.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Logging</label>
 	</ui-application>
+	<ui-application appid="popup.example" exec="/usr/apps/com.samsung.dali-demo/bin/popup.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Popup</label>
+	</ui-application>
+	<ui-application appid="tableview.example" exec="/usr/apps/com.samsung.dali-demo/bin/tableview.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Table View</label>
+	</ui-application>
+	<ui-application appid="alignment.example" exec="/usr/apps/com.samsung.dali-demo/bin/alignment.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Alignment</label>
+	</ui-application>
 </manifest>
