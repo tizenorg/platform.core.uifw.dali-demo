@@ -24,7 +24,6 @@ class NewWindowController;
 
 namespace
 {
-const char * gModelFile = DALI_MODEL_DIR "AlbumCute.dali-bin";
 const char * const BACKGROUND_IMAGE( DALI_IMAGE_DIR "background-2.jpg" );
 const char * const TOOLBAR_IMAGE( DALI_IMAGE_DIR "top-bar.png" );
 const char * const LOSE_CONTEXT_IMAGE( DALI_IMAGE_DIR "icon-cluster-wobble.png" );
@@ -63,13 +62,8 @@ public:
 
   void OnContextLost();
   void OnContextRegained();
-  void CreateMeshActor();
-  Mesh CreateMesh(bool, Material);
-  void CreateBubbles(Vector2 stageSize);
   void CreateBlending();
   void CreateText();
-  void CreateModel();
-  void OnModelLoaded(Model model);
   bool OnTrackTimerTick();
   bool OnExplodeTimerTick();
   void SetUpAnimation( Vector2 emitPosition, Vector2 direction );
@@ -80,25 +74,16 @@ public:
 
 private:
   Application                mApplication;
-  Animation                  mModelAnimation;
-  Actor                      mModelActor;
-  Actor                      mCastingLight;
   ImageActor                 mImageActor;
   ImageActor                 mBlendActor;
   Image                      mEffectImage;
   Image                      mBaseImage;
-  LightActor                 mKeyLightActor;
-  MeshActor                  mMeshActor;
-  MeshActor                  mAnimatedMeshActor;
-  Model                      mModel;
 
   Toolkit::View              mView;                              ///< The View instance.
   Toolkit::ToolBar           mToolBar;                           ///< The View's Toolbar.
   Layer                      mContentLayer;                      ///< Content layer (scrolling cluster content)
   Toolkit::PushButton        mLoseContextButton;
   Vector3                    mHSVDelta;
-  Toolkit::BubbleEmitter     mEmitter;
-
   Timer                      mEmitTrackTimer;
   Timer                      mExplodeTimer;
   bool                       mNeedNewAnimation;
@@ -168,11 +153,8 @@ void NewWindowController::Create( Application& app )
   mirrorImageActor.SetAnchorPoint(AnchorPoint::TOP_CENTER);
   logoLayoutActor.Add(mirrorImageActor);
 
-  CreateBubbles(stage.GetSize());
-  CreateMeshActor();
   CreateBlending();
   CreateText();
-  CreateModel();
 
   stage.ContextLostSignal().Connect(this, &NewWindowController::OnContextLost);
   stage.ContextRegainedSignal().Connect(this, &NewWindowController::OnContextRegained);
@@ -187,31 +169,6 @@ bool NewWindowController::OnLoseContextButtonClicked( Toolkit::Button button )
   // Add as an idle callback to avoid ProcessEvents being recursively called.
   mApplication.AddIdle(NewWindowController::NewWindow);
   return true;
-}
-
-void NewWindowController::CreateMeshActor()
-{
-  mEffectImage = Image::New(EFFECT_IMAGE);
-
-  Material baseMaterial = Material::New( "Material1" );
-  Dali::MeshActor meshActor = MeshActor::New( CreateMesh(true, baseMaterial) );
-  meshActor.SetScale( 100.0f );
-  meshActor.SetParentOrigin( ParentOrigin::CENTER );
-  meshActor.SetPosition(Vector3( -150.0f, 200.0f, 0.0f ));
-  meshActor.SetAffectedByLighting( false );
-  meshActor.SetName("MeshActor");
-  mContentLayer.Add( meshActor );
-
-  Material orchidMaterial = Material::New( "Material2" );
-  orchidMaterial.SetDiffuseTexture(mEffectImage);
-
-  Dali::MeshActor meshActor2 = MeshActor::New( CreateMesh(false, orchidMaterial) );
-  meshActor2.SetScale( 100.0f );
-  meshActor2.SetParentOrigin( ParentOrigin::CENTER );
-  meshActor2.SetPosition(Vector3( -150.0f, 310.0f, 0.0f ));
-  meshActor2.SetAffectedByLighting( false );
-  meshActor2.SetName("MeshActor");
-  mContentLayer.Add( meshActor2 );
 }
 
 FrameBufferImage NewWindowController::CreateMirrorImage(const char* imageName)
@@ -282,32 +239,9 @@ FrameBufferImage NewWindowController::CreateFrameBufferForImage(const char* imag
   return framebuffer;
 }
 
-void NewWindowController::CreateBubbles(Vector2 stageSize)
-{
-  mEmitter = Toolkit::BubbleEmitter::New( stageSize,
-                                          Image::New( DALI_IMAGE_DIR "bubble-ball.png" ),
-                                          1000, Vector2( 5.0f, 5.0f ) );
-
-  Image background = Image::New(BACKGROUND_IMAGE);
-  mEmitter.SetBackground( background, mHSVDelta );
-  Actor bubbleRoot = mEmitter.GetRootActor();
-  mContentLayer.Add( bubbleRoot );
-  bubbleRoot.SetParentOrigin(ParentOrigin::CENTER);
-  bubbleRoot.SetZ(0.1f);
-
-  mEmitTrackTimer = Timer::New( EMIT_INTERVAL_IN_MS );
-  mEmitTrackTimer.TickSignal().Connect(this, &NewWindowController::OnTrackTimerTick);
-  mEmitTrackTimer.Start();
-
-  //mExplodeTimer = Timer::New( Random::Range(4000.f, 8000.f) );
-  //mExplodeTimer.TickSignal().Connect(this, &NewWindowController::OnExplodeTimerTick);
-  //mExplodeTimer.Start();
-}
 
 bool NewWindowController::OnExplodeTimerTick()
 {
-  mEmitter.StartExplosion( EXPLOSION_DURATION, 5.0f );
-
   mExplodeTimer = Timer::New( Random::Range(4.f, 8.f) );
   mExplodeTimer.TickSignal().Connect(this, &NewWindowController::OnExplodeTimerTick);
   return false;
@@ -322,8 +256,6 @@ void NewWindowController::SetUpAnimation( Vector2 emitPosition, Vector2 directio
     mNeedNewAnimation = false;
     mAnimateComponentCount = 0;
   }
-
-  mEmitter.EmitBubble( mEmitAnimation, emitPosition, direction, Vector2(1, 1) );
 
   mAnimateComponentCount++;
 
@@ -359,8 +291,7 @@ bool NewWindowController::OnTrackTimerTick()
 
 void NewWindowController::CreateBlending()
 {
-  Toolkit::ColorAdjuster colorAdjuster = ColorAdjuster::New(mHSVDelta);
-  FrameBufferImage fb2 = CreateFrameBufferForImage( EFFECT_IMAGE, mEffectImage, colorAdjuster );
+  FrameBufferImage fb2 = CreateFrameBufferForImage( EFFECT_IMAGE, mEffectImage, ShaderEffect() );
 
   ImageActor tmpActor = ImageActor::New(fb2);
   mContentLayer.Add(tmpActor);
@@ -385,85 +316,6 @@ void NewWindowController::CreateBlending()
 void NewWindowController::CreateText()
 {
   // TODO
-}
-
-Mesh NewWindowController::CreateMesh(bool hasColor, Material material)
-{
-  // Create vertices and specify their color
-  MeshData::VertexContainer vertices(4);
-  vertices[ 0 ] = MeshData::Vertex( Vector3( -0.5f, -0.5f, 0.0f ), Vector2(0.0f, 0.0f), Vector3(1.0f, 0.0f, 0.0f) );
-  vertices[ 1 ] = MeshData::Vertex( Vector3(  0.5f, -0.5f, 0.0f ), Vector2(1.0f, 0.0f), Vector3(1.0f, 1.0f, 0.0f) );
-  vertices[ 2 ] = MeshData::Vertex( Vector3( -0.5f,  0.5f, 0.0f ), Vector2(0.0f, 1.0f), Vector3(0.0f,1.0f,0.0f) );
-  vertices[ 3 ] = MeshData::Vertex( Vector3(  0.5f,  0.5f, 0.0f ), Vector2(1.0f, 1.0f), Vector3(0.0f,0.0f,1.0f) );
-
-  // Specify all the faces
-  MeshData::FaceIndices faces;
-  faces.reserve( 6 ); // 2 triangles in Quad
-  faces.push_back( 0 ); faces.push_back( 3 ); faces.push_back( 1 );
-  faces.push_back( 0 ); faces.push_back( 2 ); faces.push_back( 3 );
-
-  // Create the mesh data from the vertices and faces
-  MeshData meshData;
-  meshData.SetHasColor( hasColor );
-  meshData.SetMaterial( material );
-  meshData.SetVertices( vertices );
-  meshData.SetFaceIndices( faces );
-
-  // Create a mesh from the data
-  Dali::Mesh mesh = Mesh::New( meshData );
-  return mesh;
-}
-
-void NewWindowController::CreateModel()
-{
-  mModel = Model::New(gModelFile);
-  mModel.LoadingFinishedSignal().Connect(this, &NewWindowController::OnModelLoaded);
-
-  //Create a Key light
-  Light keylight = Light::New("KeyLight");
-  keylight.SetFallOff(Vector2(10000.0f, 10000.0f));
-
-  mCastingLight = Actor::New();
-  mCastingLight.SetParentOrigin(ParentOrigin::CENTER);
-  mCastingLight.SetAnchorPoint(AnchorPoint::CENTER);
-  mCastingLight.SetPosition( Vector3( 0.0f, 0.0f, 800.0f ) );
-  mContentLayer.Add( mCastingLight );
-
-  mKeyLightActor = LightActor::New();
-  mKeyLightActor.SetParentOrigin(ParentOrigin::CENTER);
-  mKeyLightActor.SetName(keylight.GetName());
-
-  //Add all the actors to the stage
-  mCastingLight.Add(mKeyLightActor);
-  mKeyLightActor.SetLight(keylight);
-}
-
-void NewWindowController::OnModelLoaded( Model model )
-{
-  if( model.GetLoadingState() == ResourceLoadingSucceeded )
-  {
-    std::cout << "Succeeded loading model" << std::endl;
-    mModelActor = ModelActorFactory::BuildActorTree(mModel, "");  // Gets root actor
-    mModelActor.SetSize(250.0f, 250.0f);
-    mModelActor.SetPosition(0.0f, 200.0f, 70.0f);
-    mModelActor.SetScale(0.5f);
-    mModelActor.SetRotation(Radian(Math::PI*0.25f), Vector3(1.0, 0.7, 0.0));
-
-    mContentLayer.Add( mModelActor );
-
-    if (mModel.NumberOfAnimations())
-    {
-      mModelAnimation = ModelActorFactory::BuildAnimation(mModel, mModelActor, 0);
-      mModelAnimation.SetDuration(4.0f);
-      mModelAnimation.SetLooping(true);
-      mModelAnimation.Play();
-    }
-  }
-  else
-  {
-    std::cout << "Failed loading model" << std::endl;
-    mApplication.Quit();
-  }
 }
 
 void NewWindowController::NewWindow(void)

@@ -17,7 +17,6 @@ examples_src_dir = ../../../examples
 
 bin_PROGRAMS = \
                blocks.example \
-               bubble-effect.example \
                cluster.example \
                cube-transition-effect.example \
                dissolve-effect.example \
@@ -28,10 +27,7 @@ bin_PROGRAMS = \
                motion-stretch.example \
                new-window.example \
                page-turn-view.example \
-               radial-menu.example \
-               refraction-effect.example \
                scroll-view.example \
-               shadow-bone-lighting.example \
                dali-builder \
                builder.example \
                image-scaling-irregular-grid.example \
@@ -67,11 +63,6 @@ blocks_example_SOURCES = $(examples_src_dir)/blocks/blocks-example.cpp
 blocks_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 blocks_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 blocks_example_LDADD = $(EXAMPLE_LDADD)
-
-bubble_effect_example_SOURCES = $(examples_src_dir)/shader-effect/bubble-effect-example.cpp
-bubble_effect_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
-bubble_effect_example_DEPENDENCIES = $(EXAMPLE_DEPS)
-bubble_effect_example_LDADD = $(EXAMPLE_LDADD)
 
 cluster_example_SOURCES = $(examples_src_dir)/cluster/cluster-example.cpp
 cluster_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
@@ -123,27 +114,10 @@ page_turn_view_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 page_turn_view_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 page_turn_view_example_LDADD = $(EXAMPLE_LDADD)
 
-radial_menu_example_SOURCES = $(examples_src_dir)/radial-menu/radial-menu-example.cpp \
-                              $(examples_src_dir)/radial-menu/radial-sweep-view.cpp \
-                              $(examples_src_dir)/radial-menu/radial-sweep-view-impl.cpp
-radial_menu_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
-radial_menu_example_DEPENDENCIES = $(EXAMPLE_DEPS)
-radial_menu_example_LDADD = $(EXAMPLE_LDADD)
-
-refraction_effect_example_SOURCES = $(examples_src_dir)/shader-effect/refraction-effect-example.cpp
-refraction_effect_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
-refraction_effect_example_DEPENDENCIES = $(EXAMPLE_DEPS)
-refraction_effect_example_LDADD = $(EXAMPLE_LDADD)
-
 scroll_view_example_SOURCES = $(examples_src_dir)/scroll-view/scroll-view-example.cpp
 scroll_view_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 scroll_view_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 scroll_view_example_LDADD = $(EXAMPLE_LDADD)
-
-shadow_bone_lighting_example_SOURCES = $(examples_src_dir)/shadows/shadow-bone-lighting-example.cpp
-shadow_bone_lighting_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
-shadow_bone_lighting_example_DEPENDENCIES = $(EXAMPLE_DEPS)
-shadow_bone_lighting_example_LDADD = $(EXAMPLE_LDADD)
 
 dali_builder_SOURCES = $(examples_src_dir)/builder/dali-builder.cpp
 dali_builder_CXXFLAGS = $(EXAMPLE_CXXFLAGS)

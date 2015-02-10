@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
   DaliTableView demo(app);
 
-  demo.AddExample(Example("bubble-effect.example", "Bubbles"));
+//  demo.AddExample(Example("bubble-effect.example", "Bubbles"));
   demo.AddExample(Example("blocks.example", "Blocks"));
   demo.AddExample(Example("cluster.example", "Cluster control"));
   demo.AddExample(Example("cube-transition-effect.example", "Cube Transition"));
@@ -35,10 +35,10 @@ int main(int argc, char **argv)
   demo.AddExample(Example("motion-blur.example", "Motion Blur"));
   demo.AddExample(Example("motion-stretch.example", "Motion Stretch"));
   demo.AddExample(Example("page-turn-view.example", "Page Turn View"));
-  demo.AddExample(Example("radial-menu.example", "Radial Menu"));
-  demo.AddExample(Example("refraction-effect.example", "Refraction"));
+//  demo.AddExample(Example("radial-menu.example", "Radial Menu"));
+//  demo.AddExample(Example("refraction-effect.example", "Refraction"));
   demo.AddExample(Example("scroll-view.example", "Scroll View"));
-  demo.AddExample(Example("shadow-bone-lighting.example", "Lights and shadows"));
+//  demo.AddExample(Example("shadow-bone-lighting.example", "Lights and shadows"));
   demo.AddExample(Example("builder.example", "Script Based UI"));
   demo.AddExample(Example("image-scaling-irregular-grid.example", "Image Scaling Modes"));
   demo.AddExample(Example("text-view.example", "Text View"));
