@@ -507,6 +507,7 @@ void RunTest(Application& app)
 {
   gNewWindowController = new NewWindowController(app);
   app.MainLoop(Configuration::APPLICATION_DOES_NOT_HANDLE_CONTEXT_LOSS);
+  delete gNewWindowController;
 }
 
 // Entry point for Linux & SLP applications

@@ -40,7 +40,7 @@ public:
   }
 
   // The Init signal is received once (only) during the Application lifetime
-  void Create( Application& application )
+  void Create( Application& /*application*/ )
   {
     std::cout << "HelloWorldController::Create" << std::endl;
 
@@ -60,7 +60,7 @@ public:
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
   }
 
-  bool OnTouch( Actor actor, const TouchEvent& touch )
+  bool OnTouch( Actor /*actor*/, const TouchEvent& /*touch*/ )
   {
     // quit the application
     mApplication.Quit();
