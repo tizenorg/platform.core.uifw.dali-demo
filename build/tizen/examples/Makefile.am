@@ -36,6 +36,7 @@ bin_PROGRAMS = \
                builder.example \
                image-scaling-irregular-grid.example \
                buttons.example \
+               texture-atlas.example \
                logging.example
 
 daliimagedir = $(appdatadir)/images/
@@ -169,3 +170,8 @@ logging_example_SOURCES = $(examples_src_dir)/logging/logging-example.cpp
 logging_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
 logging_example_DEPENDENCIES = $(EXAMPLE_DEPS)
 logging_example_LDADD = $(EXAMPLE_LDADD)
+
+texture_atlas_example_SOURCES = $(examples_src_dir)/texture-atlas/texture-atlas-example.cpp
+texture_atlas_example_CXXFLAGS = $(EXAMPLE_CXXFLAGS)
+texture_atlas_example_DEPENDENCIES = $(EXAMPLE_DEPS)
+texture_atlas_example_LDADD = $(EXAMPLE_LDADD)
