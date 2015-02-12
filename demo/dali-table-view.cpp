@@ -308,8 +308,9 @@ void DaliTableView::Initialize( Application& application )
 
   mScrollView.SetAnchorPoint( AnchorPoint::CENTER );
   mScrollView.SetParentOrigin( ParentOrigin::CENTER );
-  mScrollView.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ),
-                                                                     Dali::RelativeToConstraint( SCROLLVIEW_RELATIVE_SIZE ) ) );
+  // Note: Currently, changing mScrollView to use SizeMode RELATIVE_TO_PARENT
+  // will cause scroll ends to appear in the wrong position.
+  mScrollView.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::RelativeToConstraint( SCROLLVIEW_RELATIVE_SIZE ) ) );
   mScrollView.SetAxisAutoLock( true );
   mScrollView.ScrollCompletedSignal().Connect( this, &DaliTableView::OnScrollComplete );
   mScrollView.ScrollStartedSignal().Connect( this, &DaliTableView::OnScrollStart );
@@ -406,7 +407,7 @@ void DaliTableView::Populate()
 
       page.SetAnchorPoint( AnchorPoint::CENTER );
       page.SetParentOrigin( ParentOrigin::CENTER );
-      page.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), EqualToConstraint() ) );
+      page.SetSizeMode( SIZE_EQUAL_TO_PARENT );
 
       // add cells to table
       const float margin = 4.0f;
@@ -510,7 +511,7 @@ Actor DaliTableView::CreateTile( const std::string& name, const std::string& tit
   Actor content = Actor::New();
   content.SetAnchorPoint( AnchorPoint::CENTER );
   content.SetParentOrigin( ParentOrigin::CENTER );
-  content.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), EqualToConstraint() ) );
+  content.SetSizeMode( SIZE_EQUAL_TO_PARENT );
   tile.Add(content);
 
   // create background image
@@ -521,7 +522,7 @@ Actor DaliTableView::CreateTile( const std::string& name, const std::string& tit
     image.SetAnchorPoint( AnchorPoint::CENTER );
     image.SetParentOrigin( ParentOrigin::CENTER );
     // make the image 100% of tile
-    image.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), EqualToConstraint() ) );
+    image.SetSizeMode( SIZE_EQUAL_TO_PARENT );
     // move image back to get text appear in front
     image.SetZ( -1 );
     image.SetStyle( ImageActor::STYLE_NINE_PATCH );
@@ -531,7 +532,7 @@ Actor DaliTableView::CreateTile( const std::string& name, const std::string& tit
 
     // Add stencil
     ImageActor stencil = NewStencilImage();
-    stencil.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), EqualToConstraint() ) );
+    stencil.SetSizeMode( SIZE_EQUAL_TO_PARENT );
     image.Add( stencil );
   }
 
