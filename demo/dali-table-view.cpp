@@ -491,6 +491,8 @@ void DaliTableView::Rotate( unsigned int degrees )
 
 Actor DaliTableView::CreateTile( const std::string& name, const std::string& title, const Size& parentSize, bool addBackground )
 {
+  std::cout << "parentSize: " << parentSize << std::endl;
+
   Actor tile = Actor::New();
   tile.SetName( name );
   tile.SetAnchorPoint( AnchorPoint::CENTER );
@@ -531,6 +533,9 @@ Actor DaliTableView::CreateTile( const std::string& name, const std::string& tit
   label.SetProperty( TextLabel::PROPERTY_TEXT, title );
   label.SetColor( Color::BLACK );
   content.Add( label );
+
+  // FIXME - This is a kludge because size negotiation is not finished
+  label.SetSize( parentSize );
 
   // Set the tile to be keyboard focusable
   tile.SetKeyboardFocusable(true);
