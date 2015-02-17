@@ -637,7 +637,7 @@ void DaliTableView::OnPressedAnimationFinished( Dali::Animation& source )
       const Example& example( iter->second );
 
       std::stringstream stream;
-      stream << DALI_EXAMPLE_BIN << example.name.c_str();
+      //stream << DALI_EXAMPLE_BIN << example.name.c_str();
       pid_t pid = fork();
       if( pid == 0)
       {
