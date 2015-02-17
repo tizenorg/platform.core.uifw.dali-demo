@@ -47,13 +47,16 @@ CXXFLAGS+=" -Wall -g -O2"
 LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -fPIC"
 
 %ifarch %{arm}
-EXTRA_CONFIGURE_OPTIONS=" --host=arm"
+#EXTRA_CONFIGURE_OPTIONS=" --host=arm"
 CXXFLAGS+=" -D_ARCH_ARM_"
+ARCH="arm"
 %endif
 
-libtoolize --force
-cd %{_builddir}/%{name}-%{version}/build/tizen && autoreconf --install
-cd %{_builddir}/%{name}-%{version}/build/tizen && CXXFLAGS=$CXXFLAGS LDFLAGS=$LDFLAGS DALI_APP_DIR=%{dali_app_ro_dir} ./configure --prefix=$PREFIX $EXTRA_CONFIGURE_OPTIONS
+#libtoolize --force
+#cd %{_builddir}/%{name}-%{version}/build/tizen && autoreconf --install
+#cd %{_builddir}/%{name}-%{version}/build/tizen && CXXFLAGS=$CXXFLAGS LDFLAGS=$LDFLAGS DALI_APP_DIR=%{dali_app_ro_dir} ./configure --prefix=$PREFIX $EXTRA_CONFIGURE_OPTIONS
+
+cd %{_builddir}/%{name}-%{version}/build/tizen && cmake . -DCXXFLAGS=$CXXFLAGS -DLDFLAGS=$LDFLAGS -DDALI_APP_DIR=%{dali_app_ro_dir} -DARCH=%{ARCH}
 
 make %{?jobs:-j%jobs}
 
