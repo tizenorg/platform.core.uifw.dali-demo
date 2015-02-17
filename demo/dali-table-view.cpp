@@ -17,7 +17,10 @@
 
 // CLASS HEADER
 #include "dali-table-view.h"
+
+// INTERNAL INCLUDES
 #include "examples/shared/view.h"
+#include <dali/public-api/text-abstraction/text-abstraction.h>
 
 // EXTERNAL INCLUDES
 #include <algorithm>
