@@ -16,20 +16,26 @@
  */
 
 #include "dali-table-view.h"
+#include "examples/shared/dali-demo-strings.h"
 
 using namespace Dali;
 
 int main(int argc, char **argv)
 {
+  // Configure gettext for internalization
+  bindtextdomain(DALI_DEMO_DOMAIN_LOCAL, DALI_LOCALE_DIR);
+  textdomain(DALI_DEMO_DOMAIN_LOCAL);
+  setlocale(LC_ALL, DALI_LANG);
+
   Application app = Application::New(&argc, &argv);
 
   DaliTableView demo(app);
 
-  demo.AddExample(Example("bubble-effect.example", "Bubbles"));
-  demo.AddExample(Example("blocks.example", "Blocks"));
-  demo.AddExample(Example("cluster.example", "Cluster control"));
-  demo.AddExample(Example("cube-transition-effect.example", "Cube Transition"));
-  demo.AddExample(Example("dissolve-effect.example", "Dissolve Transition"));
+  demo.AddExample(Example("bubble-effect.example", DALI_DEMO_STR_TITLE_BUBBLES));
+  demo.AddExample(Example("blocks.example", DALI_DEMO_STR_TITLE_BLOCKS));
+  demo.AddExample(Example("cluster.example", DALI_DEMO_STR_TITLE_CLUSTER));
+  demo.AddExample(Example("cube-transition-effect.example", DALI_DEMO_STR_TITLE_CUBE_TRANSITION));
+  demo.AddExample(Example("dissolve-effect.example", DALI_DEMO_STR_TITLE_DISSOLVE_TRANSITION));
   demo.AddExample(Example("item-view.example", "Item View"));
   demo.AddExample(Example("magnifier.example", "Magnifier"));
   demo.AddExample(Example("motion-blur.example", "Motion Blur"));

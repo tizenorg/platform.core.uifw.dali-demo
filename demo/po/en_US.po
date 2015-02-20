@@ -1,0 +1,2 @@
+msgid "DALI_DEMO_STR_TITLE_BUBBLES"
+msgstr "Bubbles"
