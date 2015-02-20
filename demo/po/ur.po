@@ -1,0 +1,50 @@
+msgid "DALI_DEMO_STR_TITLE_BUBBLES"
+msgstr "بلبل"
+
+msgid "DALI_DEMO_STR_TITLE_BLOCKS"
+msgstr "بهاری لکڑی"
+
+msgid "DALI_DEMO_STR_TITLE_CLUSTER"
+msgstr "کلسٹر"
+
+msgid "DALI_DEMO_STR_TITLE_CUBE_TRANSITION"
+msgstr "مکعب عبور اثر"
+
+msgid "DALI_DEMO_STR_TITLE_DISSOLVE_TRANSITION"
+msgstr "بکھراو عبور اثر"
+
+msgid "DALI_DEMO_STR_TITLE_ITEM_VIEW"
+msgstr "شے منظر"
+
+msgid "DALI_DEMO_STR_TITLE_MAGNIFIER"
+msgstr "مکبر"
+
+msgid "DALI_DEMO_STR_TITLE_MOTION_BLUR"
+msgstr "تحریک کلنک"
+
+msgid "DALI_DEMO_STR_TITLE_MOTION_STRETCH"
+msgstr "کھینچیں"
+
+msgid "DALI_DEMO_STR_TITLE_PAGE_TURN_VIEW"
+msgstr "صفحہ باری"
+
+msgid "DALI_DEMO_STR_TITLE_RADIAL_MENU"
+msgstr "ریڈیل مینو"
+
+msgid "DALI_DEMO_STR_TITLE_REFRACTION"
+msgstr "اپورتن"
+
+msgid "DALI_DEMO_STR_TITLE_SCROLL_VIEW"
+msgstr "طومار کر رہا ہے"
+
+msgid "DALI_DEMO_STR_TITLE_LIGHTS_AND_SHADOWS"
+msgstr "سائے"
+
+msgid "DALI_DEMO_STR_TITLE_SCRIPT_BASED_UI"
+msgstr "سکرپٹ کی"
+
+msgid "DALI_DEMO_STR_TITLE_IMAGE_SCALING"
+msgstr "تصویر پیمائی"
+
+msgid "DALI_DEMO_STR_TITLE_TEXT_LABEL"
+msgstr "لیبل"
