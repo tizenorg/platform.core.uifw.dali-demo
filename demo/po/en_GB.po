@@ -1,0 +1,14 @@
+msgid "DALI_DEMO_STR_TITLE_BUBBLES"
+msgstr "Bubbles"
+
+msgid "DALI_DEMO_STR_TITLE_BLOCKS"
+msgstr "Blocks"
+
+msgid "DALI_DEMO_STR_TITLE_CLUSTER"
+msgstr "Cluster"
+
+msgid "DALI_DEMO_STR_TITLE_CUBE_TRANSITION"
+msgstr "Cube Transition"
+
+msgid "DALI_DEMO_STR_TITLE_DISSOLVE_TRANSITION"
+msgstr "Dissolve Transition"

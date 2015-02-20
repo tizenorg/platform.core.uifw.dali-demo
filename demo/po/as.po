@@ -1,0 +1,13 @@
+msgid "DALI_DEMO_STR_TITLE_BUBBLES"
+msgstr "বেলুন"
+
+msgid "DALI_DEMO_STR_TITLE_BLOCKS"
+msgstr "অৱৰুদ্ধ কৰক"
+
+msgid "DALI_DEMO_STR_TITLE_CLUSTER"
+msgstr "থুপ"
+
+msgid "DALI_DEMO_STR_TITLE_CUBE_TRANSITION"
+msgstr "ঘনক পৰিৱৰ্তনীয় প্ৰভাৱ"
+
+
