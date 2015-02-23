@@ -17,6 +17,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <cstdio>
 
 #include "../shared/view.h"
 #include <dali/dali.h>
@@ -525,6 +526,10 @@ public:
     DALI_ASSERT_ALWAYS(paths);
 
     // Add a background image to the cluster
+    Dali::ImageAttributes backgroundAttributes;
+    backgroundAttributes.SetSize( Stage::GetCurrent().GetSize() * 0.5f );
+    backgroundAttributes.SetFilterMode( Dali::ImageAttributes::Box );
+    backgroundAttributes.SetScalingMode( Dali::ImageAttributes::ShrinkToFit );
     Image bg = ResourceImage::New( CLUSTER_BACKGROUND_IMAGE_PATH );
     ImageActor image = ImageActor::New(bg);
     clusterActor.SetBackgroundImage(image);
@@ -552,10 +557,26 @@ public:
     actor.SetParentOrigin( ParentOrigin::CENTER );
     actor.SetAnchorPoint( AnchorPoint::CENTER );
 
-    // Load the thumbnail
+    // Load the thumbnail at third of screen width or natural size:
     ImageAttributes attribs = ImageAttributes::New();
+<<<<<<< HEAD
     attribs.SetSize(CLUSTER_IMAGE_THUMBNAIL_WIDTH, CLUSTER_IMAGE_THUMBNAIL_HEIGHT);
     attribs.SetScalingMode(Dali::ImageAttributes::ShrinkToFit);
+=======
+    float stageQuarter = Stage::GetCurrent().GetSize().x *
+        0.25f;
+    fprintf( stderr, " Stage quarter: %f, CLUSTER_IMAGE_THUMBNAIL_WIDTH: %f <---------------------------------------------------- \n", stageQuarter, CLUSTER_IMAGE_THUMBNAIL_WIDTH );
+    if( stageQuarter < CLUSTER_IMAGE_THUMBNAIL_WIDTH )
+    {
+      attribs.SetSize( stageQuarter, stageQuarter );
+    }
+    else
+    {
+      attribs.SetSize( CLUSTER_IMAGE_THUMBNAIL_WIDTH, CLUSTER_IMAGE_THUMBNAIL_HEIGHT );
+    }
+    attribs.SetFilterMode( Dali::ImageAttributes::BoxThenLinear );
+    attribs.SetScalingMode(Dali::ImageAttributes::ScaleToFill);
+>>>>>>> Added appropriate image scaling and filtering to all applicable demos.
 
     // Add a shadow image child actor
     Image shadowImage = ResourceImage::New( CLUSTER_SHADOW_IMAGE_PATH, attribs );
