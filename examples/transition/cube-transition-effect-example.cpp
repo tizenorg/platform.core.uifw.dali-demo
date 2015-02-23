@@ -85,6 +85,20 @@ const float CUBE_DISPLACEMENT_CROSS(30.f);
 
 // The duration of the current image staying on screen when slideshow is on
 const int VIEWINGTIME = 2000; // 2 seconds
+
+/**
+ * Load an image, scaled-down to no more than the stage dimensions.
+ */
+ResourceImage LoadImage( const char * const imagePath )
+{
+  Size stageSize = Stage::GetCurrent().GetSize();
+  ImageAttributes attributes;
+  attributes.SetSize( stageSize.x, stageSize.y );
+  attributes.SetFilterMode( ImageAttributes::BoxThenLinear );
+  attributes.SetScalingMode( ImageAttributes::ShrinkToFit );
+  return ResourceImage::New( imagePath, attributes );
+}
+
 } // namespace
 
 class CubeTransitionApp : public ConnectionTracker
@@ -266,7 +280,7 @@ void CubeTransitionApp::OnInit( Application& application )
   // show the first image
   mImageConstraint = Constraint::New<Vector3>( Actor::SCALE, LocalSource( Actor::SIZE ), ParentSource( Actor::SIZE ), ScaleToFitKeepAspectRatioConstraint() );
 
-  mCurrentImage = ImageActor::New( ResourceImage::New( IMAGES[mIndex] ) );
+  mCurrentImage = ImageActor::New( LoadImage( IMAGES[mIndex] ) );
   mCurrentImage.SetPositionInheritanceMode( USE_PARENT_POSITION );
   mCurrentImage.ApplyConstraint( mImageConstraint );
   mParent.Add( mCurrentImage );
@@ -308,8 +322,9 @@ void CubeTransitionApp::OnPanGesture( Actor actor, const PanGesture& gesture )
 
 void CubeTransitionApp::GoToNextImage()
 {
-  ResourceImage image = ResourceImage::New( IMAGES[ mIndex ] );
+  ResourceImage image = LoadImage( IMAGES[ mIndex ] );
   mNextImage = ImageActor::New( image );
+
   mNextImage.SetPositionInheritanceMode(USE_PARENT_POSITION);
   mNextImage.ApplyConstraint( mImageConstraint );
   mCurrentEffect.SetTargetImage(mNextImage);

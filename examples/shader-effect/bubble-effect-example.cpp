@@ -49,6 +49,20 @@ const unsigned int NUM_BUBBLE_SHAPE_IMAGES( sizeof( BUBBLE_SHAPE_IMAGES ) / size
 
 const Vector2 DEFAULT_BUBBLE_SIZE( 10.f, 30.f );
 const unsigned int DEFAULT_NUMBER_OF_BUBBLES( 1000 );
+
+/**
+ * Load an image, scaled-down to no more than the stage dimensions.
+ */
+ResourceImage LoadImage( const char * const imagePath )
+{
+  Size stageSize = Stage::GetCurrent().GetSize();
+  ImageAttributes attributes;
+  attributes.SetSize( stageSize.x, stageSize.y );
+  attributes.SetFilterMode( ImageAttributes::BoxThenLinear );
+  attributes.SetScalingMode( ImageAttributes::ScaleToFill );
+  return ResourceImage::New( imagePath, attributes );
+}
+
 }// end LOCAL_STUFF
 
 // This example shows the usage of BubbleEmitter which displays lots of moving bubbles on the stage.
@@ -114,7 +128,7 @@ private:
                                                   ResourceImage::New( BUBBLE_SHAPE_IMAGES[mCurrentBubbleShapeImageId] ),
                                                   DEFAULT_NUMBER_OF_BUBBLES,
                                                   DEFAULT_BUBBLE_SIZE);
-    mBackgroundImage = ResourceImage::New( BACKGROUND_IMAGES[mCurrentBackgroundImageId] );
+    mBackgroundImage = LoadImage( BACKGROUND_IMAGES[mCurrentBackgroundImageId] );
     mBubbleEmitter.SetBackground( mBackgroundImage, mHSVDelta );
 
     // Get the root actor of all bubbles, and add it to stage.
@@ -235,7 +249,7 @@ private:
   {
     if(button == mChangeBackgroundButton)
     {
-      mBackgroundImage = ResourceImage::New( BACKGROUND_IMAGES[ ++mCurrentBackgroundImageId % NUM_BACKGROUND_IMAGES  ] );
+      mBackgroundImage = LoadImage( BACKGROUND_IMAGES[ ++mCurrentBackgroundImageId % NUM_BACKGROUND_IMAGES  ] );
 
       mBubbleEmitter.SetBackground( mBackgroundImage, mHSVDelta );
 

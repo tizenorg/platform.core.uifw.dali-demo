@@ -65,6 +65,19 @@ struct LightOffsetConstraint
   float mRadius;
 };
 
+/**
+ * Load an image, scaled-down to no more than the stage dimensions.
+ */
+ResourceImage LoadImage( const char * const imagePath )
+{
+  Size stageSize = Stage::GetCurrent().GetSize();
+  ImageAttributes attributes;
+  attributes.SetSize( stageSize.x, stageSize.y );
+  attributes.SetFilterMode( ImageAttributes::BoxThenLinear );
+  attributes.SetScalingMode( ImageAttributes::ScaleToFill );
+  return ResourceImage::New( imagePath, attributes );
+}
+
 } // namespace
 
 /************************************************************************************************
@@ -338,7 +351,7 @@ private:
     mNoEffect = NoEffect::New(); // used in the other situations, basic render shader
     // Create the mesh from the obj file and add to stage
     mMaterial =  Material::New( "Material" ) ;
-    mMaterial.SetDiffuseTexture(ResourceImage::New(TEXTURE_IMAGES[mCurrentTextureId]));
+    mMaterial.SetDiffuseTexture( LoadImage( TEXTURE_IMAGES[mCurrentTextureId] ) );
     CreateSurface( MESH_FILES[mCurrentMeshId] );
 
     // Connect the callback to the touch signal on the mesh actor
@@ -371,7 +384,7 @@ private:
   bool OnChangeTexture( Toolkit::Button button )
   {
     mCurrentTextureId = ( mCurrentTextureId + 1 ) % NUM_TEXTURE_IMAGES;
-    mMaterial.SetDiffuseTexture(ResourceImage::New(TEXTURE_IMAGES[mCurrentTextureId]));
+    mMaterial.SetDiffuseTexture( LoadImage( TEXTURE_IMAGES[mCurrentTextureId] ) );
 
     return true;
   }

@@ -359,6 +359,9 @@ public:
     mContentLayer.Add( mScrollView );
     mScrollView.Add( imageField );
     mGridActor = imageField;
+
+    // Scroll to top of grid so first images loaded are on-screen:
+    mScrollView.ScrollTo( Vector3( 0, -1000000, 0 ) );
   }
 
   /**
