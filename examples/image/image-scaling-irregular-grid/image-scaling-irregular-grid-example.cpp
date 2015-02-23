@@ -359,6 +359,8 @@ public:
     mContentLayer.Add( mScrollView );
     mScrollView.Add( imageField );
     mGridActor = imageField;
+
+    mScrollView.ScrollTo( Vector3( 0, -100000, 0) );
   }
 
   /**
