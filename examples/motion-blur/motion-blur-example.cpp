@@ -88,9 +88,22 @@ const Vector3 BUTTON_TITLE_LABEL_INSTRUCTIONS_POPUP_SIZE_CONSTRAINT( 1.0f, 1.0f,
 const float BUTTON_TITLE_LABEL_Y_OFFSET = 0.05f;
 
 const float ORIENTATION_DURATION = 0.5f;                  ///< Time to rotate to new orientation.
+
+/**
+ * Load an image, scaled-down to no more than half the stage dimensions.
+ */
+ResourceImage LoadImage( const char * const imagePath )
+{
+  Size stageSize = Stage::GetCurrent().GetSize();
+  ImageAttributes attributes;
+  attributes.SetSize( stageSize.x * 0.5f, stageSize.y * 0.5f );
+  // Use a box filter to make sure the downscaling is high quality and conservative:
+  attributes.SetFilterMode( ImageAttributes::Box );
+  attributes.SetScalingMode( ImageAttributes::ShrinkToFit );
+  return ResourceImage::New( imagePath, attributes );
+}
+
 } // unnamed namespace
-
-
 
 
 //
@@ -187,7 +200,7 @@ public:
     // Motion blurred actor
     //
 
-    Image image = ResourceImage::New( MOTION_BLUR_ACTOR_IMAGE1 );
+    Image image = LoadImage( MOTION_BLUR_ACTOR_IMAGE1 );
     mMotionBlurImageActor = ImageActor::New(image);
     mMotionBlurImageActor.SetParentOrigin( ParentOrigin::CENTER );
     mMotionBlurImageActor.SetSize(MOTION_BLUR_ACTOR_WIDTH, MOTION_BLUR_ACTOR_HEIGHT);
@@ -478,7 +491,7 @@ public:
       mCurrentImage = 0;
     }
 
-    Image blurImage = ResourceImage::New( MOTION_BLUR_ACTOR_IMAGES[mCurrentImage] );
+    Image blurImage = LoadImage( MOTION_BLUR_ACTOR_IMAGES[mCurrentImage] );
     mMotionBlurImageActor.SetImage(blurImage);
   }
 
