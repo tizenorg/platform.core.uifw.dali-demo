@@ -71,6 +71,20 @@ const int VIEWINGTIME = 2000; // 2 seconds
 const float TRANSITION_DURATION = 2.5f; //2.5 second
 
 const float INITIAL_DEPTH = -10.0f;
+
+/**
+ * Load an image, scaled-down to no more than the stage dimensions.
+ */
+ResourceImage LoadImage( const char * const imagePath )
+{
+  Size stageSize = Stage::GetCurrent().GetSize();
+  ImageAttributes attributes;
+  attributes.SetSize( stageSize.x, stageSize.y );
+  attributes.SetFilterMode( ImageAttributes::BoxThenLinear );
+  attributes.SetScalingMode( ImageAttributes::ScaleToFill );
+  return ResourceImage::New( imagePath, attributes );
+}
+
 } // namespace
 
 class DissolveEffectApp : public ConnectionTracker
@@ -235,7 +249,7 @@ void DissolveEffectApp::OnInit( Application& application )
   mSizeConstraint= Constraint::New<Vector3>( Actor::Property::SCALE, LocalSource( Actor::Property::SIZE ), ParentSource( Actor::Property::SIZE ), ScaleToFitKeepAspectRatioConstraint() );
 
   // show the first image
-  mCurrentImage = ImageActor::New( ResourceImage::New( IMAGES[mIndex] ) );
+  mCurrentImage = ImageActor::New( LoadImage( IMAGES[mIndex] ) );
   mCurrentImage.SetPositionInheritanceMode(USE_PARENT_POSITION_PLUS_LOCAL_POSITION);
   mCurrentImage.ApplyConstraint( mSizeConstraint );
   mParent.Add( mCurrentImage );
@@ -263,7 +277,7 @@ void DissolveEffectApp::OnPanGesture( Actor actor, const PanGesture& gesture )
       mIndex = (mIndex + NUM_IMAGES -1)%NUM_IMAGES;
     }
 
-    Image image = ResourceImage::New( IMAGES[ mIndex ] );
+    Image image = LoadImage( IMAGES[ mIndex ] );
     mNextImage = ImageActor::New( image );
     mNextImage.SetPositionInheritanceMode(USE_PARENT_POSITION_PLUS_LOCAL_POSITION);
     mNextImage.ApplyConstraint( mSizeConstraint );
@@ -375,7 +389,7 @@ bool DissolveEffectApp::OnTimerTick()
   if(mSlideshow)
   {
     mIndex = (mIndex + 1)%NUM_IMAGES;
-    Image image = ResourceImage::New( IMAGES[ mIndex ] );
+    Image image = LoadImage( IMAGES[ mIndex ] );
     mNextImage = ImageActor::New( image );
     mNextImage.SetPositionInheritanceMode(USE_PARENT_POSITION_PLUS_LOCAL_POSITION);
     mNextImage.ApplyConstraint( mSizeConstraint );
