@@ -44,6 +44,11 @@ int main(int argc, char **argv)
   demo.AddExample(Example("text-view.example", "Text View"));
   demo.AddExample(Example("animated-shapes.example", "Animated Shapes"));
   demo.AddExample(Example("path-animation.example", "Path Animation"));
+  demo.AddExample(Example("size-negotiation.example", "Size Negotiation"));
+  demo.AddExample(Example("buttons.example", "Buttons"));
+
+  demo.SortAlphabetically( true );
+
   app.MainLoop();
 
   return 0;

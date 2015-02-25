@@ -226,6 +226,7 @@ private:
     Vector2 stageSize = stage.GetSize();
 
     mScrollView = ScrollView::New();
+    mScrollView.SetRelayoutEnabled( false );
     mScrollView.SetAnchorPoint(AnchorPoint::CENTER);
     mScrollView.SetParentOrigin(ParentOrigin::CENTER);
     mContentLayer.Add( mScrollView );
@@ -565,6 +566,7 @@ private:
     attributes.SetScalingMode(ImageAttributes::ShrinkToFit);
     Image img = ResourceImage::New(filename, attributes);
     ImageActor actor = ImageActor::New(img);
+    actor.SetRelayoutEnabled( false );
     actor.SetName( filename );
     actor.SetParentOrigin(ParentOrigin::CENTER);
     actor.SetAnchorPoint(AnchorPoint::CENTER);

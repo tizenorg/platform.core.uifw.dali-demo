@@ -593,6 +593,7 @@ private:
     ImageActor brick = ImageActor::New(img);
     brick.SetParentOrigin(ParentOrigin::TOP_LEFT);
     brick.SetAnchorPoint(AnchorPoint::CENTER);
+    brick.SetRelayoutEnabled( false );
     brick.SetSize( brickSize );
     brick.SetPosition( Vector3( position ) );
 
@@ -625,6 +626,7 @@ private:
     ImageActor actor = ImageActor::New(img);
     actor.SetParentOrigin(ParentOrigin::TOP_LEFT);
     actor.SetAnchorPoint(AnchorPoint::CENTER);
+    actor.SetRelayoutEnabled( false );
     return actor;
   }
 

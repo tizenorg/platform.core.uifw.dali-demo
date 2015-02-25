@@ -477,6 +477,7 @@ public:
 
     // create and setup the scroll view...
     mScrollView = ScrollView::New();
+    mScrollView.SetRelayoutEnabled( false );
     mScrollView.SetSize(stageSize);
 
     // attach Wobble Effect to ScrollView
@@ -515,6 +516,7 @@ public:
     Cluster clusterActor = Cluster::New(style);
     clusterActor.SetParentOrigin(ParentOrigin::CENTER);
     clusterActor.SetAnchorPoint(AnchorPoint::CENTER);
+    clusterActor.SetRelayoutEnabled( false );
 
     Vector2 stageSize = Dali::Stage::GetCurrent().GetSize();
     float minStageDimension = std::min(stageSize.x, stageSize.y);
@@ -527,6 +529,7 @@ public:
     // Add a background image to the cluster
     Image bg = ResourceImage::New( CLUSTER_BACKGROUND_IMAGE_PATH );
     ImageActor image = ImageActor::New(bg);
+    image.SetRelayoutEnabled( false );
     clusterActor.SetBackgroundImage(image);
 
     // Add actors (pictures) as the children of the cluster
@@ -560,6 +563,7 @@ public:
     // Add a shadow image child actor
     Image shadowImage = ResourceImage::New( CLUSTER_SHADOW_IMAGE_PATH, attribs );
     ImageActor shadowActor = ImageActor::New(shadowImage);
+    shadowActor.SetRelayoutEnabled( false );
 
     // Shadow is not exactly located on the center of the image, so it is moved to a little
     // upper-left side of the image relatively using customised AnchorPoint.
@@ -578,6 +582,7 @@ public:
     imageActor.SetParentOrigin( ParentOrigin::CENTER );
     imageActor.SetAnchorPoint( AnchorPoint::CENTER );
     imageActor.SetSizeMode( SIZE_EQUAL_TO_PARENT );
+    imageActor.SetRelayoutEnabled( false );
     actor.Add( imageActor );
 
     // Add a border image child actor (with a fixed size offset from parent).
@@ -589,6 +594,7 @@ public:
     borderActor.SetPosition( Vector3( 0.0f, 0.0f, 1.0f ) );
     borderActor.SetSizeMode( SIZE_FIXED_OFFSET_FROM_PARENT );
     borderActor.SetSizeModeFactor( Vector3( CLUSTER_IMAGE_BORDER_INDENT - 1.0f, CLUSTER_IMAGE_BORDER_INDENT - 1.0f, 0.0f ) * 2.0f );
+    borderActor.SetRelayoutEnabled( false );
     actor.Add( borderActor );
 
     return actor;
