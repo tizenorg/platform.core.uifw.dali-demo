@@ -232,17 +232,17 @@ class ButtonsController: public ConnectionTracker
     // First radio button
     {
       Toolkit::TableView tableView = Toolkit::TableView::New( 1, 2 );
-      tableView.SetSize( DP(260), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
+      tableView.SetSize( DP(260), 0.0f );
+      tableView.SetResizePolicy( USE_NATURAL_SIZE, HEIGHT );
 
       Toolkit::TextView textView = Toolkit::TextView::New( "Select enabled" );
-      Toolkit::Alignment alignment = Toolkit::Alignment::New( Toolkit::Alignment::HorizontalLeft );
-      alignment.Add( textView );
-      tableView.AddChild( alignment, Toolkit::TableView::CellPosition( 0, 0 ) );
+      tableView.AddChild( textView, Toolkit::TableView::CellPosition( 0, 0 ) );
 
       ImageActor imageActor = ImageActor::New( ResourceImage::New( ENABLED_IMAGE ) );
       imageActor.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
+      imageActor.SetResizePolicy( FIXED );
+      imageActor.SetPadding( Vector2( DP(20.0f), 0.0f ), WIDTH );
       tableView.AddChild( imageActor, Toolkit::TableView::CellPosition( 0, 1 ) );
-      tableView.SetFixedWidth( 1, DP(RADIO_LABEL_THUMBNAIL_SIZE) );
 
       Toolkit::RadioButton radioButton = Dali::Toolkit::RadioButton::New( tableView );
       radioButton.SetName( "radio-select-enable" );
