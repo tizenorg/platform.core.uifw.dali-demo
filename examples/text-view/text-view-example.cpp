@@ -151,10 +151,12 @@ public:
       Toolkit::TextView textView = Toolkit::TextView::New( tableString.text );
       textView.SetStyleToCurrentText( textStyle );
       textView.SetRotation( Dali::Degree( tableString.orientation ), Vector3( 0.0f, 0.0f, 1.0f ) );
+      textView.SetResizePolicy( USE_NATURAL_SIZE );
 
       Toolkit::Alignment alignmentContainer = Toolkit::Alignment::New( tableString.horizontalAlignment, tableString.verticalAlignment );
-      alignmentContainer.SetPadding( Toolkit::Alignment::Padding( tableString.padding, tableString.padding, tableString.padding, tableString.padding ) );
-      alignmentContainer.SetScaling( Toolkit::Alignment::ScaleToFill );
+      Actor alignmentContainerActor = alignmentContainer;
+      alignmentContainerActor.SetPadding( Vector2( tableString.padding, tableString.padding ) );
+      alignmentContainer.SetResizePolicy( FILL_TO_PARENT );
       alignmentContainer.Add( textView );
 
       textContainer.AddChild( alignmentContainer, Toolkit::TableView::CellPosition( tableString.cellPosition.row, tableString.cellPosition.column, tableString.cellPosition.rowSpan, tableString.cellPosition.columnSpan ) );
