@@ -275,6 +275,7 @@ public:
 
     // Create a delete button (bottom right of screen)
     mDeleteButton = Toolkit::PushButton::New();
+    mDeleteButton.SetRelayoutEnabled( false );
     mDeleteButton.SetParentOrigin(ParentOrigin::BOTTOM_RIGHT);
     mDeleteButton.SetAnchorPoint(AnchorPoint::BOTTOM_RIGHT);
     mDeleteButton.SetPosition( BUTTON_BORDER, BUTTON_BORDER );
@@ -289,6 +290,7 @@ public:
 
     // Create an insert button (bottom right of screen)
     mInsertButton = Toolkit::PushButton::New();
+    mInsertButton.SetRelayoutEnabled( false );
     mInsertButton.SetParentOrigin(ParentOrigin::BOTTOM_RIGHT);
     mInsertButton.SetAnchorPoint(AnchorPoint::BOTTOM_RIGHT);
     mInsertButton.SetPosition( BUTTON_BORDER, BUTTON_BORDER );
@@ -303,6 +305,7 @@ public:
 
     // Create an replace button (bottom right of screen)
     mReplaceButton = Toolkit::PushButton::New();
+    mReplaceButton.SetRelayoutEnabled( false );
     mReplaceButton.SetParentOrigin(ParentOrigin::BOTTOM_RIGHT);
     mReplaceButton.SetAnchorPoint(AnchorPoint::BOTTOM_RIGHT);
     mReplaceButton.SetPosition( BUTTON_BORDER, BUTTON_BORDER );
@@ -318,6 +321,7 @@ public:
     // Create the item view actor
     mImageAtlas = CreateImageAtlas();
     mItemView = ItemView::New(*this);
+    mItemView.SetRelayoutEnabled( false );
     mItemView.SetParentOrigin(ParentOrigin::CENTER);
     mItemView.SetAnchorPoint(AnchorPoint::CENTER);
 
@@ -897,6 +901,7 @@ public: // From ItemFactory
     borderActor.SetStyle( ImageActor::STYLE_NINE_PATCH );
     borderActor.SetNinePatchBorder( Vector4( ITEM_IMAGE_BORDER_LEFT, ITEM_IMAGE_BORDER_TOP, ITEM_IMAGE_BORDER_RIGHT, ITEM_IMAGE_BORDER_BOTTOM ) );
     borderActor.SetColorMode( USE_OWN_MULTIPLY_PARENT_COLOR ); // darken with parent image-actor
+    borderActor.SetResizePolicy( FILL_TO_PARENT );
     borderActor.SetSizeMode( SIZE_FIXED_OFFSET_FROM_PARENT );
     borderActor.SetSizeModeFactor( ITEM_BORDER_MARGIN_SIZE );
     actor.Add(borderActor);
@@ -908,6 +913,7 @@ public: // From ItemFactory
     // Add a checkbox child actor; invisible until edit-mode is enabled
 
     ImageActor checkbox = ImageActor::New( mWhiteImage );
+    checkbox.SetRelayoutEnabled( false );
     checkbox.SetName( "CheckBox" );
     checkbox.SetColor( Vector4(0.0f,0.0f,0.0f,0.6f) );
     checkbox.SetParentOrigin( ParentOrigin::TOP_RIGHT );
@@ -924,6 +930,7 @@ public: // From ItemFactory
     actor.Add( checkbox );
 
     ImageActor tick = ImageActor::New( ResourceImage::New(SELECTED_IMAGE) );
+    tick.SetRelayoutEnabled( false );
     tick.SetColorMode( USE_OWN_COLOR );
     tick.SetName( "Tick" );
     tick.SetParentOrigin( ParentOrigin::TOP_RIGHT );
