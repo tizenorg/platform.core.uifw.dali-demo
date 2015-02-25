@@ -39,6 +39,7 @@ of the capability of the toolkit.
 %define dali_xml_file_dir     /usr/share/packages/
 %define dali_icon_dir         /usr/share/icons/
 %define smack_rule_dir        /etc/smack/accesses2.d/
+%define locale_dir            /usr/local/share/locale
 
 ##############################
 # Build
@@ -112,6 +113,7 @@ exit 0
 %{dali_app_ro_dir}/scripts/*
 %{dali_xml_file_dir}/%{name}.xml
 %{dali_icon_dir}/*
+%{locale_dir}/*
 %if 0%{?enable_dali_smack_rules} && !%{with wayland}
 %config %{smack_rule_dir}/%{name}.rule
 %endif
