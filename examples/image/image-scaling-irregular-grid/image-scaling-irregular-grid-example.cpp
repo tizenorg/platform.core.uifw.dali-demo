@@ -42,6 +42,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <cstdio>
 #include <algorithm>
 #include <map>
 #include <dali-toolkit/dali-toolkit.h>
@@ -63,13 +64,14 @@ namespace
 
 const char* BACKGROUND_IMAGE( DALI_IMAGE_DIR "background-gradient.jpg" );
 const char* TOOLBAR_IMAGE( DALI_IMAGE_DIR "top-bar.png" );
-const char* APPLICATION_TITLE( "Image Scaling Modes" );
+const char* APPLICATION_TITLE( "Image Scaling and Filtering" );
 const char* TOGGLE_SCALING_IMAGE( DALI_IMAGE_DIR "icon-change.png" );
+const char* TOGGLE_FILTER_IMAGE( DALI_IMAGE_DIR "icon-replace.png" ); // Also available: icon-reset.png
 
 /** The width of the grid in whole grid cells. */
 const unsigned GRID_WIDTH = 9;
 /** Limit the grid to be no higher than this in units of a cell. */
-const unsigned GRID_MAX_HEIGHT = 600;
+const unsigned GRID_MAX_HEIGHT = GRID_WIDTH * 9;
 
 /** The space between the edge of a grid cell and the image embedded within it. */
 const unsigned GRID_CELL_PADDING = 4;
@@ -78,9 +80,14 @@ const unsigned GRID_CELL_PADDING = 4;
 const float CELL_ASPECT_RATIO = 1.33333333333333333333f;
 
 const ImageAttributes::ScalingMode DEFAULT_SCALING_MODE = ImageAttributes::ScaleToFill;
+const ImageAttributes::FilterMode DEFAULT_FILTER_MODE = ImageAttributes::BoxThenLinear;
 
-/** The number of times to spin an image on touching, each spin taking a second.*/
-const float SPIN_DURATION = 1.0f;
+/** The number of seconds to take to spin an image on touching.*/
+const float SPIN_DURATION = 3;
+/** Seconds to fade-in notifications for. */
+const float FADE_IN_DURATION = 2;
+/** Seconds to fade-out notifications for. */
+const float FADE_OUT_DURATION = FADE_IN_DURATION * 5;
 
 /** The target image sizes in grid cells. */
 const Vector2 IMAGE_SIZES[] = {
@@ -96,6 +103,24 @@ const Vector2 IMAGE_SIZES[] = {
  // Large, square-ish images to show shrink-to-fit well with wide and tall images:
  Vector2( GRID_WIDTH / 2, GRID_WIDTH / 2.0f * CELL_ASPECT_RATIO + 0.5f ),
  Vector2( GRID_WIDTH - 2, (GRID_WIDTH - 2) * CELL_ASPECT_RATIO + 0.5f ),
+ // Temp, odder ones: ///@ToDo: Remove <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+ /*Vector2( 1, 1 ),
+  Vector2( 2, 1 ),
+  Vector2( 3, 1 ),
+  Vector2( 1, 2 ),
+  Vector2( 1, 3 ),
+  Vector2( 2, 3 ),
+  Vector2( 3, 2 ),
+ Vector2( GRID_WIDTH, GRID_WIDTH ),
+ Vector2( 1, GRID_WIDTH ),
+ Vector2( GRID_WIDTH, 1 ),
+ Vector2( 1, GRID_WIDTH ),
+ Vector2( GRID_WIDTH, 1 ),
+ // Square ones to fill gaps:
+ Vector2( 2, 2 ),
+     Vector2( 4, 4 ),
+          Vector2( 3, 3 ),
+*/
 };
 const unsigned NUM_IMAGE_SIZES = sizeof(IMAGE_SIZES) / sizeof(IMAGE_SIZES[0]);
 
@@ -116,7 +141,7 @@ const char* IMAGE_PATHS[] = {
   // Images from other demos that are tall, wide or just large:
 
   DALI_IMAGE_DIR "gallery-large-1.jpg",
-  DALI_IMAGE_DIR "gallery-large-2.jpg",
+/*  DALI_IMAGE_DIR "gallery-large-2.jpg",
   DALI_IMAGE_DIR "gallery-large-3.jpg",
   DALI_IMAGE_DIR "gallery-large-4.jpg",
   DALI_IMAGE_DIR "gallery-large-5.jpg",
@@ -160,7 +185,7 @@ const char* IMAGE_PATHS[] = {
 
   DALI_IMAGE_DIR "book-portrait-cover.jpg",
   DALI_IMAGE_DIR "book-portrait-p1.jpg",
-  DALI_IMAGE_DIR "book-portrait-p2.jpg",
+  DALI_IMAGE_DIR "book-portrait-p2.jpg",*/
   NULL
 };
 const unsigned NUM_IMAGE_PATHS = sizeof(IMAGE_PATHS) / sizeof(IMAGE_PATHS[0]) - 1u;
@@ -174,7 +199,7 @@ const unsigned NUM_IMAGE_PATHS = sizeof(IMAGE_PATHS) / sizeof(IMAGE_PATHS[0]) - 
  * @param[in] height The height of the image in pixels.
  * @param[in] scalingMode The mode to use when scaling the image to fit the desired dimensions.
  */
-Image CreateImage(const std::string& filename, unsigned int width, unsigned int height, ImageAttributes::ScalingMode scalingMode )
+ResourceImage CreateImage(const std::string& filename, unsigned int width, unsigned int height, ImageAttributes::ScalingMode scalingMode, ImageAttributes::FilterMode filterMode )
 {
 #ifdef DEBUG_PRINT_DIAGNOSTICS
     fprintf( stderr, "CreateImage(%s, %u, %u, scalingMode=%u)\n", filename.c_str(), width, height, unsigned( scalingMode ) );
@@ -183,7 +208,8 @@ Image CreateImage(const std::string& filename, unsigned int width, unsigned int 
 
   attributes.SetSize( width, height );
   attributes.SetScalingMode( scalingMode );
-  Image image = ResourceImage::New( filename, attributes );
+  attributes.SetFilterMode( filterMode );
+  ResourceImage image = ResourceImage::New( filename, attributes );
   return image;
 }
 
@@ -195,19 +221,18 @@ Image CreateImage(const std::string& filename, unsigned int width, unsigned int 
  * @param[in] height The height of the image in pixels.
  * @param[in] scalingMode The mode to use when scaling the image to fit the desired dimensions.
  */
-ImageActor CreateImageActor(const std::string& filename, unsigned int width, unsigned int height, ImageAttributes::ScalingMode scalingMode )
+ImageActor CreateImageActor(const std::string& filename, unsigned int width, unsigned int height, ImageAttributes::ScalingMode scalingMode, ImageAttributes::FilterMode filterMode )
 {
-  Image img = CreateImage( filename, width, height, scalingMode );
+  Image img = CreateImage( filename, width, height, scalingMode, filterMode );
   ImageActor actor = ImageActor::New( img );
   actor.SetName( filename );
   actor.SetParentOrigin(ParentOrigin::CENTER);
   actor.SetAnchorPoint(AnchorPoint::CENTER);
-
   return actor;
 }
 
 /** Cycle the scaling mode options. */
-ImageAttributes::ScalingMode NextMode( const ImageAttributes::ScalingMode oldMode )
+ImageAttributes::ScalingMode NextScalingMode( ImageAttributes::ScalingMode oldMode )
 {
   ImageAttributes::ScalingMode newMode = ImageAttributes::ShrinkToFit;
   switch ( oldMode )
@@ -223,6 +248,38 @@ ImageAttributes::ScalingMode NextMode( const ImageAttributes::ScalingMode oldMod
       break;
     case ImageAttributes::FitHeight:
       newMode = ImageAttributes::ShrinkToFit;
+      break;
+  }
+  return newMode;
+}
+
+/** Cycle through filter mode options. */
+ImageAttributes::FilterMode NextFilterMode( ImageAttributes::FilterMode oldMode )
+{
+  ImageAttributes::FilterMode newMode = ImageAttributes::Box;
+
+  switch ( oldMode )
+  {
+    case ImageAttributes::Box:
+      newMode = ImageAttributes::Nearest;
+      break;
+    case ImageAttributes::Nearest:
+      newMode = ImageAttributes::Linear;
+      break;
+    case ImageAttributes::Linear:
+      newMode = ImageAttributes::BoxThenNearest;
+      break;
+    case ImageAttributes::BoxThenNearest:
+      newMode = ImageAttributes::BoxThenLinear;
+      break;
+    case ImageAttributes::BoxThenLinear:
+      newMode = ImageAttributes::NoFilter;
+      break;
+    case ImageAttributes::NoFilter:
+      newMode = ImageAttributes::Box;
+      break;
+    case ImageAttributes::DontCare:
+      newMode = ImageAttributes::Box;
       break;
   }
   return newMode;
@@ -259,6 +316,16 @@ struct PositionedImage
   Vector2 imageGridDims;
 };
 
+const char* StringFromScalingMode( ImageAttributes::ScalingMode scalingMode )
+{
+  return scalingMode == ImageAttributes::ScaleToFill ? "ScaleToFill" : scalingMode == ImageAttributes::ShrinkToFit ? "ShrinkToFit" : scalingMode == ImageAttributes::FitWidth ? "FitWidth" : "FitHeight";
+}
+
+const char* StringFromFilterMode( ImageAttributes::FilterMode filterMode )
+{
+  return filterMode == ImageAttributes::Box ? "Box" : filterMode == ImageAttributes::BoxThenNearest ? "BoxThenNearest" : filterMode == ImageAttributes::BoxThenLinear ? "BoxThenLinear" : filterMode == ImageAttributes::Nearest ? "Nearest" : filterMode == ImageAttributes::Linear ? "Linear" : filterMode == ImageAttributes::NoFilter ? "NoFilter" : filterMode == ImageAttributes::DontCare ? "DontCare" :"Other";
+}
+
 }
 
 /**
@@ -270,7 +337,9 @@ public:
 
   ImageScalingIrregularGridController( Application& application )
   : mApplication( application ),
-    mScrolling( false )
+    mScrolling( false ),
+    mScalingMode( ImageAttributes::ScaleToFill ),
+    mFilterMode( ImageAttributes::BoxThenLinear )
   {
     std::cout << "ImageScalingScaleToFillController::ImageScalingScaleToFillController" << std::endl;
 
@@ -297,7 +366,7 @@ public:
     stage.KeyEventSignal().Connect(this, &ImageScalingIrregularGridController::OnKeyEvent);
 
     // Hide the indicator bar
-    mApplication.GetWindow().ShowIndicator(Dali::Window::INVISIBLE);
+    //////////////////// mApplication.GetWindow().ShowIndicator(Dali::Window::INVISIBLE);
 
     // Create a default view with a default tool bar:
     mContentLayer = DemoHelper::CreateView( mApplication,
@@ -305,31 +374,59 @@ public:
                                             mToolBar,
                                             BACKGROUND_IMAGE,
                                             TOOLBAR_IMAGE,
-                                            "" );
+                                            APPLICATION_TITLE );
+
+    // Make a button to toggle
+    Image toggleFilterImage = ResourceImage::New( TOGGLE_FILTER_IMAGE );
+    Toolkit::PushButton toggleFilterButton = Toolkit::PushButton::New();
+    toggleFilterButton.SetBackgroundImage( toggleFilterImage );
+    toggleFilterButton.ClickedSignal().Connect( this, &ImageScalingIrregularGridController::OnToggleFilterTouched );
+    mToolBar.AddControl( toggleFilterButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalCenter, DemoHelper::DEFAULT_PLAY_PADDING );
 
     // Create an image scaling toggle button. (right of toolbar)
     Image toggleScalingImage = ResourceImage::New( TOGGLE_SCALING_IMAGE );
     Toolkit::PushButton toggleScalingButton = Toolkit::PushButton::New();
     toggleScalingButton.SetBackgroundImage( toggleScalingImage );
     toggleScalingButton.ClickedSignal().Connect( this, &ImageScalingIrregularGridController::OnToggleScalingTouched );
-    mToolBar.AddControl( toggleScalingButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
+    //mToolBar.AddControl( toggleScalingButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
 
-    SetTitle( APPLICATION_TITLE );
+    mToolBar.AddControl( toggleScalingButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING );
 
     // Build the main content of the widow:
-    PopulateContentLayer( DEFAULT_SCALING_MODE );
+    PopulateContentLayer( DEFAULT_SCALING_MODE, DEFAULT_FILTER_MODE );
+
+    // Scroll to top of contents:
+    mScrollView.ScrollTo( Vector3(0, -1000000000, 0 ) );
+
+    mNotificationLayer = Dali::Layer::New();
+    mNotificationLayer.SetAnchorPoint( Dali::AnchorPoint::CENTER );
+    mNotificationLayer.SetParentOrigin( Dali::ParentOrigin::CENTER );
+    mNotificationLayer.SetSizeMode( Dali::SIZE_EQUAL_TO_PARENT );
+    stage.Add( mNotificationLayer );
+
+    mFilterModeText = Toolkit::TextView::New( std::string("FM: ") + StringFromFilterMode( mFilterMode ) );
+    mFilterModeText.SetAnchorPoint( Dali::AnchorPoint::BOTTOM_LEFT );
+    mFilterModeText.SetPosition( 5, stage.GetSize().y - 5 );
+    mNotificationLayer.Add( mFilterModeText );
+    FadeActorInOut( mFilterModeText );
+
+    mScalingModeText = Toolkit::TextView::New( std::string("SM: ") + StringFromScalingMode( mScalingMode ) );
+    mScalingModeText.SetAnchorPoint( Dali::AnchorPoint::BOTTOM_LEFT );
+    mScalingModeText.SetPosition( 5, stage.GetSize().y - 30 );
+    mNotificationLayer.Add( mScalingModeText );
+    FadeActorInOut( mScalingModeText );
   }
 
   /**
    * Build the main part of the application's view.
    */
-  void PopulateContentLayer( const ImageAttributes::ScalingMode scalingMode )
+  void PopulateContentLayer( const ImageAttributes::ScalingMode scalingMode, const ImageAttributes::FilterMode filterMode )
   {
     Stage stage = Stage::GetCurrent();
     Vector2 stageSize = stage.GetSize();
 
     float fieldHeight;
-    Actor imageField = BuildImageField( stageSize.x, GRID_WIDTH, GRID_MAX_HEIGHT, scalingMode, fieldHeight );
+    Actor imageField = BuildImageField( stageSize.x, GRID_WIDTH, GRID_MAX_HEIGHT, scalingMode, filterMode, fieldHeight );
 
     mScrollView = ScrollView::New();
 
@@ -370,6 +467,7 @@ public:
                            const unsigned gridWidth,
                            const unsigned maxGridHeight,
                            ImageAttributes::ScalingMode scalingMode,
+                           const ImageAttributes::FilterMode filterMode,
                            float & outFieldHeight )
   {
     // Generate the list of image configurations to be fitted into the field:
@@ -382,6 +480,7 @@ public:
       {
         configurations.push_back( ImageConfiguration( IMAGE_PATHS[imageIndex], IMAGE_SIZES[dimensionsIndex] ) );
       }
+      std::random_shuffle( configurations.begin(), configurations.end() );///@tOdO: <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<temp
     }
     // Stir-up the list to get some nice irregularity in the generated field:
     std::random_shuffle( configurations.begin(), configurations.end() );
@@ -429,6 +528,7 @@ public:
     const Vector2 gridOrigin = Vector2( -fieldWidth * 0.5f, -outFieldHeight * 0.5 );
 
     // Build the image actors in their right locations in their parent's frame:
+    mImageCells.clear();
     for( std::vector<PositionedImage>::const_iterator i = placedImages.begin(), end = placedImages.end(); i != end; ++i )
     {
       const PositionedImage& imageSource = *i;
@@ -436,12 +536,12 @@ public:
       const Vector2 imageRegionCorner = gridOrigin + cellSize * Vector2( imageSource.cellX, imageSource.cellY );
       const Vector2 imagePosition = imageRegionCorner + Vector2( GRID_CELL_PADDING , GRID_CELL_PADDING ) + imageSize * 0.5f;
 
-      ImageActor image = CreateImageActor( imageSource.configuration.path, imageSize.x, imageSize.y, scalingMode );
+      ImageActor image = CreateImageActor( imageSource.configuration.path, imageSize.x, imageSize.y, scalingMode, filterMode );
       image.SetPosition( Vector3( imagePosition.x, imagePosition.y, 0 ) );
       image.SetSize( imageSize );
       image.TouchedSignal().Connect( this, &ImageScalingIrregularGridController::OnTouchImage );
-      mScalingModes[image.GetId()] = scalingMode;
-      mSizes[image.GetId()] = imageSize;
+      mCellDims[image.GetId()] = imageSize;
+      mImageCells.push_back( image );
 
       gridActor.Add( image );
     }
@@ -451,7 +551,8 @@ public:
 
  /**
   * Upon Touching an image (Release), change its scaling mode and make it spin, provided we're not scrolling.
-  * @param[in] actor The actor touched
+  * This reveals sampling artifacts that are apparent in non-face-on views and in motion.
+  * @param[in] actor The actor touched.
   * @param[in] event The TouchEvent.
   */
   bool OnTouchImage( Actor actor, const TouchEvent& event )
@@ -463,19 +564,8 @@ public:
       {
         // Spin the image a few times:
         Animation animation = Animation::New(SPIN_DURATION);
-        animation.RotateBy( actor, Degree(360.0f * SPIN_DURATION), Vector3::XAXIS, AlphaFunctions::EaseOut);
+        animation.RotateBy( actor, Degree( 360.0f ), Vector3::XAXIS, AlphaFunctions::EaseOut);
         animation.Play();
-
-        // Change the scaling mode:
-        const unsigned id = actor.GetId();
-        ImageAttributes::ScalingMode newMode = NextMode( mScalingModes[id] );
-        const Vector2 imageSize = mSizes[actor.GetId()];
-
-        ImageActor imageActor = ImageActor::DownCast( actor );
-        Image oldImage = imageActor.GetImage();
-        Image newImage = CreateImage( ResourceImage::DownCast(oldImage).GetUrl(), imageSize.width + 0.5f, imageSize.height + 0.5f, newMode );
-        imageActor.SetImage( newImage );
-        mScalingModes[id] = newMode;
       }
     }
     return false;
@@ -490,11 +580,48 @@ public:
     if( event.state == KeyEvent::Down )
     {
       if( IsKey( event, Dali::DALI_KEY_ESCAPE )
-          || IsKey( event, Dali::DALI_KEY_BACK ) )
+       || IsKey( event, Dali::DALI_KEY_BACK ) )
       {
         mApplication.Quit();
       }
     }
+  }
+
+
+ /**
+  * Signal handler, called when the 'Filter' button has been touched.
+  *
+  * @param[in] button The button that was pressed.
+  */
+  bool OnToggleFilterTouched( Button button )
+  {
+    mFilterMode = NextFilterMode( mFilterMode );
+
+    std::cout << "OnToggleFilterTouched() - Changing to filter mode " << mFilterMode << std::endl;
+
+    for( unsigned int i = 0; i < mImageCells.size(); ++i )
+    {
+      fputs( ".", stdout );
+      ImageActor gridImageActor = mImageCells[i];
+      if( gridImageActor )
+      {
+        fputs( "+", stdout );
+        // Cycle the filter mode options:
+        const Vector2 imageSize = mCellDims[gridImageActor.GetId()];
+        Image oldImage = gridImageActor.GetImage();
+        Image newImage = CreateImage( ResourceImage::DownCast(oldImage).GetUrl(), imageSize.width, imageSize.height, mScalingMode, mFilterMode );
+        gridImageActor.SetImage( newImage );
+        fputs( "=", stdout );
+      }
+      ///@ToDo:Set a toast or a button to the new mode
+      ///@ToDo: DEAL With layout changes.
+    }
+    puts( "\n" );
+
+    FadeActorInOut( mFilterModeText );
+    mFilterModeText.SetText( std::string( "FM: " ) + StringFromFilterMode( mFilterMode ) );
+
+    return true;
   }
 
  /**
@@ -506,23 +633,57 @@ public:
   {
     const unsigned numChildren = mGridActor.GetChildCount();
 
-    for( unsigned i = 0; i < numChildren; ++i )
+    ImageAttributes::ScalingMode oldMode = mScalingMode;
+    ImageAttributes::ScalingMode newMode = NextScalingMode( oldMode );
+    mScalingMode = newMode;
+
+    if( newMode == ImageAttributes::FitWidth )
     {
-      ImageActor gridImageActor = ImageActor::DownCast( mGridActor.GetChildAt( i ) );
-      if( gridImageActor )
+      ///@ToDo: build columns
+    }
+    else if( newMode == ImageAttributes::FitHeight )
+    {
+      ///@ToDo: Build Strips
+    }
+    else
+    {
+      if( oldMode != ImageAttributes::ScaleToFill && oldMode != ImageAttributes::ShrinkToFit )
       {
-        // Cycle the scaling mode options:
-        const Vector2 imageSize = mSizes[gridImageActor.GetId()];
-        ImageAttributes::ScalingMode newMode = NextMode( mScalingModes[gridImageActor.GetId()] );
-        Image oldImage = gridImageActor.GetImage();
-        Image newImage = CreateImage(ResourceImage::DownCast(oldImage).GetUrl(), imageSize.width, imageSize.height, newMode );
-        gridImageActor.SetImage( newImage );
+        ///@ToDo: Build the grid <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      }
+      else
+      {
+        // Swap the images in the grid:
 
-        mScalingModes[gridImageActor.GetId()] = newMode;
+        for( unsigned i = 0; i < numChildren; ++i )
+        {
+          ImageActor gridImageActor = ImageActor::DownCast( mGridActor.GetChildAt( i ) );
+          if( gridImageActor )
+          {
+            // Cycle the scaling mode options:
+            const Vector2 imageSize = mCellDims[gridImageActor.GetId()];
 
-        SetTitle( std::string( newMode == ImageAttributes::ShrinkToFit ? "ShrinkToFit" : newMode == ImageAttributes::ScaleToFill ?  "ScaleToFill" : newMode == ImageAttributes::FitWidth ? "FitWidth" : "FitHeight" ) );
+            Image oldImage = gridImageActor.GetImage();
+            ResourceImage newImage = CreateImage( ResourceImage::DownCast( oldImage ).GetUrl(), imageSize.width, imageSize.height, newMode, mFilterMode );
+            gridImageActor.SetImage( newImage );
+            if( newMode == ImageAttributes::ShrinkToFit )
+            {
+              newImage.LoadingFinishedSignal().Connect( this, &ImageScalingIrregularGridController::OnImageLoadedShrinktoFit );
+            }
+            mImageActorMap[&newImage.GetBaseObject()] = gridImageActor;
+            mImageActorMap.erase( &oldImage.GetBaseObject() );
+
+            ///@ToDo: resize actor on scale to fill
+
+          }
+          ///@ToDo:Set a toast or a button to the new mode
+          ///@ToDo: DEAL With layout changes.
+        }
       }
     }
+
+    FadeActorInOut( mScalingModeText );
+    mScalingModeText.SetText( std::string( "SM: " ) + StringFromScalingMode( mScalingMode ) );
     return true;
   }
 
@@ -565,18 +726,63 @@ public:
     mScrolling = false;
   }
 
+  /**
+   * Animate opacity of actor passed in.
+   */
+  void FadeActorInOut( Actor& actor )
+  {
+    // Fade in moderately:
+    mFadeInAnimation = Animation::New( FADE_IN_DURATION );
+    mFadeInAnimation.OpacityTo( actor, 1.1, AlphaFunctions::EaseOut );
+    mFadeInAnimation.Play();
+
+    // Fade out again:
+    mFadeOutAnimation = Animation::New( FADE_OUT_DURATION );
+    mFadeOutAnimation.OpacityTo( actor, 0.3, AlphaFunctions::EaseOut );
+    mFadeOutAnimation.Play();
+  }
+
+ /**
+  * Callback for image resource loading success.
+  * Updates the dimensions of the actor to match.
+  * @param[in] image The image that loaded.
+  */
+
+  void OnImageLoadedShrinktoFit( ResourceImage image )
+  {
+    if( mScalingMode != ImageAttributes::ShrinkToFit )
+    {
+      // Stray load notification from previous mode: ignore.
+      return;
+    }
+    ImageActor cellActor = mImageActorMap[&image.GetBaseObject()];
+    if( cellActor )
+    {
+      fprintf( stderr, "image: %u %u, actor: %f %f\n", image.GetWidth(), image.GetHeight(), cellActor.GetSize().x, cellActor.GetSize().y );
+      cellActor.SetSize( Vector2( image.GetWidth(), image.GetHeight() ) );
+    }
+  }
+
 private:
   Application&  mApplication;
 
   Layer mContentLayer;                ///< The content layer (contains non gui chrome actors)
+  Layer mNotificationLayer;           ///< The notification layer (contains topmost overlaid actors)
   Toolkit::View mView;                ///< The View instance.
   Toolkit::ToolBar mToolBar;          ///< The View's Toolbar.
   TextView mTitleActor;               ///< The Toolbar's Title.
   Actor mGridActor;                   ///< The container for the grid of images
+  std::vector<ImageActor> mImageCells;///< All the images for easy access.
+  std::map<const BaseObject*, ImageActor> mImageActorMap;///< A shortcut from Images to Actors that own them in the layout.
+  std::map<unsigned, Vector2> mCellDims;///< Stores the dimensions of each image cell, keyed by image actor id.
   ScrollView mScrollView;             ///< ScrollView UI Component
   bool mScrolling;                    ///< ScrollView scrolling state (true = scrolling, false = stationary)
-  std::map<unsigned, ImageAttributes::ScalingMode> mScalingModes; ///< Stores the current scaling mode of each image, keyed by image actor id.
-  std::map<unsigned, Vector2> mSizes; ///< Stores the current size of each image, keyed by image actor id.
+  ImageAttributes::ScalingMode mScalingMode; ///< The current scaling mode
+  ImageAttributes::FilterMode mFilterMode; ///< The current filter mode
+  Toolkit::TextView mFilterModeText;  ///< Label to show filter mode.
+  Toolkit::TextView mScalingModeText;   ///< Label to show filter mode.
+  Animation mFadeInAnimation;
+  Animation mFadeOutAnimation;
 };
 
 void RunTest( Application& application )
