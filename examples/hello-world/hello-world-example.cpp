@@ -16,9 +16,11 @@
  */
 
 #include <dali/dali.h>
+#include <dali-toolkit/dali-toolkit.h>
 #include <iostream>
 
 using namespace Dali;
+using namespace Dali::Toolkit;
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -43,33 +45,76 @@ public:
   // The Init signal is received once (only) during the Application lifetime
   void Create( Application& application )
   {
-    std::cout << "HelloWorldController::Create" << std::endl;
-
-    // Initialize the actor
-    TextActor textActor = TextActor::New( "Hello World" );
-
-    // Reposition the actor
-    textActor.SetParentOrigin( ParentOrigin::CENTER );
-
-    // Get a handle to the stage
     Stage stage = Stage::GetCurrent();
+    Vector2 size(200, 200);
 
-    // Display the actor on the stage
-    stage.Add( textActor );
+    mActor = CreateSolidColorActor(Color::RED);
+    mActor.SetAnchorPoint(AnchorPoint::CENTER);
+    mActor.SetParentOrigin(ParentOrigin::CENTER);
+    mActor.SetSize(size);
+    mActor.SetName("ACTOR");
+    mActor.SetLeaveRequired(true);
+    stage.Add(mActor);
 
-    // Respond to a click anywhere on the stage
-    stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
+
+    mActor.TouchedSignal().Connect(this, &HelloWorldController::OnNoConsumeTouch);
+
+    mTimer = Timer::New(2000);
+    mTimer.TickSignal().Connect(this, &HelloWorldController::OnTimeTick);
+    mTimer.Start();
   }
 
-  bool OnTouch( Actor actor, const TouchEvent& touch )
+  bool OnConsumeTouch( Actor actor, const TouchEvent& touch )
   {
-    // quit the application
-    mApplication.Quit();
+    std::cout << actor.GetName() << ", " << touch.GetPoint(0).state << std::endl;
     return true;
+  }
+
+  bool OnNoConsumeTouch( Actor actor, const TouchEvent& touch )
+  {
+    std::cout << actor.GetName() << ", " << touch.GetPoint(0).state << std::endl;
+    return false;
+  }
+
+  bool OnTimeTick()
+  {
+    std::cout << "TimeTick" << std::endl;
+    static int i = 0;
+
+    if (i == 0)
+    {
+      Stage stage = Stage::GetCurrent();
+      Vector2 size(200, 200);
+
+      mActor.Unparent();
+ 
+      stage.Add(mActor);
+     
+      Actor actor = CreateSolidColorActor(Color::BLUE);
+      actor.SetAnchorPoint(AnchorPoint::CENTER);
+      actor.SetParentOrigin(ParentOrigin::CENTER);
+      actor.SetSize(size);
+      actor.SetName("LAYER");
+      actor.SetZ(10);
+      stage.Add(actor);
+     
+      actor.TouchedSignal().Connect(this, &HelloWorldController::OnNoConsumeTouch);
+
+      i += 3;
+      return true;
+    }
+    else if (i == 1)
+    {
+      mActor.SetZ(20);
+    }
+
+    return false;
   }
 
 private:
   Application&  mApplication;
+  ImageActor    mActor;
+  Timer         mTimer;
 };
 
 void RunTest( Application& application )
