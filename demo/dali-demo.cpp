@@ -42,6 +42,7 @@ int main(int argc, char **argv)
   demo.AddExample(Example("builder.example", "Script Based UI"));
   demo.AddExample(Example("image-scaling-irregular-grid.example", "Image Scaling Modes"));
   demo.AddExample(Example("text-view.example", "Text View"));
+  demo.AddExample(Example("path-animation.example", "Path Animation"));
   app.MainLoop();
 
   return 0;
