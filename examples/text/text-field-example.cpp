@@ -24,6 +24,9 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/public-api/text-abstraction/text-abstraction.h>
 
+// INTERNAL INCLUDES
+#include "edit-layout.h"
+
 using namespace Dali;
 using namespace Dali::Toolkit;
 
@@ -55,9 +58,15 @@ public:
 
     stage.KeyEventSignal().Connect(this, &TextFieldExample::OnKeyEvent);
 
+    EditLayout layout = EditLayout::New();
+    layout.SetParentOrigin( ParentOrigin::CENTER );
+    layout.SetAnchorPoint( AnchorPoint::CENTER );
+    stage.Add( layout );
+
     TextField field = TextField::New();
     field.SetParentOrigin( ParentOrigin::CENTER );
-    stage.Add( field );
+    field.SetBackgroundColor( Color::RED );
+    layout.Add( field );
 
     field.SetProperty( TextField::PROPERTY_TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog" );
 
