@@ -24,6 +24,9 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/public-api/text-abstraction/text-abstraction.h>
 
+// INTERNAL INCLUDES
+#include "center-layout.h"
+
 using namespace Dali;
 using namespace Dali::Toolkit;
 
@@ -55,9 +58,12 @@ public:
 
     stage.KeyEventSignal().Connect(this, &TextLabelExample::OnKeyEvent);
 
+    CenterLayout centerLayout = CenterLayout::New();
+    centerLayout.SetParentOrigin( ParentOrigin::CENTER );
+    stage.Add( centerLayout );
+
     TextLabel label = TextLabel::New();
-    label.SetParentOrigin( ParentOrigin::CENTER );
-    stage.Add( label );
+    centerLayout.Add( label );
 
     label.SetProperty( TextLabel::PROPERTY_MULTI_LINE, true );
 
