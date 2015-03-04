@@ -80,4 +80,8 @@
 	<ui-application appid="logging.example" exec="/usr/apps/com.samsung.dali-demo/bin/logging.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Logging</label>
 	</ui-application>
+
+	<ui-application appid="emoticon.example" exec="/usr/apps/com.samsung.dali-demo/bin/emoticon.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Emoticons</label>
+	</ui-application>
 </manifest>
