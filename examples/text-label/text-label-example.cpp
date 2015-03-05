@@ -30,6 +30,13 @@
 using namespace Dali;
 using namespace Dali::Toolkit;
 
+namespace
+{
+  const unsigned int KEY_ZERO = 10;
+  const unsigned int KEY_ONE = 11;
+  const unsigned int KEY_M = 58;
+}
+
 /**
  * @brief The main class of the demo.
  */
@@ -65,12 +72,12 @@ public:
     centerLayout.SetSize( stageSize.width*0.6f, stageSize.width*0.6f );
     stage.Add( centerLayout );
 
-    TextLabel label = TextLabel::New();
-    label.SetBackgroundColor( Color::BLACK );
-    centerLayout.Add( label );
+    mLabel = TextLabel::New();
+    mLabel.SetBackgroundColor( Color::BLACK );
+    centerLayout.Add( mLabel );
 
-    label.SetProperty( TextLabel::PROPERTY_MULTI_LINE, true );
-    label.SetProperty( TextLabel::PROPERTY_TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog" );
+    mLabel.SetProperty( TextLabel::PROPERTY_MULTI_LINE, true );
+    mLabel.SetProperty( TextLabel::PROPERTY_TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog" );
 
     // TODO
     //Property::Value labelText = label.GetProperty( TextLabel::PROPERTY_TEXT );
@@ -88,12 +95,32 @@ public:
       {
         mApplication.Quit();
       }
+      else if( event.IsCtrlModifier() )
+      {
+        switch( event.keyCode )
+        {
+          case KEY_ZERO: // fall through
+          case KEY_ONE:
+          {
+            mLabel.SetProperty( TextLabel::PROPERTY_RENDERING_BACKEND, event.keyCode - 10 );
+            break;
+          }
+          case KEY_M:
+          {
+            bool multiLine = mLabel.GetProperty<bool>( TextLabel::PROPERTY_MULTI_LINE );
+            mLabel.SetProperty( TextLabel::PROPERTY_MULTI_LINE, !multiLine );
+            break;
+          }
+        }
+      }
     }
   }
 
 private:
 
   Application& mApplication;
+
+  TextLabel mLabel;
 };
 
 void RunTest( Application& application )
