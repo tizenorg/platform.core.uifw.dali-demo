@@ -113,16 +113,23 @@ void VerticalLayout::OnRelayout( const Vector2& size, ActorSizeContainer& contai
   Vector3 position;
   for( unsigned int index = 0u, count = self.GetChildCount(); index < count; ++index )
   {
+    Size childSize = size;
     Toolkit::TextLabel label = Toolkit::TextLabel::DownCast( self.GetChildAt( index ) );
 
     if( label )
     {
       label.SetPosition( position );
+      std::cout << "  position : " << position << std::endl;
 
-      position.height += label.GetHeightForWidth( size.width );
+      childSize.height = label.GetHeightForWidth( size.width );
+      position.height += childSize.height;
+
+      std::cout << "  label size : " << childSize << std::endl;
+
+      label.SetSize( childSize );
     }
 
-    container.push_back( ActorSizePair( label, size ) );
+    container.push_back( ActorSizePair( label, childSize ) );
   }
 }
 
