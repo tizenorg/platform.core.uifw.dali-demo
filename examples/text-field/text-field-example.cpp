@@ -73,16 +73,15 @@ public:
     layout.SetSize( stageSize.width - BORDER_WIDTH*2.0f, stageSize.height*0.2f );
     stage.Add( layout );
 
-    TextField field = TextField::New();
-    field.SetParentOrigin( ParentOrigin::CENTER );
-    field.SetBackgroundColor( Color::BLACK );
-    layout.SetTopPanel( field );
+    mTextField = TextField::New();
+    mTextField.SetParentOrigin( ParentOrigin::CENTER );
+    mTextField.SetBackgroundColor( Color::BLACK );
+    layout.SetTopPanel( mTextField );
 
-    field.SetProperty( TextField::Property::TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog" );
+    mTextField.SetProperty( TextField::Property::TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog" );
 
-    // TODO
-    //Property::Value fieldText = field.GetProperty( TextField::Property::TEXT );
-    //std::cout << "Got text from field: " << fieldText.Get< std::string >() << std::endl;
+    Property::Value fieldText = mTextField.GetProperty( TextField::Property::TEXT );
+    std::cout << "Displaying text: \"" << fieldText.Get< std::string >() << "\"" << std::endl;
   }
 
   /**
@@ -102,6 +101,8 @@ public:
 private:
 
   Application& mApplication;
+
+  TextField mTextField;
 };
 
 void RunTest( Application& application )

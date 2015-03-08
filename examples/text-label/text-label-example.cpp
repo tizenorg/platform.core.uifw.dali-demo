@@ -30,6 +30,7 @@
 
 using namespace Dali;
 using namespace Dali::Toolkit;
+using namespace Dali::TextAbstraction;
 using namespace MultiLanguageStrings;
 
 namespace
@@ -49,7 +50,9 @@ public:
 
   TextLabelExample( Application& application )
   : mApplication( application ),
-    mLanguageId( 0u )
+    mLanguageId( 0u ),
+    mIndex( 1 ),
+    mCharCode( 0x1F645 )
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect( this, &TextLabelExample::Create );
@@ -81,10 +84,41 @@ public:
     centerLayout.Add( mLabel );
 
     mLabel.SetProperty( TextLabel::Property::MULTI_LINE, true );
-    mLabel.SetProperty( TextLabel::Property::TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog" );
+    mLabel.SetProperty( TextLabel::Property::TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog \xF0\x9F\x99\x85" ); // 0x1F645
+    //mLabel.SetProperty( TextLabel::Property::TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog" );
 
     Property::Value labelText = mLabel.GetProperty( TextLabel::Property::TEXT );
     std::cout << "Displaying text: \"" << labelText.Get< std::string >() << "\"" << std::endl;
+
+    // FIXME
+
+    //for( Character charCode = 0x1F601; charCode < 0x1F6C5; ++charCode )
+    for( Character charCode = 0x1F645; charCode < 0x1F646; ++charCode )
+    {
+      mFontId = FontClient::Get().FindDefaultFont( charCode, TextAbstraction::FontClient::DEFAULT_POINT_SIZE );
+      Dali::TextAbstraction::FontDescription description;
+      FontClient::Get().GetDescription( mFontId, description );
+      std::cout << "Default font for charCode: " << charCode << " is: " << mFontId << "i.e. " << description.path << std::endl;
+    }
+
+    // FIXME
+
+    //mFontId = FontClient::Get().GetFontId( "TizenColorEmoji", "Regular", 62 * 64 );
+
+    std::cout << "Emoji fontId: " << mFontId << std::endl;
+
+    GlyphIndex index = FontClient::Get().GetGlyphIndex( mFontId, 0x1F645 );
+
+    BufferImage image = FontClient::Get().CreateBitmap( mFontId, index );
+
+    if( image )
+    {
+      std::cout << "Got image!" << std::endl;
+
+      mActor = ImageActor::New( image );
+      mActor.SetParentOrigin( ParentOrigin::CENTER );
+      //stage.Add( mActor );
+    }
   }
 
   /**
@@ -96,7 +130,16 @@ public:
     {
       if( IsKey( event, DALI_KEY_ESCAPE) || IsKey( event, DALI_KEY_BACK ) )
       {
-        mApplication.Quit();
+        BufferImage image;
+        while ( !image )
+        {
+          GlyphIndex index = FontClient::Get().GetGlyphIndex( mFontId, mCharCode++ );
+
+          image = FontClient::Get().CreateBitmap( mFontId, index );
+        }
+        std::cout << "mCharCode: " << mCharCode-1 << std::endl;
+
+        mActor.SetImage( image );
       }
       else if( event.IsCtrlModifier() )
       {
@@ -137,6 +180,14 @@ private:
   TextLabel mLabel;
 
   unsigned int mLanguageId;
+
+  int mIndex;
+
+  ImageActor mActor;
+
+  FontId mFontId;
+
+  Character mCharCode;
 };
 
 void RunTest( Application& application )
