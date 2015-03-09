@@ -15,7 +15,7 @@
  *
  */
 
-#include "../shared/view.h"
+#include "shared/view.h"
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 
@@ -142,7 +142,7 @@ class ButtonsController: public ConnectionTracker
 
     // Radio 1
     {
-      ImageActor imageActor = ImageActor::New( Image::New( SMALL_IMAGE_1 ) );
+      ImageActor imageActor = ImageActor::New( ResourceImage::New( SMALL_IMAGE_1 ) );
       imageActor.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
       mRadioButtonImage1 = Dali::Toolkit::RadioButton::New( imageActor );
       mRadioButtonImage1.SetParentOrigin( ParentOrigin::TOP_LEFT );
@@ -157,7 +157,7 @@ class ButtonsController: public ConnectionTracker
     {
       radioY += RADIO_LABEL_THUMBNAIL_SIZE + RADIO_IMAGE_SPACING;
 
-      ImageActor imageActor = ImageActor::New( Image::New( SMALL_IMAGE_2 ) );
+      ImageActor imageActor = ImageActor::New( ResourceImage::New( SMALL_IMAGE_2 ) );
       imageActor.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
 
       mRadioButtonImage2 = Dali::Toolkit::RadioButton::New( imageActor );
@@ -172,7 +172,7 @@ class ButtonsController: public ConnectionTracker
     {
       radioY += RADIO_LABEL_THUMBNAIL_SIZE + RADIO_IMAGE_SPACING;
 
-      ImageActor imageActor = ImageActor::New( Image::New( SMALL_IMAGE_3 ) );
+      ImageActor imageActor = ImageActor::New( ResourceImage::New( SMALL_IMAGE_3 ) );
       imageActor.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
 
       mRadioButtonImage3 = Dali::Toolkit::RadioButton::New( imageActor );
@@ -191,18 +191,18 @@ class ButtonsController: public ConnectionTracker
     mUpdateButton.SetLabel("Select");
     mUpdateButton.SetSize( DP(100), DP(BUTTON_HEIGHT) );
 
-    mUpdateButton.SetSelectedImage( Dali::Image::New( PUSHBUTTON_PRESS_IMAGE ) );
-    mUpdateButton.SetDisabledImage( Dali::Image::New( PUSHBUTTON_DISABLED_IMAGE ) );
-    mUpdateButton.SetButtonImage( Dali::Image::New( PUSHBUTTON_BUTTON_IMAGE ) );
+    mUpdateButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
+    mUpdateButton.SetDisabledImage( Dali::ResourceImage::New( PUSHBUTTON_DISABLED_IMAGE ) );
+    mUpdateButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
 
     mUpdateButton.ClickedSignal().Connect( this, &ButtonsController::OnButtonClicked );
 
     radioButtonsGroup2.Add(mUpdateButton);
 
     // ImageActor to display selected image
-    mBigImage1 = Image::New( BIG_IMAGE_1 );
-    mBigImage2 = Image::New( BIG_IMAGE_2 );
-    mBigImage3 = Image::New( BIG_IMAGE_3 );
+    mBigImage1 = ResourceImage::New( BIG_IMAGE_1 );
+    mBigImage2 = ResourceImage::New( BIG_IMAGE_2 );
+    mBigImage3 = ResourceImage::New( BIG_IMAGE_3 );
 
     mImage = ImageActor::New( mBigImage1 );
     mImage.SetParentOrigin( ParentOrigin::TOP_RIGHT );
@@ -239,7 +239,7 @@ class ButtonsController: public ConnectionTracker
       alignment.Add( textView );
       tableView.AddChild( alignment, Toolkit::TableView::CellPosition( 0, 0 ) );
 
-      ImageActor imageActor = ImageActor::New( Image::New( ENABLED_IMAGE ) );
+      ImageActor imageActor = ImageActor::New( ResourceImage::New( ENABLED_IMAGE ) );
       imageActor.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
       tableView.AddChild( imageActor, Toolkit::TableView::CellPosition( 0, 1 ) );
       tableView.SetFixedWidth( 1, DP(RADIO_LABEL_THUMBNAIL_SIZE) );
@@ -279,8 +279,8 @@ class ButtonsController: public ConnectionTracker
     checkBoxBackground.SetSize( DP(430), DP(GROUP3_HEIGHT) );
     mContentLayer.Add( checkBoxBackground );
 
-    Dali::Image unselected = Dali::Image::New( CHECKBOX_UNSELECTED_IMAGE );
-    Dali::Image selected = Dali::Image::New( CHECKBOX_SELECTED_IMAGE );
+    Dali::Image unselected = Dali::ResourceImage::New( CHECKBOX_UNSELECTED_IMAGE );
+    Dali::Image selected = Dali::ResourceImage::New( CHECKBOX_SELECTED_IMAGE );
 
     int checkYPos = MARGIN_SIZE;
 
@@ -292,18 +292,11 @@ class ButtonsController: public ConnectionTracker
       checkBox.SetAnchorPoint( AnchorPoint::TOP_LEFT );
       checkBox.SetBackgroundImage( unselected );
       checkBox.SetSelectedImage( selected );
-      checkBox.SetSize( DP(48), DP(48) );
+      checkBox.SetLabel( "CheckBox1 is unselected" );
       checkBox.StateChangedSignal().Connect( this, &ButtonsController::OnCheckBoxesSelected );
 
       checkBoxBackground.Add( checkBox );
     }
-
-    mCheckBox1State = Toolkit::TextView::New( "CheckBox1 is unselected" );
-
-    mCheckBox1State.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    mCheckBox1State.SetPosition( DP(80), DP(checkYPos) );
-
-    checkBoxBackground.Add( mCheckBox1State );
 
     checkYPos += 60;
 
@@ -314,19 +307,12 @@ class ButtonsController: public ConnectionTracker
       checkBox.SetAnchorPoint( AnchorPoint::TOP_LEFT );
       checkBox.SetBackgroundImage( unselected );
       checkBox.SetSelectedImage( selected );
-      checkBox.SetSize( DP(48), DP(48) );
+      checkBox.SetLabel( "CheckBox2 is selected" );
       checkBox.SetSelected( true );
       checkBox.StateChangedSignal().Connect( this, &ButtonsController::OnCheckBoxesSelected );
 
       checkBoxBackground.Add( checkBox );
     }
-
-    mCheckBox2State = Toolkit::TextView::New( "CheckBox2 is selected" );
-    mCheckBox2State.SetParentOrigin( ParentOrigin::TOP_LEFT );
-    mCheckBox2State.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    mCheckBox2State.SetPosition( DP(80), DP(checkYPos) );
-
-    checkBoxBackground.Add( mCheckBox2State );
 
     checkYPos += 60;
 
@@ -337,18 +323,11 @@ class ButtonsController: public ConnectionTracker
       checkBox.SetAnchorPoint( AnchorPoint::TOP_LEFT );
       checkBox.SetBackgroundImage( unselected );
       checkBox.SetSelectedImage( selected );
-      checkBox.SetSize( DP(48), DP(48) );
+      checkBox.SetLabel( "CheckBox3 is unselected" );
       checkBox.StateChangedSignal().Connect( this, &ButtonsController::OnCheckBoxesSelected );
 
       checkBoxBackground.Add( checkBox );
     }
-
-    mCheckBox3State = Toolkit::TextView::New( "CheckBox3 is unselected" );
-
-    mCheckBox3State.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    mCheckBox3State.SetPosition( DP(80), DP(checkYPos) );
-
-    checkBoxBackground.Add( mCheckBox3State );
 
     // Create togglabe button
     yPos += GROUP3_HEIGHT + MARGIN_SIZE;
@@ -368,9 +347,9 @@ class ButtonsController: public ConnectionTracker
     toggleButton.SetLabel( "Unselected" );
     toggleButton.SetSize( DP(150), DP(BUTTON_HEIGHT) );
 
-    toggleButton.SetSelectedImage( Dali::Image::New( PUSHBUTTON_PRESS_IMAGE ) );
-    toggleButton.SetDisabledImage( Dali::Image::New( PUSHBUTTON_DISABLED_IMAGE ) );
-    toggleButton.SetButtonImage( Dali::Image::New( PUSHBUTTON_BUTTON_IMAGE ) );
+    toggleButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
+    toggleButton.SetDisabledImage( Dali::ResourceImage::New( PUSHBUTTON_DISABLED_IMAGE ) );
+    toggleButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
 
     toggleButton.StateChangedSignal().Connect( this, &ButtonsController::OnButtonSelected );
 
@@ -444,11 +423,11 @@ class ButtonsController: public ConnectionTracker
     {
       if( button.IsSelected() )
       {
-        mCheckBox1State.SetText("CheckBox1 is selected");
+        button.SetLabel("CheckBox1 is selected");
       }
       else
       {
-        mCheckBox1State.SetText("CheckBox1 is unselected");
+        button.SetLabel("CheckBox1 is unselected");
       }
     }
 
@@ -456,11 +435,11 @@ class ButtonsController: public ConnectionTracker
     {
       if( button.IsSelected() )
       {
-        mCheckBox2State.SetText("CheckBox2 is selected");
+        button.SetLabel("CheckBox2 is selected");
       }
       else
       {
-        mCheckBox2State.SetText("CheckBox2 is unselected");
+        button.SetLabel("CheckBox2 is unselected");
       }
     }
 
@@ -468,11 +447,11 @@ class ButtonsController: public ConnectionTracker
     {
       if( button.IsSelected() )
       {
-        mCheckBox3State.SetText("CheckBox3 is selected");
+        button.SetLabel("CheckBox3 is selected");
       }
       else
       {
-        mCheckBox3State.SetText("CheckBox3 is unselected");
+        button.SetLabel("CheckBox3 is unselected");
       }
     }
 
@@ -496,10 +475,6 @@ class ButtonsController: public ConnectionTracker
   Image mBigImage2;
   Image mBigImage3;
   ImageActor mImage;
-
-  Toolkit::TextView mCheckBox1State;
-  Toolkit::TextView mCheckBox2State;
-  Toolkit::TextView mCheckBox3State;
 };
 
 void RunTest( Application& application )

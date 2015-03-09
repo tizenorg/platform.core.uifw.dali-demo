@@ -30,13 +30,12 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/public-api/builder/builder.h>
 #include <dali-toolkit/public-api/builder/tree-node.h>
+#include <iostream>
 #include <map>
 #include <string>
 #include <fstream>
 #include <streambuf>
-#include <boost/scoped_ptr.hpp>
 
-//#include <boost/regex.hpp>
 #include "sys/stat.h"
 #include <ctime>
 

@@ -19,7 +19,7 @@
 #include <sstream>
 
 // INTERNAL INCLUDES
-#include "../shared/view.h"
+#include "shared/view.h"
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 
@@ -194,11 +194,11 @@ public:
                                             TOOLBAR_IMAGE,
                                             "" );
 
-    mEffectIcon[ DepthEffect ]     = Image::New( EFFECT_DEPTH_IMAGE );
-    mEffectIcon[ CubeEffect ]      = Image::New( EFFECT_INNER_CUBE_IMAGE );
-    mEffectIcon[ PageCarouselEffect ] = Image::New( EFFECT_CAROUSEL_IMAGE );
-    mEffectIcon[ PageCubeEffect ]     = Image::New( EFFECT_CAROUSEL_IMAGE );
-    mEffectIcon[ PageSpiralEffect ]   = Image::New( EFFECT_CAROUSEL_IMAGE );
+    mEffectIcon[ DepthEffect ]     = ResourceImage::New( EFFECT_DEPTH_IMAGE );
+    mEffectIcon[ CubeEffect ]      = ResourceImage::New( EFFECT_INNER_CUBE_IMAGE );
+    mEffectIcon[ PageCarouselEffect ] = ResourceImage::New( EFFECT_CAROUSEL_IMAGE );
+    mEffectIcon[ PageCubeEffect ]     = ResourceImage::New( EFFECT_CAROUSEL_IMAGE );
+    mEffectIcon[ PageSpiralEffect ]   = ResourceImage::New( EFFECT_CAROUSEL_IMAGE );
 
     // Create a effect change button. (right of toolbar)
     mEffectChangeButton = Toolkit::PushButton::New();
@@ -210,7 +210,7 @@ public:
 
     // Hack to force screen refresh.
     Animation animation = Animation::New(1.0f);
-    animation.AnimateTo(Property(mContentLayer, Actor::POSITION), Vector3::ZERO );
+    animation.AnimateTo(Property(mContentLayer, Actor::Property::POSITION), Vector3::ZERO );
     animation.Play();
   }
 
@@ -298,7 +298,7 @@ private:
   Actor CreatePage()
   {
     Actor page = Actor::New();
-    page.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), EqualToConstraint() ) );
+    page.SetSizeMode( SIZE_EQUAL_TO_PARENT );
     page.SetParentOrigin( ParentOrigin::CENTER );
     page.SetAnchorPoint( AnchorPoint::CENTER );
 
@@ -450,7 +450,7 @@ private:
    void ApplyEffectToPage(Actor page)
    {
      page.RemoveConstraints();
-     page.ApplyConstraint( Constraint::New<Vector3>( Actor::SIZE, ParentSource( Actor::SIZE ), EqualToConstraint() ) );
+     page.SetSizeMode( SIZE_EQUAL_TO_PARENT );
 
      switch( mEffectMode )
      {
@@ -563,7 +563,7 @@ private:
 
     attributes.SetSize(width, height);
     attributes.SetScalingMode(ImageAttributes::ShrinkToFit);
-    Image img = Image::New(filename, attributes);
+    Image img = ResourceImage::New(filename, attributes);
     ImageActor actor = ImageActor::New(img);
     actor.SetName( filename );
     actor.SetParentOrigin(ParentOrigin::CENTER);

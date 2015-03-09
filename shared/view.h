@@ -86,21 +86,21 @@ Dali::Layer CreateToolbar( Dali::Toolkit::ToolBar& toolBar,
   Dali::Layer toolBarLayer = Dali::Layer::New();
   toolBarLayer.SetAnchorPoint( Dali::AnchorPoint::TOP_CENTER );
   toolBarLayer.SetParentOrigin( Dali::ParentOrigin::TOP_CENTER );
-  toolBarLayer.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::SourceWidthFixedHeight( style.mToolBarHeight  ) ) );
+  toolBarLayer.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::Property::SIZE, Dali::ParentSource( Dali::Actor::Property::SIZE ), Dali::SourceWidthFixedHeight( style.mToolBarHeight  ) ) );
   toolBarLayer.SetSize( 0.0f, style.mToolBarHeight );
 
   // Raise tool bar layer to the top.
   toolBarLayer.RaiseToTop();
 
   // Tool bar
-  Dali::Image image = Dali::Image::New( toolbarImagePath );
+  Dali::Image image = Dali::ResourceImage::New( toolbarImagePath );
   Dali::ImageActor toolBarBackground = Dali::ImageActor::New( image );
   toolBar = Dali::Toolkit::ToolBar::New();
   toolBar.SetBackground( toolBarBackground );
   toolBar.SetParentOrigin( Dali::ParentOrigin::TOP_CENTER );
   toolBar.SetAnchorPoint( Dali::AnchorPoint::TOP_CENTER );
-  toolBar.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::EqualToConstraint() ) );
   toolBar.SetSize( 0.0f, style.mToolBarHeight );
+  toolBar.SetSizeMode( Dali::SIZE_EQUAL_TO_PARENT );
   toolBarBackground.SetSortModifier(1.0f);
 
   // Add the tool bar to the too bar layer.
@@ -145,7 +145,7 @@ Dali::Layer CreateView( Dali::Application& application,
   // Set background image.
   if ( ! backgroundImagePath.empty() )
   {
-    Dali::Image backgroundImage = Dali::Image::New( backgroundImagePath );
+    Dali::Image backgroundImage = Dali::ResourceImage::New( backgroundImagePath );
     Dali::ImageActor backgroundImageActor = Dali::ImageActor::New( backgroundImage );
     view.SetBackground( backgroundImageActor );
   }
@@ -166,7 +166,7 @@ Dali::Layer CreateView( Dali::Application& application,
   Dali::Layer contentLayer = Dali::Layer::New();
   contentLayer.SetAnchorPoint( Dali::AnchorPoint::CENTER );
   contentLayer.SetParentOrigin( Dali::ParentOrigin::CENTER );
-  contentLayer.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::SIZE, Dali::ParentSource( Dali::Actor::SIZE ), Dali::EqualToConstraint() ) );
+  contentLayer.SetSizeMode( Dali::SIZE_EQUAL_TO_PARENT );
   view.AddContentLayer( contentLayer );
   contentLayer.LowerBelow( toolBarLayer );
 

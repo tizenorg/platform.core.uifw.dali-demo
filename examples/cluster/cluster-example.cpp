@@ -18,7 +18,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include "../shared/view.h"
+#include "shared/view.h"
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 
@@ -195,33 +195,6 @@ struct CarouselEffectOrientationConstraint
   }
 
   Vector2 mAngleSweep;
-
-};
-
-/**
- * RescaleConstraint
- * Rescales the inputer scale by the ratio of the height:width of it's parent.
- */
-struct RescaleConstraint
-{
-  /**
-   * Constructor
-   * @param[in] value0 Constant multiplication operand (K).
-   */
-  RescaleConstraint()
-  {
-  }
-
-  /**
-   * @param[in] current The object's current property value
-   * @param[in] property0 The first property to multiplication operand
-   * @return The object's new property value
-   */
-  Vector3 operator()(const Vector3&    current,
-                     const PropertyInput& property0)
-  {
-    return current * Vector3( property0.GetVector3().y / property0.GetVector3().x, 1.0f, 1.0f );
-  }
 
 };
 
@@ -493,10 +466,10 @@ public:
                                             "" );
 
     // Create a effect toggle button. (right of toolbar)
-    mLayoutButtonImages[ NO_EFFECT ] = Image::New( LAYOUT_NONE_IMAGE );
-    mLayoutButtonImages[ WOBBLE_EFFECT ] = Image::New( LAYOUT_WOBBLE_IMAGE );
-    mLayoutButtonImages[ CAROUSEL_EFFECT ] = Image::New( LAYOUT_CAROUSEL_IMAGE );
-    mLayoutButtonImages[ SPHERE_EFFECT ] = Image::New( LAYOUT_SPHERE_IMAGE );
+    mLayoutButtonImages[ NO_EFFECT ] = ResourceImage::New( LAYOUT_NONE_IMAGE );
+    mLayoutButtonImages[ WOBBLE_EFFECT ] = ResourceImage::New( LAYOUT_WOBBLE_IMAGE );
+    mLayoutButtonImages[ CAROUSEL_EFFECT ] = ResourceImage::New( LAYOUT_CAROUSEL_IMAGE );
+    mLayoutButtonImages[ SPHERE_EFFECT ] = ResourceImage::New( LAYOUT_SPHERE_IMAGE );
 
     mLayoutButton = Toolkit::PushButton::New();
     mLayoutButton.ClickedSignal().Connect( this, &ClusterController::OnEffectTouched );
@@ -514,18 +487,14 @@ public:
     mScrollView.SetAnchorPoint(AnchorPoint::CENTER);
     mScrollView.SetParentOrigin(ParentOrigin::CENTER);
 
-    // Scale ScrollView to fit within parent (mContentLayer)
-    Constraint constraint = Constraint::New<Vector3>( Actor::SCALE,
-                                                    LocalSource( Actor::SIZE ),
-                                                    ParentSource( Actor::SIZE ),
-                                                    ScaleToFitConstraint() );
-    mScrollView.ApplyConstraint(constraint);
+    // Scale ScrollView to fit parent (mContentLayer)
+    mScrollView.SetSizeMode( SIZE_EQUAL_TO_PARENT );
 
     // Add the scroll view to the content layer
     mContentLayer.Add(mScrollView);
 
     // Create the image border shared by all the cluster image actors
-    mClusterBorderImage = Image::New(CLUSTER_BORDER_IMAGE_PATH);
+    mClusterBorderImage = ResourceImage::New(CLUSTER_BORDER_IMAGE_PATH);
 
     AddCluster( PEOPLE,   ClusterStyleStandard::New(ClusterStyleStandard::ClusterStyle1) );
     AddCluster( TODAY,    ClusterStyleStandard::New(ClusterStyleStandard::ClusterStyle2) );
@@ -556,7 +525,7 @@ public:
     DALI_ASSERT_ALWAYS(paths);
 
     // Add a background image to the cluster
-    Image bg = Image::New( CLUSTER_BACKGROUND_IMAGE_PATH );
+    Image bg = ResourceImage::New( CLUSTER_BACKGROUND_IMAGE_PATH );
     ImageActor image = ImageActor::New(bg);
     clusterActor.SetBackgroundImage(image);
 
@@ -587,10 +556,9 @@ public:
     ImageAttributes attribs = ImageAttributes::New();
     attribs.SetSize(CLUSTER_IMAGE_THUMBNAIL_WIDTH, CLUSTER_IMAGE_THUMBNAIL_HEIGHT);
     attribs.SetScalingMode(Dali::ImageAttributes::ShrinkToFit);
-    attribs.SetPixelFormat( Pixel::RGB888  );
 
     // Add a shadow image child actor
-    Image shadowImage = Image::New( CLUSTER_SHADOW_IMAGE_PATH, attribs );
+    Image shadowImage = ResourceImage::New( CLUSTER_SHADOW_IMAGE_PATH, attribs );
     ImageActor shadowActor = ImageActor::New(shadowImage);
 
     // Shadow is not exactly located on the center of the image, so it is moved to a little
@@ -605,7 +573,7 @@ public:
     actor.Add( shadowActor );
 
     // Add a picture image actor to actor (with equal size to the parent).
-    Image image = Image::New( imagePath, attribs );
+    Image image = ResourceImage::New( imagePath, attribs );
     ImageActor imageActor = ImageActor::New( image );
     imageActor.SetParentOrigin( ParentOrigin::CENTER );
     imageActor.SetAnchorPoint( AnchorPoint::CENTER );
@@ -649,14 +617,7 @@ public:
     mScrollView.Add(pageView);
     pageView.SetParentOrigin(ParentOrigin::CENTER);
     pageView.SetPosition(Vector3(stageSize.width * column, 0.0f, 0.0f));
-    pageView.SetSize(stageSize);
-
-    // Resize pageView (which contains a Cluster)
-    Constraint constraintScale = Constraint::New<Vector3>( Actor::SCALE,
-                                                           ParentSource( Actor::SCALE ),
-                                                           RescaleConstraint() );
-    constraintScale.SetRemoveAction(Constraint::Discard);
-    pageView.ApplyConstraint(constraintScale);
+    pageView.SetSizeMode( SIZE_EQUAL_TO_PARENT );
 
     // Create cluster actors, add them to scroll view, and set the shear effect with the given center point.
     Cluster cluster = CreateClusterActor(clusterType, style);
@@ -746,7 +707,7 @@ public:
           Vector2 shearCenter( Vector2(position.x + size.width * shearAnchor.x, position.y + size.height * shearAnchor.y) );
           Property::Index centerProperty = shaderEffect.GetPropertyIndex(shaderEffect.GetCenterPropertyName());
           Constraint constraint = Constraint::New<Vector2>( centerProperty,
-                                                            Source(mView, Actor::SIZE),
+                                                            Source(mView, Actor::Property::SIZE),
                                                             ShearEffectCenterConstraint(stageSize, shearCenter) );
           shaderEffect.ApplyConstraint(constraint);
 
@@ -759,12 +720,12 @@ public:
 
           constraint = Constraint::New<float>( angleXAxisProperty,
                                                Source(mScrollView, scrollOvershootProperty),
-                                               Source(mView, Actor::ROTATION),
+                                               Source(mView, Actor::Property::ROTATION),
                                                ShearEffectConstraint(stageSize, SHEAR_EFFECT_MAX_OVERSHOOT, Vector2::XAXIS) );
           shaderEffect.ApplyConstraint(constraint);
           constraint = Constraint::New<float>( angleYAxisProperty,
                                                Source(mScrollView, scrollOvershootProperty),
-                                               Source(mView, Actor::ROTATION),
+                                               Source(mView, Actor::Property::ROTATION),
                                                ShearEffectConstraint(stageSize, SHEAR_EFFECT_MAX_OVERSHOOT, Vector2::YAXIS) );
           shaderEffect.ApplyConstraint(constraint);
 
@@ -791,7 +752,7 @@ public:
 
         Property::Index anglePerUnit = shaderEffect.GetPropertyIndex( shaderEffect.GetAnglePerUnitPropertyName() );
         shaderEffect.ApplyConstraint( Constraint::New<Vector2>( anglePerUnit,
-                                                                Source(mView, Actor::ROTATION),
+                                                                Source(mView, Actor::Property::ROTATION),
                                                                 CarouselEffectOrientationConstraint( angleSweep ) ) );
 
         break;
@@ -818,7 +779,7 @@ public:
         // dont apply shader effect to scrollview as it might override internal shaders for bounce effect etc
         for( std::vector<ClusterInfo>::iterator i = mClusterInfo.begin(); i != mClusterInfo.end(); ++i )
         {
-          Constraint constraint = Constraint::New<float>(Actor::POSITION_Z, SphereEffectOffsetConstraint(SPHERE_EFFECT_POSITION_Z));
+          Constraint constraint = Constraint::New<float>(Actor::Property::POSITION_Z, SphereEffectOffsetConstraint(SPHERE_EFFECT_POSITION_Z));
           constraint.SetRemoveAction(Constraint::Discard);
           Cluster cluster = i->mCluster;
           SetShaderEffectRecursively( cluster, shaderEffect );
