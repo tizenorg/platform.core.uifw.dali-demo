@@ -78,7 +78,9 @@ public:
     field.SetBackgroundColor( Color::BLACK );
     layout.SetTopPanel( field );
 
-    field.SetProperty( TextField::Property::TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog" );
+    field.SetProperty( TextField::Property::TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog. Five or six big jet planes zoomed quickly by the new tower." );
+
+    //field.SetProperty( TextField::Property::EXCEED_POLICY, 1 );
 
     // TODO
     //Property::Value fieldText = field.GetProperty( TextField::Property::TEXT );
