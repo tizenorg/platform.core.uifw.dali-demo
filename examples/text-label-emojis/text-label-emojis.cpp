@@ -16,7 +16,6 @@
  */
 
 // INTERNAL INCLUDES
-
 #include "vertical-layout.h"
 #include "emoji-strings.h"
 
@@ -24,13 +23,57 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/public-api/text-abstraction/text-abstraction.h>
 #include <iostream>
+#include <stdio.h>
+
+//#define SHOW_UNICODE
+
+namespace
+{
+  const static uint8_t U1 = 1u;
+  const static uint8_t U2 = 2u;
+  const static uint8_t U3 = 3u;
+  const static uint8_t U4 = 4u;
+  const static uint8_t U0 = 0u;
+  const static uint8_t UTF8_LENGTH[256] = {
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, // lead byte = 0xxx xxxx (U+0000 - U+007F + some extended ascii characters)
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1, U1, U1, U1, U1, U1, U1, U1, U1, //
+    U1, U1,                                 //
+
+    U2, U2, U2, U2, U2, U2, U2, U2, U2, U2, //
+    U2, U2, U2, U2, U2, U2, U2, U2, U2, U2, // lead byte = 110x xxxx (U+0080 - U+07FF)
+    U2, U2, U2, U2, U2, U2, U2, U2, U2, U2, //
+    U2, U2,                                 //
+
+    U3, U3, U3, U3, U3, U3, U3, U3, U3, U3, // lead byte = 1110 xxxx (U+0800 - U+FFFF)
+    U3, U3, U3, U3, U3, U3,                 //
+
+    U4, U4, U4, U4, U4, U4, U4, U4,         // lead byte = 1111 0xxx (U+10000 - U+1FFFFF)
+
+    U0, U0, U0, U0,                         // Non valid.
+    U0, U0, U0, U0,                         // Non valid.
+  };
+} // namespace
 
 using namespace Dali;
 using namespace Dali::Toolkit;
 using namespace EmojiStrings;
-
- // TODO Need to expose Text::RENDER.....
-const int ATLAS_RENDERER = 0;
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -43,7 +86,7 @@ public:
   EmojiExample( Application& application )
   : mApplication( application )
   {
-    std::cout << "EmoticonController::EmoticonController" << std::endl;
+    std::cout << "EmojiExample::EmojiExample" << std::endl;
 
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect( this, &EmojiExample::Create );
@@ -64,19 +107,29 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.Add( mLayout );
     stage.KeyEventSignal().Connect(this, &EmojiExample::OnKeyEvent);
+    unsigned int index = 0;
 
-    for( unsigned int index = 0u; index < NUMBER_OF_EMOJIS; ++index )
+    while ( EMOJIS[ index ].mUTF8[0] )
     {
-      const Emoji& emoji = EMOJIS[index];
-      const std::string text = emoji.mUTF8 + " " + emoji.mDescription;
+      const Emoji& emoji = EMOJIS[index++];
+
+#ifdef SHOW_UNICODE
+      uint32_t unicode;
+      char unicodeNumber[ 16 ];
+      Utf8ToUtf32( ( const uint8_t* )emoji.mUTF8.c_str(), emoji.mUTF8.length(), &unicode );
+      sprintf( reinterpret_cast< char* >( &unicodeNumber ), "U+%0x", unicode );
+      std::string unicodeString( unicodeNumber);
+      const std::string text = unicodeString + emoji.mUTF8 + emoji.mDescription;
+#else
+      const std::string text = emoji.mUTF8 + emoji.mDescription;
+#endif
+
       TextLabel label = TextLabel::New();
       label.SetParentOrigin( ParentOrigin::TOP_CENTER );
       label.SetAnchorPoint( AnchorPoint::TOP_CENTER );
       label.SetProperty( TextLabel::Property::MULTI_LINE, true );
-      label.SetProperty( TextLabel::Property::RENDERING_BACKEND, 0 );
       label.SetProperty( TextLabel::Property::TEXT, text );
       mLayout.AddLabel( label );
-      mLayout.TouchedSignal().Connect( this, &EmojiExample::OnTouchEvent );
     }
 
     const Vector2& size = stage.GetSize();
@@ -128,6 +181,66 @@ public:
     }
   }
 
+  uint32_t Utf8ToUtf32( const uint8_t* const utf8, uint32_t length, uint32_t* utf32 )
+  {
+  uint32_t numberOfCharacters = 0u;
+
+  const uint8_t* begin = utf8;
+  const uint8_t* end = utf8 + length;
+
+  for( ; begin < end ; ++numberOfCharacters )
+  {
+    const uint8_t leadByte = *begin;
+
+    switch( UTF8_LENGTH[leadByte] )
+    {
+      case U1:
+      {
+        *utf32++ = leadByte;
+        begin++;
+        break;
+      }
+
+      case U2:
+      {
+        uint32_t& code = *utf32++;
+        code = leadByte & 0x1fu;
+        begin++;
+        code <<= 6u;
+        code |= *begin++ & 0x3fu;
+        break;
+      }
+
+      case U3:
+      {
+        uint32_t& code = *utf32++;
+        code = leadByte & 0x0fu;
+        begin++;
+        code <<= 6u;
+        code |= *begin++ & 0x3fu;
+        code <<= 6u;
+        code |= *begin++ & 0x3fu;
+        break;
+      }
+
+      case U4:
+      {
+        uint32_t& code = *utf32++;
+        code = leadByte & 0x07u;
+        begin++;
+        code <<= 6u;
+        code |= *begin++ & 0x3fu;
+        code <<= 6u;
+        code |= *begin++ & 0x3fu;
+        code <<= 6u;
+        code |= *begin++ & 0x3fu;
+        break;
+      }
+    }
+  }
+
+  return numberOfCharacters;
+}
 
 private:
   Application&  mApplication;
