@@ -43,7 +43,6 @@ const char* SCENE_IMAGE_1( DALI_IMAGE_DIR "gallery-small-10.jpg");
 const char* SCENE_IMAGE_2( DALI_IMAGE_DIR "gallery-small-42.jpg");
 const char* SCENE_IMAGE_3( DALI_IMAGE_DIR "gallery-small-48.jpg");
 
-const Quaternion JAUNTY_ROTATION(Math::PI/5.0f, Math::PI/5.0f, 0.0f); // Euler angles
 const float MIN_PINCH_SCALE( 0.3f );
 const float MAX_PINCH_SCALE( 2.05f );
 
@@ -94,31 +93,6 @@ public:
   }
 
 public:
-  struct PositionInFrontOf
-  {
-    PositionInFrontOf()
-    {
-    }
-
-    Vector3 operator()( const Vector3& current, const PropertyInput& property )
-    {
-      Vector3 position = property.GetVector3();
-      position.z += 1.0f;
-      return position;
-    }
-  };
-
-  struct QuaternionEqualToConstraint
-  {
-    QuaternionEqualToConstraint()
-    {
-    }
-
-    Quaternion operator()( const Quaternion& current, const PropertyInput& property )
-    {
-      return property.GetQuaternion();
-    }
-  };
 
   struct RotationConstraint
   {
@@ -129,8 +103,8 @@ public:
 
     Quaternion operator()( const Quaternion& current, const PropertyInput& property )
     {
-      Degree angle(property.GetFloat());
-      return Quaternion( Radian(angle) * mSign, Vector3::YAXIS );
+      Degree angle(property.GetFloat() * mSign);
+      return Quaternion( Radian(angle), Vector3::YAXIS );
     }
 
     float mSign;
@@ -340,8 +314,8 @@ public:
         {
           case PAN_LIGHT:
           {
-            mLightLongitudinal += gesture.displacement.x/4.0f;
-            mLightAxisTilt -= gesture.displacement.y/6.0f;
+            mLightLongitudinal = mLightLongitudinal + gesture.displacement.x/4.0f;
+            mLightAxisTilt = mLightAxisTilt - gesture.displacement.y/6.0f;
             mLightAxisTilt = Clamp<float>(mLightAxisTilt, -90.0f, 90.0f);
             mLightAnchor.SetOrientation(CalculateWorldRotation(Radian(mLightLongitudinal), Radian(mLightAxisTilt)));
             break;
@@ -356,8 +330,8 @@ public:
 
           case ROTATE_SCENE:
           {
-            mLongitudinal += gesture.displacement.x/4.0f;
-            mAxisTilt -= gesture.displacement.y/6.0f;
+            mLongitudinal = mLongitudinal + gesture.displacement.x/4.0f;
+            mAxisTilt = mAxisTilt - gesture.displacement.y/6.0f;
             mAxisTilt = Clamp<float>(mAxisTilt, -90.0f, 90.0f);
             mContents.SetOrientation(CalculateWorldRotation(Radian(mLongitudinal), Radian(mAxisTilt)));
             break;
@@ -365,8 +339,8 @@ public:
 
           case PAN_OBJECT:
           {
-            mObjectLongitudinal += gesture.displacement.x/4.0f;
-            mObjectAxisTilt -= gesture.displacement.y/6.0f;
+            mObjectLongitudinal = mObjectLongitudinal + gesture.displacement.x/4.0f;
+            mObjectAxisTilt = mObjectAxisTilt - gesture.displacement.y/6.0f;
             mObjectAxisTilt = Clamp<float>(mObjectAxisTilt, -90.0f, 90.0f);
             mSceneActor.SetOrientation(CalculateWorldRotation(Radian(mObjectLongitudinal), Radian(mObjectAxisTilt)));
             break;

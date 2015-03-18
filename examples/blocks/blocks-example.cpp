@@ -236,8 +236,8 @@ struct WobbleConstraint
    *
    * @param[in] deviation The max. deviation of wobble effect in degrees.
    */
-  WobbleConstraint(float deviation)
-  : mDeviation(Radian(Degree(deviation)))
+  WobbleConstraint( Degree deviation )
+  : mDeviation( deviation )
   {
 
   }
@@ -259,7 +259,7 @@ struct WobbleConstraint
     return q;
   }
 
-  const float mDeviation;           ///< Deviation factor in radians.
+  Radian mDeviation;           ///< Deviation factor in radians.
 };
 
 } // unnamed namespace
@@ -348,7 +348,7 @@ private:
     mWobbleProperty = mPaddle.RegisterProperty(WOBBLE_PROPERTY_NAME, 0.0f);
     Constraint wobbleConstraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION,
                                                     LocalSource(mWobbleProperty),
-                                                    WobbleConstraint(10.0f));
+                                                    WobbleConstraint( Degree( 10.0f ) ) );
     mPaddle.ApplyConstraint(wobbleConstraint);
 
     mPaddle.SetPosition( stageSize * Vector3( PADDLE_START_POSITION ) );

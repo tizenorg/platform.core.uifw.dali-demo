@@ -187,7 +187,7 @@ struct CarouselEffectOrientationConstraint
                      const PropertyInput& propertyOrientation)
   {
     Vector3 axis;
-    float angle;
+    Radian angle;
     propertyOrientation.GetQuaternion().ToAxisAngle( axis, angle );
     Vector2 direction( cosf(angle), sinf(angle) );
 
@@ -244,7 +244,7 @@ struct ShearEffectConstraint
     // Channel this shear value into either the X or Y axis depending on
     // the component mask passed in.
     Vector3 axis;
-    float angle;
+    Radian angle;
     propertyViewOrientation.GetQuaternion().ToAxisAngle( axis, angle );
     Vector2 direction( cosf(angle), sinf(angle) );
     float yield = direction.x * mComponentMask.x + direction.y * mComponentMask.y;
