@@ -634,6 +634,15 @@ private:
    */
   void SetTitle(const std::string& title)
   {
+    if(!mTitleActor)
+    {
+      mTitleActor = Dali::Toolkit::TextLabel::New();
+      mTitleActor.SetAnchorPoint( Dali::AnchorPoint::TOP_LEFT );
+      mTitleActor.SetColor( Color::BLACK );
+      mToolBar.AddControl( mTitleActor, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarTitlePercentage, Alignment::HorizontalCenter );
+    }
+
+    mTitleActor.SetProperty( TextLabel::Property::TEXT,  title );
   }
 
   /**
@@ -655,6 +664,7 @@ private:
   Application& mApplication;                            ///< Application instance
   Toolkit::View mView;                                  ///< The View instance.
   Toolkit::ToolBar mToolBar;                            ///< The View's Toolbar.
+  TextLabel mTitleActor;                                 ///< The Toolbar's Title.
   Layer mContentLayer;                                  ///< The content layer (contains game actors)
   ScrollView mScrollView;                               ///< ScrollView UI Component
   bool mScrolling;                                      ///< ScrollView scrolling state (true = scrolling, false = stationary)
