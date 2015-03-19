@@ -16,9 +16,22 @@
  */
 
 #include <dali/dali.h>
+#include <dali-toolkit/dali-toolkit.h>
 #include <iostream>
 
+using namespace std;
 using namespace Dali;
+using namespace Dali::Toolkit;
+
+const char *strEvents[] =
+{
+  "Down",
+  "Up",
+  "Motion",
+  "Leave",
+  "Stationary",
+  "Interrupted"
+};
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -29,7 +42,7 @@ public:
   HelloWorldController( Application& application )
   : mApplication( application )
   {
-    std::cout << "HelloWorldController::HelloWorldController" << std::endl;
+    cout << "HelloWorldController::HelloWorldController" << endl;
 
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect( this, &HelloWorldController::Create );
@@ -43,33 +56,69 @@ public:
   // The Init signal is received once (only) during the Application lifetime
   void Create( Application& application )
   {
-    std::cout << "HelloWorldController::Create" << std::endl;
-
-    // Initialize the actor
-    TextActor textActor = TextActor::New( "Hello World" );
-
-    // Reposition the actor
-    textActor.SetParentOrigin( ParentOrigin::CENTER );
-
-    // Get a handle to the stage
     Stage stage = Stage::GetCurrent();
+    Vector2 stageSize = stage.GetSize();
+    Vector2 actorSize(200, 200);
 
-    // Display the actor on the stage
-    stage.Add( textActor );
+    mParent1 = CreateSolidColorActor(Color::RED);
+    mParent1.SetParentOrigin(ParentOrigin::CENTER);
+    mParent1.SetAnchorPoint(AnchorPoint::BOTTOM_CENTER);
+    mParent1.SetSize(stageSize.width, stageSize.height * 0.5f);
+    mParent1.SetName("mParent1");
+    stage.Add(mParent1);
 
-    // Respond to a click anywhere on the stage
-    stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
+    mParent2 = CreateSolidColorActor(Color::BLUE);
+    mParent2.SetParentOrigin(ParentOrigin::CENTER);
+    mParent2.SetAnchorPoint(AnchorPoint::TOP_CENTER);
+    mParent2.SetSize(stageSize.width, stageSize.height * 0.5f);
+    mParent2.SetName("mParent2");
+    stage.Add(mParent2);
+
+    mActor = CreateSolidColorActor(Color::YELLOW);
+    mActor.SetParentOrigin(ParentOrigin::BOTTOM_CENTER);
+    mActor.SetAnchorPoint(AnchorPoint::CENTER);
+    mActor.SetSize(actorSize);
+    mActor.SetName("mActor");
+    mActor.SetLeaveRequired(true);
+    mActor.SetZ(1.f);
+    mParent1.Add(mActor);
+
+    mActor.TouchedSignal().Connect(this, &HelloWorldController::OnActorTouched);
+
+    mTimer = Timer::New(3000); // waiting for 3 seconds
+    mTimer.TickSignal().Connect(this, &HelloWorldController::OnTimerExpired);
+    mTimer.Start();
   }
 
-  bool OnTouch( Actor actor, const TouchEvent& touch )
+  bool OnActorTouched( Actor actor, const TouchEvent& touch )
   {
-    // quit the application
-    mApplication.Quit();
+    cout << actor.GetName() << ", " << strEvents[int(touch.GetPoint(0).state)] << endl;
+
     return true;
+  }
+
+  bool OnTimerExpired()
+  {
+    cout << "OnTimerExpired" << endl;
+
+#if 0 // case #1
+    mParent2.Add(mActor);
+    mActor.SetParentOrigin(ParentOrigin::TOP_CENTER);
+#endif
+
+#if 1 // case #2
+    mActor.Unparent();
+#endif
+
+    return false;
   }
 
 private:
   Application&  mApplication;
+  ImageActor    mParent1;
+  ImageActor    mParent2;
+  ImageActor    mActor;
+  Timer         mTimer;
 };
 
 void RunTest( Application& application )
