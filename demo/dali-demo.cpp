@@ -44,6 +44,7 @@ int main(int argc, char **argv)
   demo.AddExample(Example("text-view.example", "Text View"));
   demo.AddExample(Example("animated-shapes.example", "Animated Shapes"));
   demo.AddExample(Example("path-animation.example", "Path Animation"));
+  demo.AddExample(Example("glyphy-svg.example", "Glyphy SVG"));
   app.MainLoop();
 
   return 0;
