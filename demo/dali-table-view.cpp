@@ -151,19 +151,20 @@ public:
   {
   }
 
-  Vector3 operator()( const Vector3& current, const PropertyInput& scrollProperty, const PropertyInput& parentSize )
+  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
   {
     Vector3 pos( current );
+    const Vector3& parentSize = inputs[1]->GetVector3();
 
     // Wrap bubbles verically.
-    if( pos.y + mShapeSize * 0.5f < -parentSize.GetVector3().y * 0.5f )
+    if( pos.y + mShapeSize * 0.5f < -parentSize.y * 0.5f )
     {
-      pos.y += parentSize.GetVector3().y + mShapeSize;
+      pos.y += parentSize.y + mShapeSize;
     }
 
     // Bubbles X position moves parallax to horizontal
     // panning by a scale factor unique to each bubble.
-    pos.x = mInitialX + ( scrollProperty.GetVector3().x * mScale );
+    pos.x = mInitialX + ( inputs[0]->GetVector3().x * mScale );
     return pos;
   }
 
@@ -290,9 +291,13 @@ void DaliTableView::Initialize( Application& application )
 
   mScrollView.SetAnchorPoint( AnchorPoint::CENTER );
   mScrollView.SetParentOrigin( ParentOrigin::CENTER );
+
   // Note: Currently, changing mScrollView to use SizeMode RELATIVE_TO_PARENT
   // will cause scroll ends to appear in the wrong position.
-  mScrollView.ApplyConstraint( Dali::Constraint::New<Dali::Vector3>( Dali::Actor::Property::SIZE, Dali::ParentSource( Dali::Actor::Property::SIZE ), Dali::RelativeToConstraint( SCROLLVIEW_RELATIVE_SIZE ) ) );
+  Constraint scrollViewConstraint = Constraint::New< Dali::Vector3 >( Dali::Actor::Property::SIZE, Dali::RelativeToConstraint( SCROLLVIEW_RELATIVE_SIZE ) );
+  scrollViewConstraint.AddSource( Dali::ParentSource( Dali::Actor::Property::SIZE ) );
+  mScrollView.ApplyConstraint( scrollViewConstraint );
+
   mScrollView.SetAxisAutoLock( true );
   mScrollView.ScrollCompletedSignal().Connect( this, &DaliTableView::OnScrollComplete );
   mScrollView.ScrollStartedSignal().Connect( this, &DaliTableView::OnScrollStart );
@@ -770,10 +775,9 @@ void DaliTableView::AddBackgroundActors( Actor layer, int count, BufferImage dis
     dfActor.SetPosition( actorPos );
 
     // Define bubble horizontal parallax and vertical wrapping
-    Constraint animConstraint = Constraint::New < Vector3 > ( Actor::Property::POSITION,
-      Source( mScrollView, mScrollView.GetPropertyIndex( ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ),
-      Dali::ParentSource( Dali::Actor::Property::SIZE ),
-      AnimateBubbleConstraint( actorPos, Random::Range( -0.85f, 0.25f ), randSize ) );
+    Constraint animConstraint = Constraint::New < Vector3 > ( Actor::Property::POSITION, AnimateBubbleConstraint( actorPos, Random::Range( -0.85f, 0.25f ), randSize ) );
+    animConstraint.AddSource( Source( mScrollView, mScrollView.GetPropertyIndex( ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
+    animConstraint.AddSource( Dali::ParentSource( Dali::Actor::Property::SIZE ) );
     dfActor.ApplyConstraint( animConstraint );
 
     // Kickoff animation

@@ -283,7 +283,9 @@ void CubeTransitionApp::OnInit( Application& application )
   mViewTimer.TickSignal().Connect( this, &CubeTransitionApp::OnTimerTick );
 
   // show the first image
-  mImageConstraint = Constraint::New<Vector3>( Actor::Property::SCALE, LocalSource( Actor::Property::SIZE ), ParentSource( Actor::Property::SIZE ), ScaleToFitKeepAspectRatioConstraint() );
+  mImageConstraint = Constraint::New<Vector3>( Actor::Property::SCALE, ScaleToFitKeepAspectRatioConstraint() );
+  mImageConstraint.AddSource( LocalSource( Actor::Property::SIZE ) );
+  mImageConstraint.AddSource( ParentSource( Actor::Property::SIZE ) );
 
   mCurrentImage = ImageActor::New( LoadStageFillingImage( IMAGES[mIndex] ) );
   mCurrentImage.SetPositionInheritanceMode( USE_PARENT_POSITION );

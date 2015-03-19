@@ -100,9 +100,9 @@ public:
     {
     }
 
-    Vector3 operator()( const Vector3& current, const PropertyInput& property )
+    Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
     {
-      Vector3 position = property.GetVector3();
+      Vector3 position = inputs[0]->GetVector3();
       position.z += 1.0f;
       return position;
     }
@@ -114,9 +114,9 @@ public:
     {
     }
 
-    Quaternion operator()( const Quaternion& current, const PropertyInput& property )
+    Quaternion operator()( const Quaternion& current, const PropertyInputContainer& inputs )
     {
-      return property.GetQuaternion();
+      return inputs[0]->GetQuaternion();
     }
   };
 
@@ -127,9 +127,9 @@ public:
     {
     }
 
-    Quaternion operator()( const Quaternion& current, const PropertyInput& property )
+    Quaternion operator()( const Quaternion& current, const PropertyInputContainer& inputs )
     {
-      Degree angle(property.GetFloat());
+      Degree angle( inputs[0]->GetFloat() );
       return Quaternion( Radian(angle) * mSign, Vector3::YAXIS );
     }
 
@@ -286,10 +286,14 @@ public:
 
     Property::Index angleIndex = mImageActor2.RegisterProperty("angle", Property::Value(30.0f));
     Source angleSrc( mImageActor2, angleIndex );
-    mImageActor1.ApplyConstraint(Constraint::New<Quaternion>( Actor::Property::ORIENTATION, angleSrc,
-                                                              RotationConstraint(-1.0f)));
-    mImageActor3.ApplyConstraint(Constraint::New<Quaternion>( Actor::Property::ORIENTATION, angleSrc,
-                                                              RotationConstraint(+1.0f)));
+
+    Constraint constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, RotationConstraint(-1.0f) );
+    constraint.AddSource( angleSrc );
+    mImageActor1.ApplyConstraint( constraint );
+
+    constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, RotationConstraint(+1.0f) );
+    constraint.AddSource( angleSrc );
+    mImageActor3.ApplyConstraint( constraint );
 
     mSceneAnimation = Animation::New(2.5f);
 

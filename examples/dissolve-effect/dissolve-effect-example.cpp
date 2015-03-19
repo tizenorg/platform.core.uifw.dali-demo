@@ -251,7 +251,9 @@ void DissolveEffectApp::OnInit( Application& application )
   mParent.SetPositionInheritanceMode( USE_PARENT_POSITION );
   mContent.Add( mParent );
 
-  mSizeConstraint= Constraint::New<Vector3>( Actor::Property::SCALE, LocalSource( Actor::Property::SIZE ), ParentSource( Actor::Property::SIZE ), ScaleToFitKeepAspectRatioConstraint() );
+  mSizeConstraint= Constraint::New<Vector3>( Actor::Property::SCALE, ScaleToFitKeepAspectRatioConstraint() );
+  mSizeConstraint.AddSource( LocalSource( Actor::Property::SIZE ) );
+  mSizeConstraint.AddSource( ParentSource( Actor::Property::SIZE ) );
 
   // show the first image
   mCurrentImage = ImageActor::New( LoadStageFillingImage( IMAGES[mIndex] ) );

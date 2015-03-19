@@ -56,9 +56,9 @@ struct LightOffsetConstraint
   {
   }
 
-  Vector2 operator()( const Vector2& current, const PropertyInput& spinAngleProperty)
+  Vector2 operator()( const Vector2& current, const PropertyInputContainer& inputs )
   {
-    float spinAngle = spinAngleProperty.GetFloat();
+    float spinAngle = inputs[0]->GetFloat();
     return Vector2( cos(spinAngle ), sin( spinAngle ) ) * mRadius;
   }
 
@@ -254,9 +254,8 @@ public:
     handle.SetUniform( "uLightIntensity",  2.5f );
 
     Dali::Property::Index index = handle.RegisterProperty( "uSpinAngle", 0.f );
-    Constraint constraint = Constraint::New<Vector2>( handle.GetPropertyIndex("uLightSpinOffset"),
-                                                      LocalSource(index),
-                                                      LightOffsetConstraint(stageSize.x*0.1f));
+    Constraint constraint = Constraint::New<Vector2>( handle.GetPropertyIndex("uLightSpinOffset"), LightOffsetConstraint(stageSize.x*0.1f) );
+    constraint.AddSource( LocalSource(index) );
     handle.ApplyConstraint( constraint );
 
     return handle;
