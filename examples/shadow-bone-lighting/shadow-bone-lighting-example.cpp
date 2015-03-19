@@ -34,7 +34,7 @@ const char* TOOLBAR_IMAGE( DALI_IMAGE_DIR "top-bar.png" );
 
 //const char* APPLICATION_TITLE_PAN_LIGHT( "Lighting: Pan Light" );
 //const char* APPLICATION_TITLE_PAN_OBJECT( "Lighting: Pan Object" );
-//const char* APPLICATION_TITLE_PAN_SCENE( "Lighting: Pan Scene" );
+const char* APPLICATION_TITLE_PAN_SCENE( "Lighting: Pan Scene" );
 //const char* APPLICATION_TITLE_ROTATE_SCENE( "Lighting: Rotate Scene" );
 const char* CHANGE_EFFECT_IMAGE( DALI_IMAGE_DIR "icon-change.png" );
 const char* RESET_ICON( DALI_IMAGE_DIR "icon-reset.png" );
@@ -170,7 +170,11 @@ public:
     toolBar.AddControl( effectChangeButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING );
 
     // Add title to the tool bar.
-    // TODO
+    mTitleActor = Dali::Toolkit::TextLabel::New();
+    mTitleActor.SetAnchorPoint( Dali::AnchorPoint::TOP_LEFT );
+    mTitleActor.SetProperty( Dali::Toolkit::TextLabel::Property::TEXT, APPLICATION_TITLE_PAN_SCENE );
+    mTitleActor.SetColor( DEFAULT_TEXT_STYLE_COLOR );
+    toolBar.AddControl( mTitleActor, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarTitlePercentage, Toolkit::Alignment::HorizontalCenter );
 
     //Add a reset button
     Image resetImage = ResourceImage::New( RESET_ICON );
@@ -451,6 +455,8 @@ private:
 
   Property::Index           mAngle1Index;
   Property::Index           mAngle3Index;
+
+  Toolkit::TextLabel         mTitleActor;
 
   enum PanState
   {
