@@ -103,4 +103,7 @@
 	<ui-application appid="size-negotiation.example" exec="/usr/apps/com.samsung.dali-demo/bin/size-negotiation.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Size Negotiation</label>
 	</ui-application>
+	<ui-application appid="glyphy-svg.example" exec="/usr/apps/com.samsung.dali-demo/bin/glyphy-svg.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>glyphy svg</label>
+	</ui-application>
 </manifest>
