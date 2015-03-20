@@ -73,62 +73,6 @@ const int TOTAL_LEVELS(3);                                                  ///<
 // constraints ////////////////////////////////////////////////////////////////
 
 /**
- * CollisionConstraint generates a collision vector
- * between two actors a and b, assuming they're rectangular
- * based on their size.
- */
-struct CollisionConstraint
-{
-  /**
-   * Collision Constraint constructor
-   * The adjust (optional) parameter can be used to add a margin
-   * to the actors. A +ve size will result in larger collisions,
-   * while a -ve size will result in tighter collisions.
-   *
-   * @param[in] adjust (optional) Adjusts the rectangular size detection
-   */
-  CollisionConstraint(Vector3 adjust = Vector3::ZERO)
-  : mAdjust(adjust)
-  {
-  }
-
-  /**
-   * Generates collision vector indicating whether Actor's A and B
-   * have overlapped eachother, and the relative position of Actor B to A.
-   *
-   * @param[in] current The current collision-property (ignored)
-   * @param[in] inputs Contains:
-   *                    Actor A's Position property.
-   *                    Actor B's Position property.
-   *                    Actor A's Size property.
-   *                    Actor B's Size property.
-   * @return The collision vector is returned.
-   */
-  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
-  {
-    const Vector3& a = inputs[0]->GetVector3();
-    const Vector3& b = inputs[1]->GetVector3();
-    const Vector3& sizeA = inputs[2]->GetVector3();
-    const Vector3& sizeB = inputs[3]->GetVector3();
-    const Vector3 sizeComb = (sizeA + sizeB + mAdjust) * 0.5f;
-
-    // get collision relative to a.
-    Vector3 delta = b - a;
-
-    // Check if not overlapping Actors.
-    if( (fabsf(delta.x) > sizeComb.width) ||
-        (fabsf(delta.y) > sizeComb.height) )
-    {
-      delta = Vector3::ZERO; // not overlapping
-    }
-
-    return delta; // overlapping, return overlap vector relative to actor a.
-  }
-
-  const Vector3 mAdjust;            ///< Size Adjustment value
-};
-
-/**
  * CollisionCircleRectangleConstraint generates a collision vector
  * between two actors a (circle) and b (rectangle)
  */
@@ -154,7 +98,7 @@ struct CollisionCircleRectangleConstraint
    * Generates collision vector indicating whether Actor's A and B
    * have overlapped eachother, and the relative position of Actor B to A.
    *
-   * @param[in] current The current collision-property (ignored)
+   * @param[in,out] current The current collision-property
    * @param[in] inputs Contains:
    *                    Actor A's Position property.
    *                    Actor B's Position property.
@@ -162,7 +106,7 @@ struct CollisionCircleRectangleConstraint
    *                    Actor B's Size property.
    * @return The collision vector is returned.
    */
-  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
     const Vector3& a = inputs[0]->GetVector3();
     const Vector3 b = inputs[1]->GetVector3() + mAdjustPosition;
@@ -205,10 +149,12 @@ struct CollisionCircleRectangleConstraint
     if(delta.Length() < sizeA2.x)
     {
       delta.Normalize();
-      return delta;
+      current = delta;
     }
-
-    return Vector3::ZERO;
+    else
+    {
+      current = Vector3::ZERO;
+    }
   }
 
   const Vector3 mAdjustPosition;            ///< Position Adjustment value
@@ -237,19 +183,17 @@ struct WobbleConstraint
   }
 
   /**
-   * @param[in] current The current rotation property (ignored)
+   * @param[in,out] current The current rotation property
    * @param[in] inputs Contains the wobble property (value from 0.0f to 1.0f)
    * @return The rotation (quaternion) is generated.
    */
-  Quaternion operator()( const Quaternion& current, const PropertyInputContainer& inputs )
+  void operator()( Quaternion& current, const PropertyInputContainer& inputs )
   {
     const float& wobble = inputs[0]->GetFloat();
 
     float f = sinf(wobble * 10.0f) * (1.0f-wobble);
 
-    Quaternion q(mDeviation * f, Vector3::ZAXIS);
-
-    return q;
+    current = Quaternion(mDeviation * f, Vector3::ZAXIS);
   }
 
   const float mDeviation;           ///< Deviation factor in radians.

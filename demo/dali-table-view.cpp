@@ -151,21 +151,19 @@ public:
   {
   }
 
-  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& position, const PropertyInputContainer& inputs )
   {
-    Vector3 pos( current );
     const Vector3& parentSize = inputs[1]->GetVector3();
 
     // Wrap bubbles verically.
-    if( pos.y + mShapeSize * 0.5f < -parentSize.y * 0.5f )
+    if( position.y + mShapeSize * 0.5f < -parentSize.y * 0.5f )
     {
-      pos.y += parentSize.y + mShapeSize;
+      position.y += parentSize.y + mShapeSize;
     }
 
     // Bubbles X position moves parallax to horizontal
     // panning by a scale factor unique to each bubble.
-    pos.x = mInitialX + ( inputs[0]->GetVector3().x * mScale );
-    return pos;
+    position.x = mInitialX + ( inputs[0]->GetVector3().x * mScale );
   }
 
 private:

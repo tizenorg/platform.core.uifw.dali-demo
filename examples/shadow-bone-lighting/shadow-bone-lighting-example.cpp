@@ -100,23 +100,10 @@ public:
     {
     }
 
-    Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
+    void operator()( Vector3& current, const PropertyInputContainer& inputs )
     {
-      Vector3 position = inputs[0]->GetVector3();
-      position.z += 1.0f;
-      return position;
-    }
-  };
-
-  struct QuaternionEqualToConstraint
-  {
-    QuaternionEqualToConstraint()
-    {
-    }
-
-    Quaternion operator()( const Quaternion& current, const PropertyInputContainer& inputs )
-    {
-      return inputs[0]->GetQuaternion();
+      current = inputs[0]->GetVector3();
+      current.z += 1.0f;
     }
   };
 
@@ -127,10 +114,10 @@ public:
     {
     }
 
-    Quaternion operator()( const Quaternion& current, const PropertyInputContainer& inputs )
+    void operator()( Quaternion& current, const PropertyInputContainer& inputs )
     {
       Degree angle( inputs[0]->GetFloat() );
-      return Quaternion( Radian(angle) * mSign, Vector3::YAXIS );
+      current = Quaternion( Radian(angle) * mSign, Vector3::YAXIS );
     }
 
     float mSign;

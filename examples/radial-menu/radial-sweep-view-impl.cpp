@@ -26,9 +26,8 @@ namespace
  * Method to project a point on a circle of radius halfSide at given
  * angle onto a square of side 2 * halfSide
  */
-Vector3 CircleSquareProjection( Degree angle, float halfSide )
+void CircleSquareProjection( Vector3& position, Degree angle, float halfSide )
 {
-  Vector3 position(0.0f, 0.0f, 0.0f);
   Radian angleInRadians(angle);
 
   //  135  90   45
@@ -58,7 +57,8 @@ Vector3 CircleSquareProjection( Degree angle, float halfSide )
     position.x = halfSide;
     position.y = -halfSide * sinf(angleInRadians) / cosf(angleInRadians);
   }
-  return position;
+
+  position.z = 0.0f;
 }
 
 float HoldZeroFastEaseInOutHoldOne(float progress)
@@ -88,7 +88,7 @@ struct SquareFanConstraint
   {
   }
 
-  Vector3 operator()( const Vector3& current, const PropertyInputContainer& inputs )
+  void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
     float degree = fmodf((inputs[0]->GetFloat() + inputs[1]->GetFloat()), 360.0f);
     if(degree < 0.0f)
@@ -100,15 +100,17 @@ struct SquareFanConstraint
     float endAngle = (90.0f*mSideIndex)+45.0f;
     if(degree < startAngle)
     {
-      return Vector3::ZERO;
+      current = Vector3::ZERO;
     }
-    else if( degree >= endAngle )
+    else
     {
-      degree = endAngle;
+      if( degree >= endAngle )
+      {
+        degree = endAngle;
+      }
+      CircleSquareProjection( current, Degree(degree), 0.5f );
+      current.x = -current.x; // Inverting X makes the animation go anti clockwise from left center
     }
-    Vector3 pos = CircleSquareProjection(Degree(degree), 0.5f);
-    pos.x = -pos.x; // Inverting X makes the animation go anti clockwise from left center
-    return pos;
   }
 
   int mSideIndex;

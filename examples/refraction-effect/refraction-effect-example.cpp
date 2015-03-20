@@ -56,10 +56,13 @@ struct LightOffsetConstraint
   {
   }
 
-  Vector2 operator()( const Vector2& current, const PropertyInputContainer& inputs )
+  void operator()( Vector2& current, const PropertyInputContainer& inputs )
   {
     float spinAngle = inputs[0]->GetFloat();
-    return Vector2( cos(spinAngle ), sin( spinAngle ) ) * mRadius;
+    current.x = cos( spinAngle );
+    current.y = sin( spinAngle );
+
+    current *= mRadius;
   }
 
   float mRadius;

@@ -57,18 +57,16 @@ struct MagnifierPathConstraint
   {
   }
 
-  Vector3 operator()(const Vector3& current, const PropertyInputContainer& inputs)
+  void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
     float time = inputs[1]->GetFloat();
     const Vector3& size = inputs[0]->GetVector3();
 
-    Vector3 range(mStageSize - size - Vector3::ONE * MAGNIFIER_INDENT * 2.0f);
-    Vector3 position(mOffset);
+    current = mOffset;
 
-    position.x += 0.5f * sinf(time * 0.471f) * range.width;
-    position.y += 0.5f * sinf(time * 0.8739f) * range.height;
-
-    return position;
+    Vector3 range( mStageSize - size - Vector3::ONE * MAGNIFIER_INDENT * 2.0f );
+    current.x += 0.5f * sinf(time * 0.471f) * range.width;
+    current.y += 0.5f * sinf(time * 0.8739f) * range.height;
   }
 
   Vector3 mStageSize;     ///< Keep track of the stage size for determining path within stage bounds
@@ -101,7 +99,7 @@ struct ConfinementConstraint
   {
   }
 
-  Vector3 operator()( const Vector3& constPosition, const PropertyInputContainer& inputs )
+  void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
     const Vector3& size = inputs[0]->GetVector3();
     const Vector3 origin = inputs[1]->GetVector3();
@@ -110,10 +108,10 @@ struct ConfinementConstraint
 
     Vector3 offset(mOffsetOrigin * referenceSize);
 
-    Vector3 newPosition( constPosition + offset );
-
     // Get actual position of Actor relative to parent's Top-Left.
-    Vector3 position(constPosition + offset + origin * referenceSize);
+    Vector3 position(current + offset + origin * referenceSize);
+
+    current += offset;
 
     // if top-left corner is outside of Top-Left bounds, then push back in screen.
     Vector3 corner(position - size * anchor - mMinIndent);
@@ -121,17 +119,17 @@ struct ConfinementConstraint
     if(mFlipHorizontal && corner.x < 0.0f)
     {
       corner.x = 0.0f;
-      newPosition.x += size.width;
+      current.x += size.width;
     }
 
     if(mFlipVertical && corner.y < 0.0f)
     {
       corner.y = 0.0f;
-      newPosition.y += size.height;
+      current.y += size.height;
     }
 
-    newPosition.x -= std::min(corner.x, 0.0f);
-    newPosition.y -= std::min(corner.y, 0.0f);
+    current.x -= std::min(corner.x, 0.0f);
+    current.y -= std::min(corner.y, 0.0f);
 
     // if bottom-right corner is outside of Bottom-Right bounds, then push back in screen.
     corner += size - referenceSize + mMinIndent + mMaxIndent;
@@ -139,19 +137,17 @@ struct ConfinementConstraint
     if(mFlipHorizontal && corner.x > 0.0f)
     {
       corner.x = 0.0f;
-      newPosition.x -= size.width;
+      current.x -= size.width;
     }
 
     if(mFlipVertical && corner.y > 0.0f)
     {
       corner.y = 0.0f;
-      newPosition.y -= size.height;
+      current.y -= size.height;
     }
 
-    newPosition.x -= std::max(corner.x, 0.0f);
-    newPosition.y -= std::max(corner.y, 0.0f);
-
-    return newPosition;
+    current.x -= std::max(corner.x, 0.0f);
+    current.y -= std::max(corner.y, 0.0f);
   }
 
   Vector3 mOffsetOrigin;                                ///< Manual Parent Offset Origin.

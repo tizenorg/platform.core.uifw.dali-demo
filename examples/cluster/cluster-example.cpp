@@ -183,14 +183,16 @@ struct CarouselEffectOrientationConstraint
    * @param[in] current The object's current property value
    * @return The object's new property value
    */
-  Vector2 operator()( const Vector2& current, const PropertyInputContainer& inputs )
+  void operator()( Vector2& current, const PropertyInputContainer& inputs )
   {
     Vector3 axis;
     float angle;
     inputs[0]->GetQuaternion().ToAxisAngle( axis, angle );
-    Vector2 direction( cosf(angle), sinf(angle) );
 
-    return mAngleSweep * direction;
+    current.x = cosf(angle);
+    current.y = sinf(angle);
+
+    current *= mAngleSweep;
   }
 
   Vector2 mAngleSweep;
@@ -219,11 +221,11 @@ struct ShearEffectConstraint
   }
 
   /**
-   * @param[in] current The current shear effect Angle.
+   * @param[in,out] current The current shear effect Angle.
    * @param[in] inputs Contains the overshoot property from ScrollView and the orientation of the view e.g. Portrait, Landscape.
    * @return angle to provide ShearShaderEffect
    */
-  float operator()( const float& current, const PropertyInputContainer& inputs )
+  void operator()( float& current, const PropertyInputContainer& inputs )
   {
     float f = inputs[0]->GetVector3().x;
 
@@ -245,7 +247,7 @@ struct ShearEffectConstraint
     Vector2 direction( cosf(angle), sinf(angle) );
     float yield = direction.x * mComponentMask.x + direction.y * mComponentMask.y;
 
-    return overshoot * mMaxOvershoot * yield;
+    current = overshoot * mMaxOvershoot * yield;
   }
 
   Vector2 mStageSize;
@@ -272,14 +274,15 @@ struct ShearEffectCenterConstraint
   }
 
   /**
-   * @param[in] current The current center
+   * @param[in,out] current The current center
    * @param[in] inputs Contains the current view size
    * @return vector to provide ShearShaderEffect
    */
-  Vector2 operator()( const Vector2& current, const PropertyInputContainer& inputs )
+  void operator()( Vector2& current, const PropertyInputContainer& inputs )
   {
     float f = inputs[0]->GetVector3().width / mStageSize.width;
-    return Vector2( f * mCenter.x, mCenter.y );
+    current.x = f * mCenter.x;
+    current.y = mCenter.y;
   }
 
   Vector2 mStageSize;
@@ -308,9 +311,9 @@ struct SphereEffectOffsetConstraint
    * @param[in] propertyViewSize The current view size
    * @return vector to provide SphereShaderEffect
    */
-  float operator()(const float& current, const PropertyInputContainer& /* inputs */ )
+  void operator()( float& current, const PropertyInputContainer& /* inputs */ )
   {
-    return current + mOffset;
+    current += mOffset;
   }
 
   float mOffset;
