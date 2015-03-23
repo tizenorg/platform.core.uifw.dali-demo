@@ -121,7 +121,7 @@ void VerticalLayout::OnRelayout( const Vector2& size, ActorSizeContainer& contai
       label.SetPosition( position );
 
       childSize.height = label.GetHeightForWidth( size.width );
-      position.height += childSize.height;
+      position.height += childSize.height + 50.0f;
 
       label.SetSize( childSize );
     }
