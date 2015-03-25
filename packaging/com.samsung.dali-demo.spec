@@ -39,6 +39,7 @@ of the capability of the toolkit.
 %define dali_icon_dir         /usr/share/icons/
 %define smack_rule_dir        /etc/smack/accesses2.d/
 %define locale_dir            %{dali_app_ro_dir}/res/locale
+%define local_style_dir       ../../resources/style/mobile
 
 ##############################
 # Build
@@ -52,7 +53,7 @@ LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -fPIC"
 CXXFLAGS+=" -D_ARCH_ARM_"
 %endif
 
-cd %{_builddir}/%{name}-%{version}/build/tizen && cmake -DDALI_APP_DIR=%{dali_app_ro_dir} -DLOCALE_DIR=%{locale_dir} .
+cd %{_builddir}/%{name}-%{version}/build/tizen && cmake -DDALI_APP_DIR=%{dali_app_ro_dir} -DLOCALE_DIR=%{locale_dir} -DLOCAL_STYLE_DIR=%{local_style_dir} .
 
 make %{?jobs:-j%jobs}
 
