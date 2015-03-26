@@ -494,7 +494,8 @@ Actor DaliTableView::CreateTile( const std::string& name, const std::string& tit
   label.SetSize( parentSize );
   label.SetProperty( TextLabel::Property::MULTI_LINE, true );
   label.SetProperty( TextLabel::Property::TEXT, title );
-  label.SetProperty( TextLabel::Property::ALIGNMENT, "CENTER" );
+  label.SetProperty( TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+  label.SetProperty( TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
   label.SetColor( TABLE_TEXT_STYLE_COLOR );
   tile.Add( label );
 
