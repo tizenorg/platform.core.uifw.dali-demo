@@ -39,6 +39,9 @@ namespace
   const unsigned int KEY_A = 38;
   const unsigned int KEY_M = 58;
   const unsigned int KEY_L = 46;
+  const unsigned int KEY_S = 39;
+  const unsigned int KEY_PLUS = 21;
+  const unsigned int KEY_MINUS = 20;
 
   const char* ALIGNMENT_STRING_TABLE[] =
   {
@@ -78,7 +81,7 @@ public:
   {
     Stage stage = Stage::GetCurrent();
 
-    stage.SetBackgroundColor( Color::BLUE );
+    stage.SetBackgroundColor( Color::BLACK );
     stage.KeyEventSignal().Connect(this, &TextLabelExample::OnKeyEvent);
     Vector2 stageSize = stage.GetSize();
 
@@ -88,11 +91,13 @@ public:
     stage.Add( centerLayout );
 
     mLabel = TextLabel::New();
-    mLabel.SetBackgroundColor( Color::BLACK );
+    mLabel.SetBackgroundColor( Vector4( 0.0f, 0.0f, 0.2f, 1.0f ) );
     centerLayout.Add( mLabel );
 
     mLabel.SetProperty( TextLabel::Property::MULTI_LINE, true );
     mLabel.SetProperty( TextLabel::Property::TEXT, "A Quick Brown Fox Jumps Over The Lazy Dog" );
+    mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2( 2.0f, 2.0f ) );
+    mLabel.SetProperty( TextLabel::Property::SHADOW_COLOR, Vector4( 0.5f, 0.5f, 0.9f, 1.0f ) );
 
     Property::Value labelText = mLabel.GetProperty( TextLabel::Property::TEXT );
     std::cout << "Displaying text: \"" << labelText.Get< std::string >() << "\"" << std::endl;
@@ -147,6 +152,40 @@ public:
             }
             break;
           }
+          case KEY_S:
+          {
+            Vector2 shadowOffset = mLabel.GetProperty<Vector2>( TextLabel::Property::SHADOW_OFFSET );
+            if ( shadowOffset.x > 0 )
+            {
+              mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2() );
+            }
+            else
+            {
+              mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2( 2.0f, 2.0f ) );
+            }
+            const Language& language = LANGUAGES[ mLanguageId ];
+            mLabel.SetProperty( TextLabel::Property::TEXT, language.text );
+            break;
+          }
+          case KEY_PLUS:
+          {
+            mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, mLabel.GetProperty<Vector2>( TextLabel::Property::SHADOW_OFFSET ) + Vector2( 1.0f, 1.0f ) );
+            const Language& language = LANGUAGES[ mLanguageId ];
+            mLabel.SetProperty( TextLabel::Property::TEXT, language.text );
+            break;
+          }
+          case KEY_MINUS:
+          {
+            Vector2 shadowOffset = mLabel.GetProperty<Vector2>( TextLabel::Property::SHADOW_OFFSET );
+            if ( shadowOffset.x > 0 )
+            {
+              mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, shadowOffset - Vector2( 1.0f, 1.0f ) );
+              const Language& language = LANGUAGES[ mLanguageId ];
+              mLabel.SetProperty( TextLabel::Property::TEXT, language.text );
+            }
+            break;
+          }
+
         }
       }
     }
