@@ -82,7 +82,7 @@ void EditLayout::OnInitialize()
   self.GetChildAt(0).SetZ(-1.0f);
 }
 
-void EditLayout::OnRelayout( const Vector2& size, ActorSizeContainer& container )
+void EditLayout::OnRelayout( const Vector2& size, RelayoutContainer& container )
 {
   CustomActor self = Self();
 
@@ -96,7 +96,7 @@ void EditLayout::OnRelayout( const Vector2& size, ActorSizeContainer& container 
 
       mTopPanel.SetSize( Vector2(panelWidth, height) );
 
-      container.push_back( ActorSizePair( mTopPanel, Vector2(panelWidth, height) ) );
+      container.Add( mTopPanel, Vector2(panelWidth, height) );
     }
   }
 }
