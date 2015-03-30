@@ -106,7 +106,7 @@ void VerticalLayout::OnFontChange( bool defaultFontChange, bool defaultFontSizeC
 {
 }
 
-void VerticalLayout::OnRelayout( const Vector2& size, ActorSizeContainer& container )
+void VerticalLayout::OnRelayout( const Vector2& size, RelayoutContainer& container )
 {
   CustomActor self = Self();
 
@@ -126,7 +126,7 @@ void VerticalLayout::OnRelayout( const Vector2& size, ActorSizeContainer& contai
       label.SetSize( childSize );
     }
 
-    container.push_back( ActorSizePair( label, childSize ) );
+    container.Add( label, childSize );
   }
 }
 
