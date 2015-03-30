@@ -82,7 +82,7 @@ void EditLayout::OnInitialize()
   self.GetChildAt(0).SetZ(-1.0f);
 }
 
-void EditLayout::OnRelayout( const Vector2& size, ActorSizeContainer& container )
+void EditLayout::OnRelayout( const Vector2& size, RelayoutContainer& container )
 {
   CustomActor self = Self();
 

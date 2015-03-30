@@ -106,7 +106,7 @@ void VerticalLayout::OnFontChange( bool defaultFontChange, bool defaultFontSizeC
 {
 }
 
-void VerticalLayout::OnRelayout( const Vector2& size, ActorSizeContainer& container )
+void VerticalLayout::OnRelayout( const Vector2& size, RelayoutContainer& container )
 {
   CustomActor self = Self();
 
