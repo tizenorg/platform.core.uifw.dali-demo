@@ -24,9 +24,6 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/public-api/text-abstraction/text-abstraction.h>
 
-// INTERNAL INCLUDES
-#include "edit-layout.h"
-
 using namespace Dali;
 using namespace Dali::Toolkit;
 
@@ -67,16 +64,13 @@ public:
 
     Vector2 stageSize = stage.GetSize();
 
-    EditLayout layout = EditLayout::New();
-    layout.SetParentOrigin( ParentOrigin::CENTER );
-    layout.SetAnchorPoint( AnchorPoint::CENTER );
-    layout.SetSize( stageSize.width - BORDER_WIDTH*2.0f, stageSize.height*0.2f );
-    stage.Add( layout );
-
     TextField field = TextField::New();
-    field.SetParentOrigin( ParentOrigin::CENTER );
+    field.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    field.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     field.SetBackgroundColor( Color::BLACK );
-    layout.SetTopPanel( field );
+    field.SetResizePolicy( FIXED, ALL_DIMENSIONS );
+    field.SetPreferredSize( stageSize );
+    stage.Add( field );
 
     field.SetProperty( TextField::Property::TEXT, "Hello" );
 
