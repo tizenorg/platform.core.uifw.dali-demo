@@ -86,7 +86,7 @@ void CenterLayout::OnInitialize()
   mPanGestureDetector.DetectedSignal().Connect( this, &CenterLayout::OnPan );
 }
 
-void CenterLayout::OnRelayout( const Vector2& size, ActorSizeContainer& container )
+void CenterLayout::OnRelayout( const Vector2& size, RelayoutContainer& container )
 {
   CustomActor self = Self();
 
@@ -107,7 +107,7 @@ void CenterLayout::OnRelayout( const Vector2& size, ActorSizeContainer& containe
       const Size childSize( size );
       child.SetSize( size );
 
-      container.push_back( ActorSizePair( child, childSize ) );
+      container.Add( child, childSize );
     }
   }
 }
