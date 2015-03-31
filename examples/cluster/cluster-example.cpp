@@ -373,11 +373,11 @@ struct ClusterInfo
   }
 
 
-  Cluster mCluster;                   ///< Cluster instance
-  int mIndex;                         ///< Cluster index
-  Vector3 mPosition;                  ///< Cluster original position
-  Vector3 mSize;                      ///< Cluster original size
-  ActiveConstraint mEffectConstraint; ///< Cluster constraint
+  Cluster mCluster;             ///< Cluster instance
+  int mIndex;                   ///< Cluster index
+  Vector3 mPosition;            ///< Cluster original position
+  Vector3 mSize;                ///< Cluster original size
+  Constraint mEffectConstraint; ///< Cluster constraint
 };
 
 /**
