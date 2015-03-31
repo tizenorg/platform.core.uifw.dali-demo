@@ -77,19 +77,15 @@ const float INITIAL_DEPTH = -10.0f;
 /**
  * @brief Load an image, scaled-down to no more than the stage dimensions.
  *
- * Uses image scaling mode ImageAttributes::ScaleToFill to resize the image at
+ * Uses image scaling mode ScaleToFill to resize the image at
  * load time to cover the entire stage with pixels with no borders,
- * and filter mode ImageAttributes::BoxThenLinear to sample the image with
+ * and filter mode BoxThenLinear to sample the image with
  * maximum quality.
  */
 ResourceImage LoadStageFillingImage( const char * const imagePath )
 {
   Size stageSize = Stage::GetCurrent().GetSize();
-  ImageAttributes attributes;
-  attributes.SetSize( stageSize.x, stageSize.y );
-  attributes.SetFilterMode( ImageAttributes::BoxThenLinear );
-  attributes.SetScalingMode( ImageAttributes::ScaleToFill );
-  return ResourceImage::New( imagePath, attributes );
+  return ResourceImage::New( imagePath, ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::ScaleToFill, Dali::SamplingMode::BoxThenLinear );
 }
 
 } // namespace
