@@ -279,8 +279,8 @@ public:
     mDeleteButton.SetAnchorPoint(AnchorPoint::BOTTOM_RIGHT);
     mDeleteButton.SetPosition( BUTTON_BORDER, BUTTON_BORDER );
     mDeleteButton.SetDrawMode( DrawMode::OVERLAY );
-    mDeleteButton.SetBackgroundImage( ResourceImage::New( TOOLBAR_IMAGE ) );
     mDeleteButton.SetButtonImage( ResourceImage::New( DELETE_IMAGE ) );
+    mDeleteButton.SetBackgroundImage( ResourceImage::New( TOOLBAR_IMAGE ) );
     mDeleteButton.SetResizePolicy( FIXED, ALL_DIMENSIONS );
     mDeleteButton.SetPreferredSize( Vector2( stageSize.width * 0.15f, stageSize.width * 0.15f ) );
     mDeleteButton.ClickedSignal().Connect( this, &ItemViewExample::OnDeleteButtonClicked);
@@ -294,8 +294,8 @@ public:
     mInsertButton.SetAnchorPoint(AnchorPoint::BOTTOM_RIGHT);
     mInsertButton.SetPosition( BUTTON_BORDER, BUTTON_BORDER );
     mInsertButton.SetDrawMode( DrawMode::OVERLAY );
-    mInsertButton.SetBackgroundImage( ResourceImage::New( TOOLBAR_IMAGE ) );
     mInsertButton.SetButtonImage( ResourceImage::New( INSERT_IMAGE ) );
+    mInsertButton.SetBackgroundImage( ResourceImage::New( TOOLBAR_IMAGE ) );
     mInsertButton.SetResizePolicy( FIXED, ALL_DIMENSIONS );
     mInsertButton.SetPreferredSize( Vector2( stageSize.width * 0.15f, stageSize.width * 0.15f ) );
     mInsertButton.ClickedSignal().Connect( this, &ItemViewExample::OnInsertButtonClicked);
@@ -309,8 +309,8 @@ public:
     mReplaceButton.SetAnchorPoint(AnchorPoint::BOTTOM_RIGHT);
     mReplaceButton.SetPosition( BUTTON_BORDER, BUTTON_BORDER );
     mReplaceButton.SetDrawMode( DrawMode::OVERLAY );
-    mReplaceButton.SetBackgroundImage( ResourceImage::New( TOOLBAR_IMAGE ) );
     mReplaceButton.SetButtonImage( ResourceImage::New( REPLACE_IMAGE ) );
+    mReplaceButton.SetBackgroundImage( ResourceImage::New( TOOLBAR_IMAGE ) );
     mReplaceButton.SetResizePolicy( FIXED, ALL_DIMENSIONS );
     mReplaceButton.SetPreferredSize( Vector2( stageSize.width * 0.15f, stageSize.width * 0.15f ) );
     mReplaceButton.ClickedSignal().Connect( this, &ItemViewExample::OnReplaceButtonClicked);

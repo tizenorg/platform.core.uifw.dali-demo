@@ -175,7 +175,7 @@ public:
 
     // Set Title text
     mTitleActor.SetText( APPLICATION_TITLE_PAN_SCENE );
-    mTitleActor.SetSize( Font::New().MeasureText( APPLICATION_TITLE_PAN_SCENE ) );
+    mTitleActor.SetPreferredSize( Font::New().MeasureText( APPLICATION_TITLE_PAN_SCENE ).GetVectorXY() );
     mTitleActor.SetStyleToCurrentText( DemoHelper::GetDefaultTextStyle() );
 
     //Add a reset button
@@ -223,7 +223,8 @@ public:
     mShadowPlaneBg.SetParentOrigin(ParentOrigin::CENTER);
     mShadowPlaneBg.SetAnchorPoint(AnchorPoint::CENTER);
     mShadowPlaneBg.SetName("Plane");
-    mShadowPlaneBg.SetSize(1000.0f, 1000.0f);
+    mShadowPlaneBg.SetResizePolicy( FIXED, ALL_DIMENSIONS );
+    mShadowPlaneBg.SetPreferredSize( Vector2( 1000.0f, 1000.0f ) );
     mContents.Add(mShadowPlaneBg);
     mShadowPlaneBg.SetPosition(Vector3(50.0f, 50.0f, -200.0f));
 
@@ -266,6 +267,7 @@ public:
   {
     mSceneActor = Actor::New();
     mSceneActor.SetParentOrigin(ParentOrigin::CENTER);
+    mSceneActor.SetRelayoutEnabled( true );
 
     // Create and add images to the scene actor:
     mImageActor1 = ImageActor::New( ResourceImage::New(SCENE_IMAGE_1) );
@@ -301,7 +303,7 @@ public:
     mSceneAnimation.SetLooping(true);
     mSceneAnimation.Play();
 
-    mSceneActor.SetSize(250.0f, 250.0f);
+    mSceneActor.SetPreferredSize( Vector2( 250.0f, 250.0f ) );
     mSceneActor.SetPosition(0.0f, 0.0f, 130.0f);
     mShadowView.Add(mSceneActor);
   }
@@ -426,22 +428,22 @@ public:
       case PAN_SCENE:
         mPanState = ROTATE_SCENE;
         mTitleActor.SetText( APPLICATION_TITLE_ROTATE_SCENE );
-        mTitleActor.SetSize( Font::New().MeasureText( APPLICATION_TITLE_ROTATE_SCENE ) );
+        mTitleActor.SetPreferredSize( Font::New().MeasureText( APPLICATION_TITLE_ROTATE_SCENE ).GetVectorXY() );
         break;
       case ROTATE_SCENE:
         mPanState = PAN_LIGHT;
         mTitleActor.SetText( APPLICATION_TITLE_PAN_LIGHT );
-        mTitleActor.SetSize( Font::New().MeasureText( APPLICATION_TITLE_PAN_LIGHT ) );
+        mTitleActor.SetPreferredSize( Font::New().MeasureText( APPLICATION_TITLE_PAN_LIGHT ).GetVectorXY() );
         break;
       case PAN_LIGHT:
         mPanState = PAN_OBJECT;
         mTitleActor.SetText( APPLICATION_TITLE_PAN_OBJECT );
-        mTitleActor.SetSize( Font::New().MeasureText( APPLICATION_TITLE_PAN_OBJECT ) );
+        mTitleActor.SetPreferredSize( Font::New().MeasureText( APPLICATION_TITLE_PAN_OBJECT ).GetVectorXY() );
         break;
       case PAN_OBJECT:
         mPanState = PAN_SCENE;
         mTitleActor.SetText( APPLICATION_TITLE_PAN_SCENE );
-        mTitleActor.SetSize( Font::New().MeasureText( APPLICATION_TITLE_PAN_SCENE ) );
+        mTitleActor.SetPreferredSize( Font::New().MeasureText( APPLICATION_TITLE_PAN_SCENE ).GetVectorXY() );
         break;
       default:
         break;
