@@ -77,7 +77,7 @@ const unsigned GRID_CELL_PADDING = 4;
 /** The aspect ratio of cells in the image grid. */
 const float CELL_ASPECT_RATIO = 1.33333333333333333333f;
 
-const ImageAttributes::ScalingMode DEFAULT_SCALING_MODE = ImageAttributes::ScaleToFill;
+const Dali::ScalingMode DEFAULT_SCALING_MODE = Dali::ScalingMode::ScaleToFill;
 
 /** The number of times to spin an image on touching, each spin taking a second.*/
 const float SPIN_DURATION = 1.0f;
@@ -174,17 +174,13 @@ const unsigned NUM_IMAGE_PATHS = sizeof(IMAGE_PATHS) / sizeof(IMAGE_PATHS[0]) - 
  * @param[in] height The height of the image in pixels.
  * @param[in] scalingMode The mode to use when scaling the image to fit the desired dimensions.
  */
-Image CreateImage(const std::string& filename, unsigned int width, unsigned int height, ImageAttributes::ScalingMode scalingMode )
+Image CreateImage(const std::string& filename, unsigned int width, unsigned int height, Dali::ScalingMode scalingMode )
 {
 #ifdef DEBUG_PRINT_DIAGNOSTICS
     fprintf( stderr, "CreateImage(%s, %u, %u, scalingMode=%u)\n", filename.c_str(), width, height, unsigned( scalingMode ) );
 #endif
-  ImageAttributes attributes;
+  Image image = ResourceImage::New( filename, ImageDimensions( width, height ), scalingMode, Dali::SamplingMode::BoxThenLinear );
 
-  attributes.SetSize( width, height );
-  attributes.SetScalingMode( scalingMode );
-  attributes.SetFilterMode( ImageAttributes::BoxThenLinear );
-  Image image = ResourceImage::New( filename, attributes );
   return image;
 }
 
@@ -196,7 +192,7 @@ Image CreateImage(const std::string& filename, unsigned int width, unsigned int 
  * @param[in] height The height of the image in pixels.
  * @param[in] scalingMode The mode to use when scaling the image to fit the desired dimensions.
  */
-ImageActor CreateImageActor(const std::string& filename, unsigned int width, unsigned int height, ImageAttributes::ScalingMode scalingMode )
+ImageActor CreateImageActor(const std::string& filename, unsigned int width, unsigned int height, Dali::ScalingMode scalingMode )
 {
   Image img = CreateImage( filename, width, height, scalingMode );
   ImageActor actor = ImageActor::New( img );
@@ -208,22 +204,22 @@ ImageActor CreateImageActor(const std::string& filename, unsigned int width, uns
 }
 
 /** Cycle the scaling mode options. */
-ImageAttributes::ScalingMode NextMode( const ImageAttributes::ScalingMode oldMode )
+Dali::ScalingMode NextMode( const Dali::ScalingMode oldMode )
 {
-  ImageAttributes::ScalingMode newMode = ImageAttributes::ShrinkToFit;
+  Dali::ScalingMode newMode = ScalingMode::ShrinkToFit;
   switch ( oldMode )
   {
-    case ImageAttributes::ShrinkToFit:
-      newMode = ImageAttributes::ScaleToFill;
+    case ScalingMode::ShrinkToFit:
+      newMode = ScalingMode::ScaleToFill;
       break;
-    case ImageAttributes::ScaleToFill:
-      newMode = ImageAttributes::FitWidth;
+    case ScalingMode::ScaleToFill:
+      newMode = ScalingMode::FitWidth;
       break;
-    case ImageAttributes::FitWidth:
-      newMode = ImageAttributes::FitHeight;
+    case ScalingMode::FitWidth:
+      newMode = ScalingMode::FitHeight;
       break;
-    case ImageAttributes::FitHeight:
-      newMode = ImageAttributes::ShrinkToFit;
+    case ScalingMode::FitHeight:
+      newMode = ScalingMode::ShrinkToFit;
       break;
   }
   return newMode;
@@ -324,7 +320,7 @@ public:
   /**
    * Build the main part of the application's view.
    */
-  void PopulateContentLayer( const ImageAttributes::ScalingMode scalingMode )
+  void PopulateContentLayer( const Dali::ScalingMode scalingMode )
   {
     Stage stage = Stage::GetCurrent();
     Vector2 stageSize = stage.GetSize();
@@ -373,7 +369,7 @@ public:
   Actor BuildImageField( const float fieldWidth,
                            const unsigned gridWidth,
                            const unsigned maxGridHeight,
-                           ImageAttributes::ScalingMode scalingMode,
+                           Dali::ScalingMode scalingMode,
                            float & outFieldHeight )
   {
     // Generate the list of image configurations to be fitted into the field:
@@ -473,7 +469,7 @@ public:
 
         // Change the scaling mode:
         const unsigned id = actor.GetId();
-        ImageAttributes::ScalingMode newMode = NextMode( mScalingModes[id] );
+        Dali::ScalingMode newMode = NextMode( mScalingModes[id] );
         const Vector2 imageSize = mSizes[actor.GetId()];
 
         ImageActor imageActor = ImageActor::DownCast( actor );
@@ -518,14 +514,14 @@ public:
       {
         // Cycle the scaling mode options:
         const Vector2 imageSize = mSizes[gridImageActor.GetId()];
-        ImageAttributes::ScalingMode newMode = NextMode( mScalingModes[gridImageActor.GetId()] );
+        Dali::ScalingMode newMode = NextMode( mScalingModes[gridImageActor.GetId()] );
         Image oldImage = gridImageActor.GetImage();
         Image newImage = CreateImage(ResourceImage::DownCast(oldImage).GetUrl(), imageSize.width, imageSize.height, newMode );
         gridImageActor.SetImage( newImage );
 
         mScalingModes[gridImageActor.GetId()] = newMode;
 
-        SetTitle( std::string( newMode == ImageAttributes::ShrinkToFit ? "ShrinkToFit" : newMode == ImageAttributes::ScaleToFill ?  "ScaleToFill" : newMode == ImageAttributes::FitWidth ? "FitWidth" : "FitHeight" ) );
+        SetTitle( std::string( newMode == ScalingMode::ShrinkToFit ? "ShrinkToFit" : newMode == ScalingMode::ScaleToFill ?  "ScaleToFill" : newMode == ScalingMode::FitWidth ? "FitWidth" : "FitHeight" ) );
       }
     }
     return true;
@@ -580,7 +576,7 @@ private:
   Actor mGridActor;                   ///< The container for the grid of images
   ScrollView mScrollView;             ///< ScrollView UI Component
   bool mScrolling;                    ///< ScrollView scrolling state (true = scrolling, false = stationary)
-  std::map<unsigned, ImageAttributes::ScalingMode> mScalingModes; ///< Stores the current scaling mode of each image, keyed by image actor id.
+  std::map<unsigned, Dali::ScalingMode> mScalingModes; ///< Stores the current scaling mode of each image, keyed by image actor id.
   std::map<unsigned, Vector2> mSizes; ///< Stores the current size of each image, keyed by image actor id.
 };
 

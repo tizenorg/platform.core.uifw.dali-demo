@@ -61,11 +61,7 @@ const unsigned int DEFAULT_NUMBER_OF_BUBBLES( 1000 );
 ResourceImage LoadStageFillingImage( const char * const imagePath )
 {
   Size stageSize = Stage::GetCurrent().GetSize();
-  ImageAttributes attributes;
-  attributes.SetSize( stageSize.x, stageSize.y );
-  attributes.SetFilterMode( ImageAttributes::BoxThenLinear );
-  attributes.SetScalingMode( ImageAttributes::ScaleToFill );
-  return ResourceImage::New( imagePath, attributes );
+  return ResourceImage::New( imagePath, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::ScalingMode::ScaleToFill, Dali::SamplingMode::BoxThenLinear );
 }
 
 }// end LOCAL_STUFF

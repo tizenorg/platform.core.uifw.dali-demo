@@ -147,7 +147,9 @@ void RadialMenuExample::OnInit(Application& app)
                       Toolkit::Alignment::HorizontalRight,
                       DemoHelper::DEFAULT_PLAY_PADDING );
 
-  Vector2 imgSize = ResourceImage::GetImageSize(TEST_OUTER_RING_FILENAME);
+
+  const Vector2Uint16 intImgSize = ResourceImage::GetImageSize(TEST_OUTER_RING_FILENAME);
+  Vector2 imgSize = Vector2( intImgSize.GetWidth(), intImgSize.GetHeight() );
   Vector2 stageSize = stage.GetSize();
   float minStageDimension = std::min(stageSize.width, stageSize.height);
 
@@ -244,8 +246,8 @@ RadialSweepView RadialMenuExample::CreateSweepView( std::string imageName,
   mImageActor.SetAnchorPoint(AnchorPoint::CENTER);
 
   // Create the stencil
-  Vector2 imageSize = ResourceImage::GetImageSize(imageName);
-  float diameter = std::max(imageSize.width, imageSize.height);
+  const Vector2Uint16 imageSize = ResourceImage::GetImageSize(imageName);
+  float diameter = std::max(imageSize.GetWidth(), imageSize.GetHeight());
   RadialSweepView radialSweepView = RadialSweepView::New();
   radialSweepView.SetDiameter( diameter );
   radialSweepView.SetInitialAngle( initialAngle );
