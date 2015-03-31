@@ -139,11 +139,7 @@ Dali::Layer CreateView( Dali::Application& application,
   // Set background image, loading it at screen resolution:
   if ( !backgroundImagePath.empty() )
   {
-    Dali::ImageAttributes backgroundAttributes;
-    backgroundAttributes.SetSize( stage.GetSize() );
-    backgroundAttributes.SetFilterMode( Dali::ImageAttributes::BoxThenLinear );
-    backgroundAttributes.SetScalingMode( Dali::ImageAttributes::ScaleToFill );
-    Dali::Image backgroundImage = Dali::ResourceImage::New( backgroundImagePath, backgroundAttributes );
+    Dali::Image backgroundImage = Dali::ResourceImage::New( backgroundImagePath, Dali::ImageDimensions( stage.GetSize().x, stage.GetSize().y ), Dali::ScalingMode::ScaleToFill, Dali::SamplingMode::BoxThenLinear );
     Dali::ImageActor backgroundImageActor = Dali::ImageActor::New( backgroundImage );
     view.SetBackground( backgroundImageActor );
   }
