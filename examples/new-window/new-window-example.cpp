@@ -220,8 +220,9 @@ FrameBufferImage NewWindowController::CreateMirrorImage(const char* imageName)
 ImageActor NewWindowController::CreateBlurredMirrorImage(const char* imageName)
 {
   FrameBufferImage fbo;
-  Image image = ResourceImage::New( imageName );
-  Vector2 FBOSize = ResourceImage::GetImageSize(imageName);
+  Image image = ResourceImage::New(imageName);
+  Vector2Uint16 intFboSize = ResourceImage::GetImageSize(imageName);
+  Vector2 FBOSize = Vector2( intFboSize.GetWidth(), intFboSize.GetHeight() );
   fbo = FrameBufferImage::New( FBOSize.width, FBOSize.height, Pixel::RGBA8888);
   GaussianBlurView gbv = GaussianBlurView::New(5, 2.0f, Pixel::RGBA8888, 0.5f, 0.5f, true);
   gbv.SetBackgroundColor(Color::TRANSPARENT);
@@ -239,7 +240,8 @@ ImageActor NewWindowController::CreateBlurredMirrorImage(const char* imageName)
 FrameBufferImage NewWindowController::CreateFrameBufferForImage(const char* imageName, Image image, ShaderEffect shaderEffect)
 {
   Stage stage = Stage::GetCurrent();
-  Vector2 FBOSize = ResourceImage::GetImageSize(imageName);
+  Vector2Uint16 intFboSize = ResourceImage::GetImageSize(imageName);
+  Vector2 FBOSize = Vector2(intFboSize.GetWidth(), intFboSize.GetHeight());
 
   FrameBufferImage framebuffer = FrameBufferImage::New(FBOSize.x, FBOSize.y );
 
