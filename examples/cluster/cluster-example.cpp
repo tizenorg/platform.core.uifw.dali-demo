@@ -791,11 +791,11 @@ public:
         // dont apply shader effect to scrollview as it might override internal shaders for bounce effect etc
         for( std::vector<ClusterInfo>::iterator i = mClusterInfo.begin(); i != mClusterInfo.end(); ++i )
         {
-          Constraint constraint = Constraint::New<float>(Actor::Property::POSITION_Z, SphereEffectOffsetConstraint(SPHERE_EFFECT_POSITION_Z));
-          constraint.SetRemoveAction(Constraint::Discard);
+          i->mEffectConstraint = Constraint::New<float>(Actor::Property::POSITION_Z, SphereEffectOffsetConstraint(SPHERE_EFFECT_POSITION_Z));
+          i->mEffectConstraint.SetRemoveAction(Constraint::Discard);
           Cluster cluster = i->mCluster;
           SetShaderEffectRecursively( cluster, shaderEffect );
-          i->mEffectConstraint = cluster.ApplyConstraint(constraint);
+          cluster.ApplyConstraint( i->mEffectConstraint );
         }
         break;
       }

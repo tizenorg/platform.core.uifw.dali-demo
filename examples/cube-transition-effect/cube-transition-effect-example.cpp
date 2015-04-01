@@ -182,7 +182,6 @@ private:
   ImageActor                      mNextImage;
   unsigned int                    mIndex;
   bool                            mIsImageLoading;
-  Constraint                      mImageConstraint;
 
   PanGestureDetector              mPanGestureDetector;
 
@@ -283,14 +282,10 @@ void CubeTransitionApp::OnInit( Application& application )
   mViewTimer.TickSignal().Connect( this, &CubeTransitionApp::OnTimerTick );
 
   // show the first image
-  mImageConstraint = Constraint::New<Vector3>( Actor::Property::SCALE, ScaleToFitKeepAspectRatioConstraint() );
-  mImageConstraint.AddSource( LocalSource( Actor::Property::SIZE ) );
-  mImageConstraint.AddSource( ParentSource( Actor::Property::SIZE ) );
-
   mCurrentImage = ImageActor::New( LoadStageFillingImage( IMAGES[mIndex] ) );
   mCurrentImage.SetPositionInheritanceMode( USE_PARENT_POSITION );
-  mCurrentImage.ApplyConstraint( mImageConstraint );
-  mCurrentImage.SetRelayoutEnabled( false );
+  mCurrentImage.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+  mCurrentImage.SetSizeScalePolicy( FIT_WITH_ASPECT_RATIO );
   mParent.Add( mCurrentImage );
 
   mCurrentEffect = mCubeWaveEffect;
@@ -334,7 +329,8 @@ void CubeTransitionApp::GoToNextImage()
   mNextImage = ImageActor::New( image );
 
   mNextImage.SetPositionInheritanceMode(USE_PARENT_POSITION);
-  mNextImage.ApplyConstraint( mImageConstraint );
+  mNextImage.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+  mNextImage.SetSizeScalePolicy( FIT_WITH_ASPECT_RATIO );
   mNextImage.SetRelayoutEnabled( false );
   mCurrentEffect.SetTargetImage(mNextImage);
   if( image.GetLoadingState() == ResourceLoadingSucceeded )
