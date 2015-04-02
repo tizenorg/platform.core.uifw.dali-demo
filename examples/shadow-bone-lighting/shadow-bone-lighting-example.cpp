@@ -275,13 +275,13 @@ public:
     Property::Index angleIndex = mImageActor2.RegisterProperty("angle", Property::Value(30.0f));
     Source angleSrc( mImageActor2, angleIndex );
 
-    Constraint constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, RotationConstraint(-1.0f) );
+    Constraint constraint = Constraint::New<Quaternion>( mImageActor1, Actor::Property::ORIENTATION, RotationConstraint(-1.0f) );
     constraint.AddSource( angleSrc );
-    mImageActor1.ApplyConstraint( constraint );
+    constraint.Apply();
 
-    constraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, RotationConstraint(+1.0f) );
+    constraint = Constraint::New<Quaternion>( mImageActor3, Actor::Property::ORIENTATION, RotationConstraint(+1.0f) );
     constraint.AddSource( angleSrc );
-    mImageActor3.ApplyConstraint( constraint );
+    constraint.Apply();
 
     mSceneAnimation = Animation::New(2.5f);
 

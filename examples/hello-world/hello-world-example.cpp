@@ -20,6 +20,10 @@
 
 using namespace Dali;
 
+void MyFunction( Vector3& current, const PropertyInputContainer& inputs )
+{
+}
+
 // This example shows how to create and display Hello World! using a simple TextActor
 //
 class HelloWorldController : public ConnectionTracker
@@ -59,6 +63,10 @@ public:
 
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
+
+    Constraint constraint = Constraint::New<Vector3>( textActor, Actor::Property::SIZE, &MyFunction );
+    constraint.AddSource( LocalSource( Actor::Property::POSITION ) );
+    constraint.Apply();
   }
 
   bool OnTouch( Actor actor, const TouchEvent& touch )

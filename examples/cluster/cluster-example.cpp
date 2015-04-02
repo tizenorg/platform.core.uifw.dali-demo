@@ -689,7 +689,7 @@ public:
       RemoveShaderEffectRecursively( cluster );
       if( i->mEffectConstraint )
       {
-        cluster.RemoveConstraint(i->mEffectConstraint);
+        i->mEffectConstraint.Remove();
         i->mEffectConstraint.Reset();
       }
     }
@@ -719,10 +719,10 @@ public:
 
           Vector2 shearCenter( Vector2(position.x + size.width * shearAnchor.x, position.y + size.height * shearAnchor.y) );
           Property::Index centerProperty = shaderEffect.GetPropertyIndex(shaderEffect.GetCenterPropertyName());
-          Constraint constraint = Constraint::New<Vector2>( centerProperty, ShearEffectCenterConstraint(stageSize, shearCenter) );
+          Constraint constraint = Constraint::New<Vector2>( shaderEffect, centerProperty, ShearEffectCenterConstraint(stageSize, shearCenter) );
           constraint.AddSource( Source(mView, Actor::Property::SIZE) );
 
-          shaderEffect.ApplyConstraint(constraint);
+          constraint.Apply();
 
           SetShaderEffectRecursively( cluster,shaderEffect );
 
@@ -731,15 +731,15 @@ public:
           Property::Index angleXAxisProperty = shaderEffect.GetPropertyIndex(shaderEffect.GetAngleXAxisPropertyName());
           Property::Index angleYAxisProperty = shaderEffect.GetPropertyIndex(shaderEffect.GetAngleYAxisPropertyName());
 
-          constraint = Constraint::New<float>( angleXAxisProperty, ShearEffectConstraint(stageSize, SHEAR_EFFECT_MAX_OVERSHOOT, Vector2::XAXIS) );
+          constraint = Constraint::New<float>( shaderEffect, angleXAxisProperty, ShearEffectConstraint(stageSize, SHEAR_EFFECT_MAX_OVERSHOOT, Vector2::XAXIS) );
           constraint.AddSource( Source(mScrollView, scrollOvershootProperty) );
           constraint.AddSource( Source(mView, Actor::Property::ORIENTATION) );
+          constraint.Apply();
 
-          shaderEffect.ApplyConstraint(constraint);
-          constraint = Constraint::New<float>( angleYAxisProperty, ShearEffectConstraint(stageSize, SHEAR_EFFECT_MAX_OVERSHOOT, Vector2::YAXIS ) );
+          constraint = Constraint::New<float>( shaderEffect, angleYAxisProperty, ShearEffectConstraint(stageSize, SHEAR_EFFECT_MAX_OVERSHOOT, Vector2::YAXIS ) );
           constraint.AddSource( Source(mScrollView, scrollOvershootProperty) );
           constraint.AddSource( Source(mView, Actor::Property::ORIENTATION) );
-          shaderEffect.ApplyConstraint(constraint);
+          constraint.Apply();
 
 
         }
@@ -763,9 +763,9 @@ public:
                                   CAROUSEL_EFFECT_ANGLE_SWEEP / stageSize.width );
 
         Property::Index anglePerUnit = shaderEffect.GetPropertyIndex( shaderEffect.GetAnglePerUnitPropertyName() );
-        Constraint constraint = Constraint::New<Vector2>( anglePerUnit, CarouselEffectOrientationConstraint( angleSweep ) );
+        Constraint constraint = Constraint::New<Vector2>( shaderEffect, anglePerUnit, CarouselEffectOrientationConstraint( angleSweep ) );
         constraint.AddSource( Source(mView, Actor::Property::ORIENTATION) );
-        shaderEffect.ApplyConstraint( constraint );
+        constraint.Apply();
 
         break;
       }
@@ -791,11 +791,11 @@ public:
         // dont apply shader effect to scrollview as it might override internal shaders for bounce effect etc
         for( std::vector<ClusterInfo>::iterator i = mClusterInfo.begin(); i != mClusterInfo.end(); ++i )
         {
-          i->mEffectConstraint = Constraint::New<float>(Actor::Property::POSITION_Z, SphereEffectOffsetConstraint(SPHERE_EFFECT_POSITION_Z));
-          i->mEffectConstraint.SetRemoveAction(Constraint::Discard);
           Cluster cluster = i->mCluster;
+          i->mEffectConstraint = Constraint::New<float>( cluster, Actor::Property::POSITION_Z, SphereEffectOffsetConstraint( SPHERE_EFFECT_POSITION_Z ) );
+          i->mEffectConstraint.SetRemoveAction(Constraint::Discard);
           SetShaderEffectRecursively( cluster, shaderEffect );
-          cluster.ApplyConstraint( i->mEffectConstraint );
+          i->mEffectConstraint.Apply();
         }
         break;
       }

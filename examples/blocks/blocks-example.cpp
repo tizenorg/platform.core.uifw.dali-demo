@@ -283,9 +283,9 @@ private:
     mPaddleImage.SetSize( mPaddleFullSize );
 
     mWobbleProperty = mPaddle.RegisterProperty(WOBBLE_PROPERTY_NAME, 0.0f);
-    Constraint wobbleConstraint = Constraint::New<Quaternion>( Actor::Property::ORIENTATION, WobbleConstraint(10.0f));
+    Constraint wobbleConstraint = Constraint::New<Quaternion>( mPaddle, Actor::Property::ORIENTATION, WobbleConstraint(10.0f));
     wobbleConstraint.AddSource( LocalSource(mWobbleProperty) );
-    mPaddle.ApplyConstraint(wobbleConstraint);
+    wobbleConstraint.Apply();
 
     mPaddle.SetPosition( stageSize * Vector3( PADDLE_START_POSITION ) );
     mContentLayer.Add(mPaddle);
@@ -311,12 +311,12 @@ private:
     Actor delegate = Actor::New();
     stage.Add(delegate);
     Property::Index property = delegate.RegisterProperty(COLLISION_PROPERTY_NAME, Vector3::ZERO);
-    Constraint constraint = Constraint::New<Vector3>( property, CollisionCircleRectangleConstraint( -Vector3(0.0f, mPaddleHitMargin.height * 0.575f, 0.0f),-Vector3(mPaddleHitMargin) ) );
+    Constraint constraint = Constraint::New<Vector3>( delegate, property, CollisionCircleRectangleConstraint( -Vector3(0.0f, mPaddleHitMargin.height * 0.575f, 0.0f),-Vector3(mPaddleHitMargin) ) );
     constraint.AddSource( Source(mBall, Actor::Property::POSITION) );
     constraint.AddSource( Source(mPaddle, Actor::Property::POSITION) );
     constraint.AddSource( Source(mBall, Actor::Property::SIZE) );
     constraint.AddSource( Source(mPaddle, Actor::Property::SIZE) );
-    delegate.ApplyConstraint(constraint);
+    constraint.Apply();
 
     PropertyNotification paddleNotification = delegate.AddPropertyNotification( property, GreaterThanCondition(0.0f) );
     paddleNotification.NotifySignal().Connect( this, &ExampleController::OnHitPaddle );
@@ -535,12 +535,12 @@ private:
 
     // Add a constraint on the brick between it and the ball generating a collision-property
     Property::Index property = brick.RegisterProperty(COLLISION_PROPERTY_NAME, Vector3::ZERO);
-    Constraint constraint = Constraint::New<Vector3>( property, CollisionCircleRectangleConstraint(BRICK_COLLISION_MARGIN) );
+    Constraint constraint = Constraint::New<Vector3>( brick, property, CollisionCircleRectangleConstraint(BRICK_COLLISION_MARGIN) );
     constraint.AddSource( Source(mBall, Actor::Property::POSITION) );
     constraint.AddSource( Source(brick, Actor::Property::POSITION) );
     constraint.AddSource( Source(mBall, Actor::Property::SIZE) );
     constraint.AddSource( Source(brick, Actor::Property::SIZE) );
-    brick.ApplyConstraint(constraint);
+    constraint.Apply();
 
     // Now add a notification on this collision-property
 
