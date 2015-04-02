@@ -208,8 +208,7 @@ DaliTableView::DaliTableView( Application& application )
   mTotalPages(),
   mScrolling( false ),
   mSortAlphabetically( false ),
-  mBackgroundAnimsPlaying( false ),
-  mVersionPopupShown( false )
+  mBackgroundAnimsPlaying( false )
 {
   application.InitSignal().Connect( this, &DaliTableView::Initialize );
 }
@@ -734,9 +733,11 @@ void DaliTableView::OnKeyEvent( const KeyEvent& event )
   {
     if ( IsKey( event, Dali::DALI_KEY_ESCAPE) || IsKey( event, Dali::DALI_KEY_BACK) )
     {
-      if ( mVersionPopup && mVersionPopupShown )
+      // If there's a Popup, Hide it if it's contributing to the display in any way (EG. transitioning in or out).
+      // Otherwise quit.
+      if ( mVersionPopup && ( mVersionPopup.GetDisplayState() != Toolkit::Popup::HIDDEN ) )
       {
-        HideVersionPopup();
+        mVersionPopup.SetDisplayState( Popup::HIDDEN );
       }
       else
       {
@@ -1014,7 +1015,8 @@ bool DaliTableView::OnTileHovered( Actor actor, const HoverEvent& event )
 
 void DaliTableView::OnLogoTapped( Dali::Actor actor, const Dali::TapGesture& tap )
 {
-  if ( !mVersionPopupShown )
+  // Only show if currently fully hidden. If transitioning-out, the transition will not be interrupted.
+  if ( !mVersionPopup || ( mVersionPopup.GetDisplayState() == Toolkit::Popup::HIDDEN ) )
   {
     if ( !mVersionPopup )
     {
@@ -1024,36 +1026,20 @@ void DaliTableView::OnLogoTapped( Dali::Actor actor, const Dali::TapGesture& tap
       stream << "DALi Toolkit: " << TOOLKIT_MAJOR_VERSION << "." << TOOLKIT_MINOR_VERSION << "." << TOOLKIT_MICRO_VERSION << std::endl << "(" << TOOLKIT_BUILD_DATE << ")";
 
       mVersionPopup = Dali::Toolkit::Popup::New();
-      mVersionPopup.SetParentOrigin( ParentOrigin::CENTER );
-      mVersionPopup.SetAnchorPoint( AnchorPoint::CENTER );
-      mVersionPopup.SetResizePolicy( SIZE_RELATIVE_TO_PARENT, WIDTH );
-      mVersionPopup.SetSizeModeFactor( Vector3( 0.75f, 1.0f, 1.0f ) );
-      mVersionPopup.SetResizePolicy( FIT_TO_CHILDREN, HEIGHT );
-      mVersionPopup.SetTitle( stream.str() );
-      mVersionPopup.HideTail();
+      mVersionPopup.SetTitle( "Version information" );
+      mVersionPopup.SetContent( TextView::New( stream.str() ) );
       mVersionPopup.OutsideTouchedSignal().Connect( this, &DaliTableView::HideVersionPopup );
-      mVersionPopup.HiddenSignal().Connect( this, &DaliTableView::PopupHidden );
-
-      mVersionPopup.MarkDirtyForRelayout();
     }
 
-    mVersionPopup.Show();
-    mVersionPopupShown = true;
+    mVersionPopup.SetDisplayState( Popup::SHOWN );
   }
 }
 
 void DaliTableView::HideVersionPopup()
 {
-  if ( mVersionPopup )
+  // Only hide if currently fully shown. If transitioning-in, the transition will not be interrupted.
+  if ( mVersionPopup && ( mVersionPopup.GetDisplayState() == Toolkit::Popup::SHOWN ) )
   {
-    mVersionPopup.Hide();
-  }
-}
-
-void DaliTableView::PopupHidden()
-{
-  if ( mVersionPopup )
-  {
-    mVersionPopupShown = false;
+    mVersionPopup.SetDisplayState( Popup::HIDDEN );
   }
 }

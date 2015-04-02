@@ -42,6 +42,10 @@ const char* const TOOLBAR_TITLE = "Size Negotiation";
 const int TOOLBAR_HEIGHT = 62;
 
 const char* MENU_ICON_IMAGE = DALI_IMAGE_DIR "icon-cluster-none.png";
+const char* CONTEXT_DISABLED_ICON_IMAGE = DALI_IMAGE_DIR "icon-scroll-view-carousel.png";
+const char* CONTEXT_ENABLED_ICON_IMAGE = DALI_IMAGE_DIR "icon-scroll-view-spiral.png";
+const char* ANIMATION_ZOOM_ICON_IMAGE = DALI_IMAGE_DIR "icon-effects-off.png";
+const char* ANIMATION_FADE_ICON_IMAGE = DALI_IMAGE_DIR "icon-effects-on.png";
 
 const char* const PUSHBUTTON_BUTTON_IMAGE = DALI_IMAGE_DIR "button-up.9.png";
 const char* const PUSHBUTTON_PRESS_IMAGE = DALI_IMAGE_DIR "button-down.9.png";
@@ -53,6 +57,7 @@ const char* const POPUP_BUTTON_EMPTY_ID = "POPUP_BUTTON_EMPTY";
 const char* const POPUP_BUTTON_TITLE_ID = "POPUP_BUTTON_TITLE";
 const char* const POPUP_BUTTON_BUTTONS_1_ID = "POPUP_BUTTON_BUTTONS_1";
 const char* const POPUP_BUTTON_BUTTONS_2_ID = "POPUP_BUTTON_BUTTONS_2";
+const char* const POPUP_BUTTON_TOAST_ID = "POPUP_BUTTON_TOAST";
 const char* const POPUP_BUTTON_TITLE_BUTTONS_ID = "POPUP_BUTTON_TITLE_BUTTONS";
 const char* const POPUP_BUTTON_CONTENT_TEXT_ID = "POPUP_BUTTON_CONTENT_TEXT";
 const char* const POPUP_BUTTON_CONTENT_IMAGE_ID = "POPUP_BUTTON_CONTENT_IMAGE";
@@ -97,6 +102,7 @@ const ButtonItem POPUP_BUTTON_ITEMS[] = {
     { POPUP_BUTTON_TITLE_ID,                      "Title" },
     { POPUP_BUTTON_BUTTONS_1_ID,                  "1 Button" },
     { POPUP_BUTTON_BUTTONS_2_ID,                  "2 Buttons" },
+    { POPUP_BUTTON_TOAST_ID,                      "Toast Popup" },
     { POPUP_BUTTON_TITLE_BUTTONS_ID,              "Title & Buttons" },
     { POPUP_BUTTON_CONTENT_TEXT_ID,               "Text" },
     { POPUP_BUTTON_CONTENT_IMAGE_ID,              "Image" },
@@ -140,7 +146,9 @@ public:
   SizeNegotiationController( Application& application )
     : mApplication( application ),
       mMenuShown( false ),
-      mDemoState( POPUP )
+      mContextual( false ),
+      mAnimationFade( false ),
+      mDemoState( SizeNegotiationController::POPUP )
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect( this, &SizeNegotiationController::Create );
@@ -174,7 +182,7 @@ public:
 
     SetTitle();
 
-    // Create menu button
+    // Create menu button.
     Toolkit::PushButton viewButton = Toolkit::PushButton::New();
     viewButton.SetBackgroundImage( ResourceImage::New( MENU_ICON_IMAGE ) );
     viewButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnMenu );
@@ -184,6 +192,25 @@ public:
     const float padding( DemoHelper::DEFAULT_VIEW_STYLE.mToolBarPadding );
     mToolBar.AddControl( mTitleActor, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarTitlePercentage, Toolkit::Alignment::HorizontalCenter, Toolkit::Alignment::Padding( padding, padding, padding, padding ) );
 
+    // Images used for toggle buttons.
+    mContextButtonDisabledImage = ResourceImage::New( CONTEXT_DISABLED_ICON_IMAGE );
+    mContextButtonEnabledImage = ResourceImage::New( CONTEXT_ENABLED_ICON_IMAGE );
+    mAnimationButtonZoomImage = ResourceImage::New( ANIMATION_ZOOM_ICON_IMAGE );
+    mAnimationButtonFadeImage = ResourceImage::New( ANIMATION_FADE_ICON_IMAGE );
+
+    // Create context button.
+    mContextButton = Toolkit::PushButton::New();
+    mContextButton.SetBackgroundImage( mContextButtonDisabledImage );
+    mContextButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnContextClicked );
+    mToolBar.AddControl( mContextButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
+
+    // Create animation button.
+    mAnimationButton = Toolkit::PushButton::New();
+    mAnimationButton.SetBackgroundImage( mAnimationButtonZoomImage );
+    mAnimationButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnAnimationClicked );
+    mToolBar.AddControl( mAnimationButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
+
+    // Add title to the tool bar.
     mItemView = Toolkit::ItemView::New( *this );
     mItemView.SetParentOrigin( ParentOrigin::CENTER );
     mItemView.SetAnchorPoint( AnchorPoint::CENTER );
@@ -241,6 +268,52 @@ public:
     return true;
   }
 
+  bool OnContextClicked( Toolkit::Button button )
+  {
+    mContextual = !mContextual;
+    if( mContextual )
+    {
+      mContextButton.SetBackgroundImage( mContextButtonEnabledImage );
+    }
+    else
+    {
+      mContextButton.SetBackgroundImage( mContextButtonDisabledImage );
+    }
+    return true;
+  }
+
+  bool OnAnimationClicked( Toolkit::Button button )
+  {
+    mAnimationFade = !mAnimationFade;
+    if( mAnimationFade )
+    {
+      mAnimationButton.SetBackgroundImage( mAnimationButtonFadeImage );
+    }
+    else
+    {
+      mAnimationButton.SetBackgroundImage( mAnimationButtonZoomImage );
+    }
+    return true;
+  }
+
+  void PopupSetup( Toolkit::Popup popup, Actor parent )
+  {
+    if( mContextual )
+    {
+      popup.SetContextualMode( Toolkit::Popup::BELOW );
+    }
+
+    if( mAnimationFade )
+    {
+      popup.SetAnimationMode( Toolkit::Popup::FADE );
+    }
+    else
+    {
+      popup.SetAnimationMode( Toolkit::Popup::ZOOM );
+    }
+    parent.Add( popup );
+  }
+
   void ShowMenu()
   {
     Stage stage = Stage::GetCurrent();
@@ -249,7 +322,7 @@ public:
     mMenu = Toolkit::Popup::New();
     mMenu.SetParentOrigin( ParentOrigin::TOP_LEFT );
     mMenu.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    mMenu.HideTail();
+    mMenu.SetTailDisplayed( false );
     mMenu.OutsideTouchedSignal().Connect( this, &SizeNegotiationController::HideMenu );
     mMenu.SetSize( popupWidth, 0.0f );
     mMenu.SetResizePolicy( FIT_TO_CHILDREN, HEIGHT );
@@ -271,7 +344,7 @@ public:
     }
 
     // Show the menu
-    mMenu.Show();
+    mMenu.SetDisplayState( Toolkit::Popup::SHOWN );
     mMenuShown = true;
   }
 
@@ -279,7 +352,7 @@ public:
   {
     if( mMenu )
     {
-      mMenu.Hide();
+      mMenu.SetDisplayState( Toolkit::Popup::HIDDEN );
       mMenu.Reset();
     }
 
@@ -328,111 +401,140 @@ public:
     popup.SetParentOrigin( ParentOrigin::CENTER );
     popup.SetAnchorPoint( AnchorPoint::CENTER );
     popup.SetSize( POPUP_WIDTH_DP, 0.0f );
-    popup.HideTail();
+    popup.SetTailDisplayed( false );
 
     popup.OutsideTouchedSignal().Connect( this, &SizeNegotiationController::OnPopupOutsideTouched );
 
     return popup;
   }
 
+  Toolkit::Popup CreateQuickPopup( int numberOfButtons )
+  {
+    Stage stage = Stage::GetCurrent();
+    const float POPUP_WIDTH_DP = stage.GetSize().width * 0.75f;
+
+    Toolkit::QuickPopup popup = Toolkit::QuickPopup::New();
+    popup.SetName( "POPUP" );
+    popup.SetSize( Vector2( POPUP_WIDTH_DP, 0.0f ) );
+
+    switch( numberOfButtons )
+    {
+      case 2:
+      {
+        popup.SetButtonLabel( Toolkit::QuickPopup::BUTTON_2, "Cancel" );
+        popup.Button2ClickedSignal().Connect( this, &SizeNegotiationController::OnPopupButtonClicked );
+        // Intentional drop-through to case 1.
+      }
+      case 1:
+      {
+        popup.SetButtonLabel( Toolkit::QuickPopup::BUTTON_1, "OK!" );
+        popup.Button1ClickedSignal().Connect( this, &SizeNegotiationController::OnPopupButtonClicked );
+        break;
+      }
+      default:
+      case 0:
+      {
+        break;
+      }
+    }
+
+    popup.OutsideTouchedSignal().Connect( this, &SizeNegotiationController::OnPopupOutsideTouched );
+
+    return popup;
+  }
+
+  Toolkit::PushButton CreateOKButton()
+  {
+    Toolkit::PushButton okayButton = Toolkit::PushButton::New();
+    okayButton.SetName( OKAY_BUTTON_ID );
+    okayButton.SetLabel( "OK!" );
+    okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
+    okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
+
+    okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
+    return okayButton;
+  }
+
+  Toolkit::PushButton CreateCancelButton()
+  {
+    Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
+    cancelButton.SetName( CANCEL_BUTTON_ID );
+    cancelButton.SetLabel( "Cancel" );
+    cancelButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
+    cancelButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
+
+    cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
+    return cancelButton;
+  }
+
+  void OnPopupButtonClicked()
+  {
+    if( mPopup )
+    {
+      mPopup.SetDisplayState( Toolkit::Popup::HIDDEN );
+    }
+  }
+
   bool OnButtonClicked( Toolkit::Button button )
   {
+    // Handle buttons from within popups first.
+    if( button.GetName() == OKAY_BUTTON_ID || button.GetName() == CANCEL_BUTTON_ID )
+    {
+      OnPopupButtonClicked();
+      return true;
+    }
+
+    // Handle menu items that create popups.
     if( button.GetName() == POPUP_BUTTON_EMPTY_ID )
     {
       mPopup = CreatePopup();
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_TITLE_ID )
     {
       mPopup = CreatePopup();
       mPopup.SetTitle( "Popup!" );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_BUTTONS_1_ID )
     {
-      mPopup = CreatePopup();
+      mPopup = CreateQuickPopup( 1 );
 
-      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
-      okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabel( "OK!" );
-      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( okayButton );
-
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_BUTTONS_2_ID )
     {
+      mPopup = CreateQuickPopup( 2 );
+
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
+    }
+    else if( button.GetName() == POPUP_BUTTON_TOAST_ID )
+    {
       mPopup = CreatePopup();
+      mPopup.SetTitle( "This is a Toast Popup. It will auto-hide itself after a few seconds. It will also let events pass through it.");
+      mPopup.SetType( Toolkit::Popup::TOAST );
 
-      Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
-      cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabel( "Cancel" );
-      cancelButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      cancelButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( cancelButton );
-
-      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
-      okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabel( "OK!" );
-      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( okayButton );
-
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_TITLE_BUTTONS_ID )
     {
       mPopup = CreatePopup();
       mPopup.SetTitle( "Popup!" );
 
-      Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
-      cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabel( "Cancel" );
-      cancelButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      cancelButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
+      Actor container = Actor::New();
+      container.Add( CreateOKButton() );
+      container.Add( CreateCancelButton() );
 
-      cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
+      mPopup.SetControlContainer( container );
 
-      mPopup.AddButton( cancelButton );
-
-      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
-      okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabel( "OK!" );
-      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( okayButton );
-
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_CONTENT_TEXT_ID )
     {
@@ -450,10 +552,8 @@ public:
 
       mPopup.Add( text );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_CONTENT_IMAGE_ID )
     {
@@ -466,10 +566,8 @@ public:
 
       mPopup.Add( image );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_CONTENT_IMAGE_SCALE_ID )
     {
@@ -483,10 +581,8 @@ public:
 
       mPopup.Add( image );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_CONTENT_IMAGE_FIT_ID )
     {
@@ -501,10 +597,8 @@ public:
 
       mPopup.Add( image );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_CONTENT_IMAGE_FILL_ID )
     {
@@ -519,10 +613,8 @@ public:
 
       mPopup.Add( image );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_TITLE_CONTENT_TEXT_ID )
     {
@@ -541,10 +633,8 @@ public:
 
       mPopup.Add( text );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_TITLE_CONTENT_TEXT_BUTTONS_ID )
     {
@@ -563,30 +653,14 @@ public:
 
       mPopup.Add( text );
 
-      Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
-      cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabel( "Cancel" );
-      cancelButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      cancelButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
+      Actor container = Actor::New();
+      container.Add( CreateOKButton() );
+      container.Add( CreateCancelButton() );
 
-      cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
+      mPopup.SetControlContainer( container );
 
-      mPopup.AddButton( cancelButton );
-
-      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
-      okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabel( "OK!" );
-      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( okayButton );
-
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_COMPLEX_ID )
     {
@@ -657,30 +731,13 @@ public:
       mPopup.Add( content );
 
       // Buttons
-      Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
-      cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabel( "Cancel" );
-      cancelButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      cancelButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
+      Actor container = Actor::New();
+      container.Add( CreateOKButton() );
+      container.Add( CreateCancelButton() );
+      mPopup.SetControlContainer( container );
 
-      cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( cancelButton );
-
-      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
-      okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabel( "OK!" );
-      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( okayButton );
-
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_EMPTY_ID )
     {
@@ -688,16 +745,13 @@ public:
       mPopup.SetResizePolicy( SIZE_RELATIVE_TO_PARENT, ALL_DIMENSIONS );
       mPopup.SetSizeModeFactor( Vector3( 0.75f, 0.5f, 1.0f ) );
 
-
       Toolkit::TableView table = Toolkit::TableView::New( 0, 0 );
       table.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_1CELL_ID )
     {
@@ -716,10 +770,8 @@ public:
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_3CELL_ID )
     {
@@ -749,10 +801,8 @@ public:
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_3X3CELL_ID )
     {
@@ -817,10 +867,8 @@ public:
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_FIXED1_ID )
     {
@@ -863,10 +911,8 @@ public:
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_FIXED2_ID )
     {
@@ -910,10 +956,8 @@ public:
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_FIT1_ID )
     {
@@ -965,10 +1009,8 @@ public:
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_FIT2_ID )
     {
@@ -1017,10 +1059,8 @@ public:
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_NATURAL1_ID )
     {
@@ -1075,10 +1115,8 @@ public:
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_NATURAL2_ID )
     {
@@ -1121,10 +1159,8 @@ public:
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_NATURAL3_ID )
     {
@@ -1165,17 +1201,8 @@ public:
 
       mPopup.Add( table );
 
-      // The popup is not yet on the stage so needs to be flaged as dirty
-      mPopup.MarkDirtyForRelayout();
-
-      mPopup.Show();
-    }
-    else if( button.GetName() == OKAY_BUTTON_ID || button.GetName() == CANCEL_BUTTON_ID )
-    {
-      if( mPopup )
-      {
-        mPopup.Hide();
-      }
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
 
     return true;
@@ -1185,7 +1212,7 @@ public:
   {
     if( mPopup )
     {
-      mPopup.Hide();
+      mPopup.SetDisplayState( Toolkit::Popup::HIDDEN );
     }
   }
 
@@ -1289,18 +1316,28 @@ private:
   Application&      mApplication;
   Toolkit::View     mView;                   ///< The View instance.
   Toolkit::ToolBar  mToolBar;                ///< The View's Toolbar.
+  Toolkit::PushButton mContextButton;        ///< For toggling contextual mode.
+  Toolkit::PushButton mAnimationButton;      ///< For toggling the fade animation.
   Layer             mContentLayer;           ///< Content layer
 
   Toolkit::TextView mTitleActor;             ///< Title text
 
   Toolkit::Popup    mMenu;                   ///< The navigation menu
   bool              mMenuShown;              ///< If the navigation menu is currently being displayed or not
+  bool              mContextual;             ///< True if currently using the contextual popup mode.
+  bool              mAnimationFade;          ///< True if currently using the fade animation.
+
+  ResourceImage mContextButtonDisabledImage; ///< The disabled context button icon.
+  ResourceImage mContextButtonEnabledImage;  ///< The enabled context button icon.
+  ResourceImage mAnimationButtonZoomImage;   ///< The zoom animation button icon.
+  ResourceImage mAnimationButtonFadeImage;   ///< The fade animation button icon.
 
   Toolkit::Popup    mPopup;
 
   Toolkit::ItemView mItemView;               ///< ItemView to hold test images
 
   DemoState mDemoState;
+
 };
 
 void RunTest( Application& application )
