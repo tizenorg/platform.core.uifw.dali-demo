@@ -989,7 +989,6 @@ private:
 
     TableView tableView = TableView::New( 0, 0 );
     tableView.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
-    mMenu.Add( tableView );
 
     Slider slider = Slider::New();
     slider.SetProperty( Slider::Property::LOWER_BOUND, 0.0f );
@@ -1019,7 +1018,7 @@ private:
     tableView.AddChild( textContainer, TableView::CellPosition( 1, 0 ) );
 
     mTapDetector = TapGestureDetector::New();
-    mTapDetector.Attach(mAlphaFunctionText);
+    mTapDetector.Attach( mAlphaFunctionText );
     mTapDetector.DetectedSignal().Connect( this, &ItemViewExample::ChangeAlphaFunctionOnTap );
 
     text = TextLabel::New( "Alpha Function" );
@@ -1029,8 +1028,9 @@ private:
     text.SetSize( 0.0f, LABEL_TEXT_SIZE_Y );
     textContainer.Add( text );
 
-    mMenu.MarkDirtyForRelayout();
-    mMenu.Show();
+    mMenu.SetContent( tableView );
+
+    mMenu.SetDisplayState( Popup::SHOWN );
     mMenuShown = true;
   }
 
@@ -1065,7 +1065,7 @@ private:
 
     if( mMenu )
     {
-      mMenu.Hide();
+      mMenu.SetDisplayState( Popup::HIDDEN );
       mMenu.Reset();
     }
 

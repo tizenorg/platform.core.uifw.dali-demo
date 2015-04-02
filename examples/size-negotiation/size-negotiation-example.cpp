@@ -44,6 +44,10 @@ const char* const TOOLBAR_TITLE = "Negotiate Size";
 const int TOOLBAR_HEIGHT = 62;
 
 const char* MENU_ICON_IMAGE = DALI_IMAGE_DIR "icon-cluster-none.png";
+const char* CONTEXT_DISABLED_ICON_IMAGE = DALI_IMAGE_DIR "icon-scroll-view-carousel.png";
+const char* CONTEXT_ENABLED_ICON_IMAGE = DALI_IMAGE_DIR "icon-scroll-view-spiral.png";
+const char* ANIMATION_ZOOM_ICON_IMAGE = DALI_IMAGE_DIR "icon-effects-off.png";
+const char* ANIMATION_FADE_ICON_IMAGE = DALI_IMAGE_DIR "icon-effects-on.png";
 
 const char* const PUSHBUTTON_BUTTON_IMAGE = DALI_IMAGE_DIR "button-up.9.png";
 const char* const PUSHBUTTON_PRESS_IMAGE = DALI_IMAGE_DIR "button-down.9.png";
@@ -55,6 +59,7 @@ const char* const POPUP_BUTTON_EMPTY_ID = "POPUP_BUTTON_EMPTY";
 const char* const POPUP_BUTTON_TITLE_ID = "POPUP_BUTTON_TITLE";
 const char* const POPUP_BUTTON_BUTTONS_1_ID = "POPUP_BUTTON_BUTTONS_1";
 const char* const POPUP_BUTTON_BUTTONS_2_ID = "POPUP_BUTTON_BUTTONS_2";
+const char* const POPUP_BUTTON_TOAST_ID = "POPUP_BUTTON_TOAST";
 const char* const POPUP_BUTTON_TITLE_BUTTONS_ID = "POPUP_BUTTON_TITLE_BUTTONS";
 const char* const POPUP_BUTTON_CONTENT_TEXT_ID = "POPUP_BUTTON_CONTENT_TEXT";
 const char* const POPUP_BUTTON_CONTENT_IMAGE_ID = "POPUP_BUTTON_CONTENT_IMAGE";
@@ -63,6 +68,7 @@ const char* const POPUP_BUTTON_CONTENT_IMAGE_FIT_ID = "POPUP_BUTTON_CONTENT_IMAG
 const char* const POPUP_BUTTON_CONTENT_IMAGE_FILL_ID = "POPUP_BUTTON_CONTENT_IMAGE_FILL";
 const char* const POPUP_BUTTON_TITLE_CONTENT_TEXT_ID = "POPUP_BUTTON_TITLE_CONTENT_TEXT";
 const char* const POPUP_BUTTON_TITLE_CONTENT_TEXT_BUTTONS_ID = "POPUP_BUTTON_TITLE_CONTENT_TEXT_BUTTONS";
+const char* const POPUP_BUTTON_FIXED_SIZE_ID = "POPUP_BUTTON_FIXED_SIZE_ID";
 const char* const POPUP_BUTTON_COMPLEX_ID = "POPUP_BUTTON_COMPLEX";
 
 const char* const TABLEVIEW_BUTTON_EMPTY_ID = "TABLEVIEW_BUTTON_EMPTY";
@@ -77,8 +83,12 @@ const char* const TABLEVIEW_BUTTON_NATURAL1_ID = "TABLEVIEW_BUTTON_NATURAL1";
 const char* const TABLEVIEW_BUTTON_NATURAL2_ID = "TABLEVIEW_BUTTON_NATURAL2";
 const char* const TABLEVIEW_BUTTON_NATURAL3_ID = "TABLEVIEW_BUTTON_NATURAL3";
 
-const char* const OKAY_BUTTON_ID = "OKAY_BUTTON";
-const char* const CANCEL_BUTTON_ID = "CANCEL_BUTTON";
+// Names to give controls for confirmation popup to recognise them.
+const char* const POPUP_CONTROL_OK_NAME = "control-ok";
+const char* const POPUP_CONTROL_CANCEL_NAME = "control-cancel";
+// Signals within ConfirmationPopup to connect to.
+const char* const POPUP_CONTROL_SIGNAL_OK ="control-signal-ok";
+const char* const POPUP_CONTROL_SIGNAL_CANCEL ="control-signal-cancel";
 
 const char* const CONTENT_TEXT = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 const char* const IMAGE1 = DALI_IMAGE_DIR "gallery-medium-5.jpg";
@@ -95,10 +105,12 @@ const unsigned int MENU_ITEMS_COUNT = sizeof( MENU_ITEMS ) / sizeof( MENU_ITEMS[
 
 const ButtonItem POPUP_BUTTON_ITEMS[] = {
     { POPUP_BUTTON_COMPLEX_ID,                    "Complex" },
-    { POPUP_BUTTON_EMPTY_ID,                      "Empty" },
     { POPUP_BUTTON_TITLE_ID,                      "Title" },
     { POPUP_BUTTON_BUTTONS_1_ID,                  "1 Button" },
     { POPUP_BUTTON_BUTTONS_2_ID,                  "2 Buttons" },
+    { POPUP_BUTTON_TOAST_ID,                      "Toast Popup" },
+    { POPUP_BUTTON_FIXED_SIZE_ID,                 "Fixed Size" },
+    { POPUP_BUTTON_EMPTY_ID,                      "Empty" },
     { POPUP_BUTTON_TITLE_BUTTONS_ID,              "Title & Buttons" },
     { POPUP_BUTTON_CONTENT_TEXT_ID,               "Text" },
     { POPUP_BUTTON_CONTENT_IMAGE_ID,              "Image" },
@@ -107,7 +119,6 @@ const ButtonItem POPUP_BUTTON_ITEMS[] = {
     { POPUP_BUTTON_CONTENT_IMAGE_FILL_ID,         "Image Fill" },
     { POPUP_BUTTON_TITLE_CONTENT_TEXT_ID,         "Title Text" },
     { POPUP_BUTTON_TITLE_CONTENT_TEXT_BUTTONS_ID, "Title, text, buttons" }
-
 };
 
 const int POPUP_BUTTON_ITEMS_COUNT = sizeof( POPUP_BUTTON_ITEMS ) / sizeof( POPUP_BUTTON_ITEMS[0] );
@@ -142,7 +153,9 @@ public:
   SizeNegotiationController( Application& application )
     : mApplication( application ),
       mMenuShown( false ),
-      mDemoState( POPUP )
+      mContextual( false ),
+      mAnimationFade( false ),
+      mDemoState( SizeNegotiationController::POPUP )
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect( this, &SizeNegotiationController::Create );
@@ -177,7 +190,7 @@ public:
 
     SetTitle();
 
-    // Create menu button
+    // Create menu button.
     Toolkit::PushButton viewButton = Toolkit::PushButton::New();
     viewButton.SetBackgroundImage( ResourceImage::New( MENU_ICON_IMAGE ) );
     viewButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnMenu );
@@ -187,6 +200,25 @@ public:
     const float padding( DemoHelper::DEFAULT_VIEW_STYLE.mToolBarPadding );
     mToolBar.AddControl( mTitleActor, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarTitlePercentage, Toolkit::Alignment::HorizontalCenter, Toolkit::Alignment::Padding( padding, padding, padding, padding ) );
 
+    // Images used for toggle buttons.
+    mContextButtonDisabledImage = ResourceImage::New( CONTEXT_DISABLED_ICON_IMAGE );
+    mContextButtonEnabledImage = ResourceImage::New( CONTEXT_ENABLED_ICON_IMAGE );
+    mAnimationButtonZoomImage = ResourceImage::New( ANIMATION_ZOOM_ICON_IMAGE );
+    mAnimationButtonFadeImage = ResourceImage::New( ANIMATION_FADE_ICON_IMAGE );
+
+    // Create context button.
+    mContextButton = Toolkit::PushButton::New();
+    mContextButton.SetBackgroundImage( mContextButtonDisabledImage );
+    mContextButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnContextClicked );
+    mToolBar.AddControl( mContextButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
+
+    // Create animation button.
+    mAnimationButton = Toolkit::PushButton::New();
+    mAnimationButton.SetBackgroundImage( mAnimationButtonZoomImage );
+    mAnimationButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnAnimationClicked );
+    mToolBar.AddControl( mAnimationButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
+
+    // Add title to the tool bar.
     mItemView = Toolkit::ItemView::New( *this );
     mItemView.SetParentOrigin( ParentOrigin::CENTER );
     mItemView.SetAnchorPoint( AnchorPoint::CENTER );
@@ -243,6 +275,174 @@ public:
     return true;
   }
 
+  bool OnContextClicked( Toolkit::Button button )
+  {
+    mContextual = !mContextual;
+    if( mContextual )
+    {
+      mContextButton.SetBackgroundImage( mContextButtonEnabledImage );
+    }
+    else
+    {
+      mContextButton.SetBackgroundImage( mContextButtonDisabledImage );
+    }
+    return true;
+  }
+
+  bool OnAnimationClicked( Toolkit::Button button )
+  {
+    mAnimationFade = !mAnimationFade;
+    if( mAnimationFade )
+    {
+      mAnimationButton.SetBackgroundImage( mAnimationButtonFadeImage );
+    }
+    else
+    {
+      mAnimationButton.SetBackgroundImage( mAnimationButtonZoomImage );
+    }
+    return true;
+  }
+
+  /**
+   * This function is designed as a shortcut to convert any resize policies set for a popup to
+   * ones that will work for contextual mode (for demo purposes).
+   * Note that in a real-use case example the policies would be set to something appropriate
+   * manually, but in the case of this demo, the popup is parented from the popup-opening buttons
+   * and (incorrectly) have their policies as "SIZE_RELATIVE_TO_PARENT". This would create a tiny
+   * popup that would not be able to contain it's contents, so to illustrate contextual behaviour
+   * this function converts the old policies and size to new ones that would give the popup the
+   * same visual appearance.
+   * @param[in] popup The popup whose policies should be modified.
+   */
+  void SetupContextualResizePolicy( Toolkit::Popup& popup )
+  {
+    Vector2 stageSize = Stage::GetCurrent().GetSize();
+    // Some defaults when creating a new fixed size.
+    // This is NOT a Vector2 so we can modify each dimension in a for-loop.
+    float newSize[ 2 ] = { stageSize.x * 0.75f, stageSize.y * 0.75f };
+    bool modifySize = false;
+
+    // Loop through each of two dimensions to process them.
+    for( unsigned int dimension = 0; dimension < 2; ++dimension )
+    {
+      float stageDimensionSize, sizeModeFactor;
+      Dimension policyDimension = dimension == 0 ? WIDTH : HEIGHT;
+
+      // Setup information related to the current dimension we are processing.
+      if( policyDimension == WIDTH )
+      {
+        stageDimensionSize = stageSize.x;
+        sizeModeFactor = popup.GetSizeModeFactor().x;
+      }
+      else
+      {
+        stageDimensionSize = stageSize.y;
+        sizeModeFactor = popup.GetSizeModeFactor().y;
+      }
+
+      bool modifyPolicy = false;
+      ResizePolicy policy = popup.GetResizePolicy( policyDimension );
+      ResizePolicy newPolicy( policy );
+
+      // Switch on each policy type to determine the new behaviour.
+      switch( policy )
+      {
+        case FIXED:
+        case USE_ASSIGNED_SIZE:
+        {
+          break;
+        }
+
+        case USE_NATURAL_SIZE:
+        case FIT_TO_CHILDREN:
+        case DIMENSION_DEPENDENCY:
+        {
+          // Set size to 0 so the policy determines size.
+          // If a non-zero size is set, policy is converted to fixed.
+          newSize[ dimension ] = 0.0f;
+          modifySize = true;
+          break;
+        }
+
+        // The following cases emulate the three size-mode related resize policies.
+        case FILL_TO_PARENT:
+        {
+          newPolicy = FIXED;
+          newSize[ dimension ] = stageDimensionSize;
+          modifyPolicy = true;
+          break;
+        }
+
+        case SIZE_RELATIVE_TO_PARENT:
+        {
+          newPolicy = FIXED;
+          newSize[ dimension ] = stageDimensionSize * sizeModeFactor;
+          modifyPolicy = true;
+          break;
+        }
+
+        case SIZE_FIXED_OFFSET_FROM_PARENT:
+        {
+          newPolicy = FIXED;
+          newSize[ dimension ] = stageDimensionSize + sizeModeFactor;
+          modifyPolicy = true;
+          break;
+        }
+      }
+
+      if( modifyPolicy )
+      {
+        // Set the new policy for this dimension, if it has been modified.
+        popup.SetResizePolicy( newPolicy, policyDimension );
+        modifySize = true;
+      }
+    }
+
+    if( modifySize )
+    {
+      // The size is set once at the end.
+      popup.SetSize( Vector2( newSize[ 0 ], newSize[ 1 ] ) );
+    }
+  }
+
+  void PopupSetup( Toolkit::Popup popup, Actor parent )
+  {
+#if 0
+    //todor
+    popup.SetSize( 300.0f, 300.0f );
+    popup.SetResizePolicy( FIXED, ALL_DIMENSIONS );
+#endif
+#if 0
+    //todor
+    popup.SetResizePolicy( SIZE_RELATIVE_TO_PARENT, WIDTH );
+    popup.SetResizePolicy( USE_NATURAL_SIZE, HEIGHT );
+    popup.SetSizeModeFactor( Vector3( 0.5f, 0.5f, 1.0f ) );
+#endif
+
+    if( mAnimationFade )
+    {
+      popup.SetAnimationMode( Toolkit::Popup::FADE );
+    }
+    else
+    {
+      popup.SetAnimationMode( Toolkit::Popup::ZOOM );
+    }
+
+    if( mContextual )
+    {
+      popup.SetContextualMode( Toolkit::Popup::BELOW );
+
+      // Modify the preset demo resize policies (and size) to contextual ones.
+      SetupContextualResizePolicy( popup );
+
+      parent.Add( popup );
+    }
+    else
+    {
+      Stage::GetCurrent().Add( popup );
+    }
+  }
+
   void ShowMenu()
   {
     Stage stage = Stage::GetCurrent();
@@ -251,7 +451,7 @@ public:
     mMenu = Toolkit::Popup::New();
     mMenu.SetParentOrigin( ParentOrigin::TOP_LEFT );
     mMenu.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    mMenu.HideTail();
+    mMenu.SetTailDisplayed( false );
     mMenu.OutsideTouchedSignal().Connect( this, &SizeNegotiationController::HideMenu );
     mMenu.SetSize( popupWidth, 0.0f );
     mMenu.SetResizePolicy( FIT_TO_CHILDREN, HEIGHT );
@@ -273,7 +473,7 @@ public:
     }
 
     // Show the menu
-    mMenu.Show();
+    mMenu.SetDisplayState( Toolkit::Popup::SHOWN );
     mMenuShown = true;
   }
 
@@ -281,7 +481,7 @@ public:
   {
     if( mMenu )
     {
-      mMenu.Hide();
+      mMenu.SetDisplayState( Toolkit::Popup::HIDDEN );
       mMenu.Reset();
     }
 
@@ -326,100 +526,160 @@ public:
     const float POPUP_WIDTH_DP = stage.GetSize().width * 0.75f;
 
     Toolkit::Popup popup = Toolkit::Popup::New();
-    popup.SetName( "POPUP" );
+    popup.SetName( "popup" );
     popup.SetParentOrigin( ParentOrigin::CENTER );
     popup.SetAnchorPoint( AnchorPoint::CENTER );
     popup.SetSize( POPUP_WIDTH_DP, 0.0f );
-    popup.HideTail();
+    popup.SetTailDisplayed( false );
 
     popup.OutsideTouchedSignal().Connect( this, &SizeNegotiationController::OnPopupOutsideTouched );
 
     return popup;
   }
 
+  Toolkit::ConfirmationPopup CreateConfirmationPopup( int numberOfButtons )
+  {
+    Stage stage = Stage::GetCurrent();
+
+    Toolkit::ConfirmationPopup confirmationPopup = Toolkit::ConfirmationPopup::New();
+
+    // Create and add buttons.
+    Actor container = Actor::New();
+    if( numberOfButtons >= 1 )
+    {
+      container.Add( CreateOKButton() );
+      if( numberOfButtons >= 2 )
+      {
+        container.Add( CreateCancelButton() );
+      }
+      confirmationPopup.SetControlContainer( container );
+
+      // Connect OK button.
+      confirmationPopup.SetProperty( Toolkit::ConfirmationPopup::Property::CONNECT_SIGNAL_OK_SELECTED, Property::Value( "clicked" ) );
+      confirmationPopup.GetControlSignal( POPUP_CONTROL_SIGNAL_OK )->Connect( this, &SizeNegotiationController::OnPopupOKButtonClicked );
+
+      if( numberOfButtons >= 2 )
+      {
+        // Connect Cancel button.
+        confirmationPopup.SetProperty( Toolkit::ConfirmationPopup::Property::CONNECT_SIGNAL_CANCEL_SELECTED, Property::Value( "clicked" ) );
+        confirmationPopup.GetControlSignal( POPUP_CONTROL_SIGNAL_CANCEL )->Connect( this, &SizeNegotiationController::OnPopupCancelButtonClicked );
+      }
+    }
+
+    confirmationPopup.OutsideTouchedSignal().Connect( this, &SizeNegotiationController::OnPopupOutsideTouched );
+
+    return confirmationPopup;
+  }
+
+  Actor CreateTitle( std::string title )
+  {
+    Toolkit::TextLabel titleActor = Toolkit::TextLabel::New( title );
+    titleActor.SetName( "title-actor" );
+    titleActor.SetProperty( Toolkit::TextLabel::Property::MULTI_LINE, true );
+    titleActor.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+
+    return titleActor;
+  }
+
+  Toolkit::PushButton CreateOKButton()
+  {
+    Toolkit::PushButton okayButton = Toolkit::PushButton::New();
+    okayButton.SetName( POPUP_CONTROL_OK_NAME );
+    okayButton.SetLabel( "OK!" );
+    okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
+    okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
+
+    return okayButton;
+  }
+
+  Toolkit::PushButton CreateCancelButton()
+  {
+    Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
+    cancelButton.SetName( POPUP_CONTROL_CANCEL_NAME );
+    cancelButton.SetLabel( "Cancel" );
+    cancelButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
+    cancelButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
+
+    return cancelButton;
+  }
+
+  void OnPopupOKButtonClicked()
+  {
+    std::cout << "todor: Got OK control clicked callback" << std::endl;
+    if( mPopup )
+    {
+      mPopup.SetDisplayState( Toolkit::Popup::HIDDEN );
+    }
+  }
+
+  void OnPopupCancelButtonClicked()
+  {
+    std::cout << "todor: Got Cancel control clicked callback" << std::endl;
+    if( mPopup )
+    {
+      mPopup.SetDisplayState( Toolkit::Popup::HIDDEN );
+    }
+  }
+
   bool OnButtonClicked( Toolkit::Button button )
   {
+    // Handle menu items that create popups.
     if( button.GetName() == POPUP_BUTTON_EMPTY_ID )
     {
       mPopup = CreatePopup();
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_TITLE_ID )
     {
       mPopup = CreatePopup();
-      mPopup.SetTitle( "Popup!" );
+      mPopup.SetTitle( CreateTitle( "Popup!" ) );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_BUTTONS_1_ID )
     {
-      mPopup = CreatePopup();
+      mPopup = CreateConfirmationPopup( 1 );
+      mPopup.SetTitle( CreateTitle( "Title" ) );
 
-      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
-      okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabel( "OK!" );
-      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( okayButton );
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_BUTTONS_2_ID )
     {
-      mPopup = CreatePopup();
+      mPopup = CreateConfirmationPopup( 2 );
+      mPopup.SetTitle( CreateTitle( "Title" ) );
 
-      Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
-      cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabel( "Cancel" );
-      cancelButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      cancelButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
+    }
+    else if( button.GetName() == POPUP_BUTTON_TOAST_ID )
+    {
+      // Create a toast popup via the type registry (as it is a named-type).
+      TypeInfo typeInfo = TypeRegistry::Get().GetTypeInfo( "popup-toast" );
+      if( typeInfo )
+      {
+        BaseHandle baseHandle = typeInfo.CreateInstance();
+        if( baseHandle )
+        {
+          mPopup = Toolkit::Popup::DownCast( baseHandle );
+          mPopup.SetTitle( CreateTitle( "This is a Toast Popup.\nIt will auto-hide itself" ) );
+          //mPopup.SetTitle( CreateTitle( "This is a Toast Popup. It will auto-hide itself after a few seconds. It will also let events pass through it." ) );
 
-      cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( cancelButton );
-
-      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
-      okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabel( "OK!" );
-      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( okayButton );
-
-      mPopup.Show();
+          Stage::GetCurrent().Add( mPopup );
+          mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
+        }
+      }
     }
     else if( button.GetName() == POPUP_BUTTON_TITLE_BUTTONS_ID )
     {
-      mPopup = CreatePopup();
-      mPopup.SetTitle( "Popup!" );
+      mPopup = CreateConfirmationPopup( 2 );
+      mPopup.SetTitle( CreateTitle( "Popup!" ) );
 
-      Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
-      cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabel( "Cancel" );
-      cancelButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      cancelButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( cancelButton );
-
-      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
-      okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabel( "OK!" );
-      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( okayButton );
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_CONTENT_TEXT_ID )
     {
@@ -434,7 +694,8 @@ public:
 
       mPopup.Add( text );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_CONTENT_IMAGE_ID )
     {
@@ -447,7 +708,8 @@ public:
 
       mPopup.Add( image );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_CONTENT_IMAGE_SCALE_ID )
     {
@@ -459,9 +721,11 @@ public:
       ImageActor image = ImageActor::New( ResourceImage::New( IMAGE2 ) );
       image.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
 
+      PopupSetup( mPopup, button );
       mPopup.Add( image );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_CONTENT_IMAGE_FIT_ID )
     {
@@ -476,7 +740,8 @@ public:
 
       mPopup.Add( image );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_CONTENT_IMAGE_FILL_ID )
     {
@@ -491,12 +756,13 @@ public:
 
       mPopup.Add( image );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_TITLE_CONTENT_TEXT_ID )
     {
       mPopup = CreatePopup();
-      mPopup.SetTitle( "Popup!" );
+      mPopup.SetTitle( CreateTitle( "Popup!" ) );
 
       Toolkit::TextLabel text = Toolkit::TextLabel::New( CONTENT_TEXT );
       text.SetName( "POPUP_CONTENT_TEXT" );
@@ -507,12 +773,35 @@ public:
 
       mPopup.Add( text );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
+    }
+    else if( button.GetName() == POPUP_BUTTON_FIXED_SIZE_ID )
+    {
+      mPopup = CreatePopup();
+      mPopup.SetTitle( CreateTitle( "Popup!" ) );
+
+      Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fixed size popup" );
+      text.SetName( "POPUP_CONTENT_TEXT" );
+      text.SetResizePolicy( FILL_TO_PARENT, WIDTH );
+      text.SetResizePolicy( DIMENSION_DEPENDENCY, HEIGHT );
+      text.SetProperty( TextLabel::Property::MULTI_LINE, true );
+      text.SetPadding( Padding( 20.0f, 20.0f, 20.0f, 20.0f ) );
+
+      mPopup.Add( text );
+
+      PopupSetup( mPopup, button );
+
+      // Fix the popup's size.
+      mPopup.SetSize( 240.0f, 400.0f );
+      mPopup.SetResizePolicy( FIXED, ALL_DIMENSIONS );
+
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_TITLE_CONTENT_TEXT_BUTTONS_ID )
     {
-      mPopup = CreatePopup();
-      mPopup.SetTitle( "Popup!" );
+      mPopup = CreateConfirmationPopup( 2 );
+      mPopup.SetTitle( CreateTitle( "Popup!" ) );
 
       Toolkit::TextLabel text = Toolkit::TextLabel::New( CONTENT_TEXT );
       text.SetName( "POPUP_CONTENT_TEXT" );
@@ -523,37 +812,18 @@ public:
 
       mPopup.Add( text );
 
-      Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
-      cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabel( "Cancel" );
-      cancelButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      cancelButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( cancelButton );
-
-      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
-      okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabel( "OK!" );
-      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( okayButton );
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == POPUP_BUTTON_COMPLEX_ID )
     {
-      mPopup = CreatePopup();
-      mPopup.SetTitle( "Warning" );
+      mPopup = CreateConfirmationPopup( 2 );
+      mPopup.SetTitle( CreateTitle( "Warning" ) );
 
       // Content
       Toolkit::TableView content = Toolkit::TableView::New( 2, 2 );
       content.SetName( "COMPLEX_TABLEVIEW" );
-      content.SetResizePolicy( FILL_TO_PARENT, WIDTH );
+      content.SetResizePolicy( FILL_TO_PARENT, WIDTH );//todor content.SetResizePolicy( USE_NATURAL_SIZE, WIDTH );
       content.SetResizePolicy( USE_NATURAL_SIZE, HEIGHT );
       content.SetFitHeight( 0 );
       content.SetFitHeight( 1 );
@@ -606,30 +876,10 @@ public:
         content.AddChild( root, Toolkit::TableView::CellPosition( 1, 0 ) );
       }
 
-      mPopup.Add( content );
+      mPopup.SetContent( content );
 
-      // Buttons
-      Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
-      cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabel( "Cancel" );
-      cancelButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      cancelButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( cancelButton );
-
-      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
-      okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabel( "OK!" );
-      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
-      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
-
-      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
-
-      mPopup.AddButton( okayButton );
-
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_EMPTY_ID )
     {
@@ -637,13 +887,13 @@ public:
       mPopup.SetResizePolicy( SIZE_RELATIVE_TO_PARENT, ALL_DIMENSIONS );
       mPopup.SetSizeModeFactor( Vector3( 0.75f, 0.5f, 1.0f ) );
 
-
       Toolkit::TableView table = Toolkit::TableView::New( 0, 0 );
       table.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
 
       mPopup.Add( table );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_1CELL_ID )
     {
@@ -662,14 +912,14 @@ public:
 
       mPopup.Add( table );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_3CELL_ID )
     {
       mPopup = CreatePopup();
       mPopup.SetResizePolicy( SIZE_RELATIVE_TO_PARENT, ALL_DIMENSIONS );
       mPopup.SetSizeModeFactor( Vector3( 0.75f, 0.5f, 1.0f ) );
-
 
       Toolkit::TableView table = Toolkit::TableView::New( 0, 0 );
       table.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
@@ -692,14 +942,14 @@ public:
 
       mPopup.Add( table );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_3X3CELL_ID )
     {
       mPopup = CreatePopup();
       mPopup.SetResizePolicy( SIZE_RELATIVE_TO_PARENT, ALL_DIMENSIONS );
       mPopup.SetSizeModeFactor( Vector3( 0.75f, 0.5f, 1.0f ) );
-
 
       Toolkit::TableView table = Toolkit::TableView::New( 3, 3 );
       table.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
@@ -757,14 +1007,14 @@ public:
 
       mPopup.Add( table );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_FIXED1_ID )
     {
       mPopup = CreatePopup();
       mPopup.SetResizePolicy( SIZE_RELATIVE_TO_PARENT, ALL_DIMENSIONS );
       mPopup.SetSizeModeFactor( Vector3( 0.75f, 0.5f, 1.0f ) );
-
 
       Toolkit::TableView table = Toolkit::TableView::New( 3, 1 );
       table.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
@@ -806,14 +1056,14 @@ public:
 
       mPopup.Add( table );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_FIXED2_ID )
     {
       mPopup = CreatePopup();
       mPopup.SetResizePolicy( SIZE_RELATIVE_TO_PARENT, ALL_DIMENSIONS );
       mPopup.SetSizeModeFactor( Vector3( 0.75f, 0.5f, 1.0f ) );
-
 
       Toolkit::TableView table = Toolkit::TableView::New( 3, 1 );
       table.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
@@ -862,14 +1112,14 @@ public:
 
       mPopup.Add( table );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_FIT1_ID )
     {
       mPopup = CreatePopup();
       mPopup.SetResizePolicy( SIZE_RELATIVE_TO_PARENT, ALL_DIMENSIONS );
       mPopup.SetSizeModeFactor( Vector3( 0.75f, 0.5f, 1.0f ) );
-
 
       Toolkit::TableView table = Toolkit::TableView::New( 3, 1 );
       table.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
@@ -926,7 +1176,8 @@ public:
 
       mPopup.Add( table );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_FIT2_ID )
     {
@@ -987,7 +1238,8 @@ public:
 
       mPopup.Add( table );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_NATURAL1_ID )
     {
@@ -1054,7 +1306,8 @@ public:
 
       mPopup.Add( table );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_NATURAL2_ID )
     {
@@ -1105,7 +1358,8 @@ public:
 
       mPopup.Add( table );
 
-      mPopup.Show();
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == TABLEVIEW_BUTTON_NATURAL3_ID )
     {
@@ -1154,14 +1408,8 @@ public:
 
       mPopup.Add( table );
 
-      mPopup.Show();
-    }
-    else if( button.GetName() == OKAY_BUTTON_ID || button.GetName() == CANCEL_BUTTON_ID )
-    {
-      if( mPopup )
-      {
-        mPopup.Hide();
-      }
+      PopupSetup( mPopup, button );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
 
     return true;
@@ -1171,7 +1419,7 @@ public:
   {
     if( mPopup )
     {
-      mPopup.Hide();
+      mPopup.SetDisplayState( Toolkit::Popup::HIDDEN );
     }
   }
 
@@ -1275,18 +1523,28 @@ private:
   Application&      mApplication;
   Toolkit::View     mView;                   ///< The View instance.
   Toolkit::ToolBar  mToolBar;                ///< The View's Toolbar.
+  Toolkit::PushButton mContextButton;        ///< For toggling contextual mode.
+  Toolkit::PushButton mAnimationButton;      ///< For toggling the fade animation.
   Layer             mContentLayer;           ///< Content layer
 
   Toolkit::TextLabel mTitleActor;             ///< Title text
 
   Toolkit::Popup    mMenu;                   ///< The navigation menu
   bool              mMenuShown;              ///< If the navigation menu is currently being displayed or not
+  bool              mContextual;             ///< True if currently using the contextual popup mode.
+  bool              mAnimationFade;          ///< True if currently using the fade animation.
+
+  ResourceImage mContextButtonDisabledImage; ///< The disabled context button icon.
+  ResourceImage mContextButtonEnabledImage;  ///< The enabled context button icon.
+  ResourceImage mAnimationButtonZoomImage;   ///< The zoom animation button icon.
+  ResourceImage mAnimationButtonFadeImage;   ///< The fade animation button icon.
 
   Toolkit::Popup    mPopup;
 
   Toolkit::ItemView mItemView;               ///< ItemView to hold test images
 
   DemoState mDemoState;
+
 };
 
 void RunTest( Application& application )
