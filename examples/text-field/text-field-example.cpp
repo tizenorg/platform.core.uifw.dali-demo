@@ -103,7 +103,7 @@ public:
     mPopup = CreatePopup( stageSize.width * 0.8f );
     mPopup.Add( mField );
     mPopup.OutsideTouchedSignal().Connect( this, &TextFieldExample::OnPopupOutsideTouched );
-    mPopup.Show();
+    mPopup.SetDisplayState( Popup::SHOWN );
 
     return true;
   }
@@ -129,7 +129,6 @@ public:
     popup.SetParentOrigin( ParentOrigin::CENTER );
     popup.SetAnchorPoint( AnchorPoint::CENTER );
     popup.SetSize( width, 0.0f );
-    popup.HideTail();
     popup.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::HEIGHT );
     popup.SetSizeModeFactor( POPUP_SIZE_FACTOR_TO_PARENT );
     popup.TouchedSignal().Connect( this, &TextFieldExample::OnPopupTouched );
@@ -150,7 +149,7 @@ public:
     // Hide & discard the pop-up
     if( mPopup )
     {
-      mPopup.Hide();
+      mPopup.SetDisplayState( Popup::HIDDEN );
     }
     mField.Reset();
     mPopup.Reset();
