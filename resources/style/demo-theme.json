@@ -38,6 +38,11 @@ distributing this software or its derivatives.
       "point-size":18
     },
 
+    "builderlabel":
+    {
+      "point-size":13
+    },
+
     "textfield":
     {
       "font-family":"HelveticaNeue",
