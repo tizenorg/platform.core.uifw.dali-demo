@@ -255,6 +255,7 @@ void DissolveEffectApp::OnInit( Application& application )
 
   // show the first image
   mCurrentImage = ImageActor::New( LoadStageFillingImage( IMAGES[mIndex] ) );
+  mCurrentImage.SetRelayoutEnabled( false );
   mCurrentImage.SetPositionInheritanceMode(USE_PARENT_POSITION_PLUS_LOCAL_POSITION);
   mCurrentImage.ApplyConstraint( mSizeConstraint );
   mParent.Add( mCurrentImage );
@@ -284,6 +285,7 @@ void DissolveEffectApp::OnPanGesture( Actor actor, const PanGesture& gesture )
 
     Image image = LoadStageFillingImage( IMAGES[ mIndex ] );
     mNextImage = ImageActor::New( image );
+    mNextImage.SetRelayoutEnabled( false );
     mNextImage.SetPositionInheritanceMode(USE_PARENT_POSITION_PLUS_LOCAL_POSITION);
     mNextImage.ApplyConstraint( mSizeConstraint );
     mNextImage.SetZ(INITIAL_DEPTH);
