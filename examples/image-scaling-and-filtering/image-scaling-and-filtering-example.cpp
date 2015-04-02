@@ -390,7 +390,6 @@ public:
     popup.SetParentOrigin( ParentOrigin::CENTER );
     popup.SetAnchorPoint( AnchorPoint::CENTER );
     popup.SetSize( POPUP_WIDTH_DP, 0.0f );
-    popup.HideTail();
 
     popup.OutsideTouchedSignal().Connect( this, &ImageScalingAndFilteringController::OnPopupOutsideTouched );
 
@@ -442,7 +441,8 @@ public:
       CreatePopupButton( fittingModes, StringFromScalingMode( FittingMode::FIT_HEIGHT ) );
 
       mPopup.Add( fittingModes );
-      mPopup.Show();
+      Stage::GetCurrent().Add( mPopup );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( button.GetName() == SAMPLING_BUTTON_ID )
     {
@@ -469,7 +469,8 @@ public:
       CreatePopupButton( samplingModes, StringFromFilterMode( SamplingMode::NO_FILTER ) );
 
       mPopup.Add( samplingModes );
-      mPopup.Show();
+      Stage::GetCurrent().Add( mPopup );
+      mPopup.SetDisplayState( Toolkit::Popup::SHOWN );
     }
     else if( CheckFittingModeButton( button, FittingMode::SCALE_TO_FILL) ||
              CheckFittingModeButton( button, FittingMode::SHRINK_TO_FIT) ||
@@ -498,7 +499,7 @@ public:
       mFittingModeButton.SetLabel( modeName );
       mFittingModeButton.GetLabel().SetProperty( Toolkit::Control::Property::STYLE_NAME, STYLE_BUTTON_TEXT );
       ResizeImage();
-      mPopup.Hide();
+      mPopup.SetDisplayState( Toolkit::Popup::HIDDEN );
       mPopup.Reset();
       return true;
     }
@@ -514,7 +515,7 @@ public:
       mSamplingModeButton.SetLabel( modeName );
       mSamplingModeButton.GetLabel().SetProperty( Toolkit::Control::Property::STYLE_NAME, STYLE_BUTTON_TEXT );
       ResizeImage();
-      mPopup.Hide();
+      mPopup.SetDisplayState( Toolkit::Popup::HIDDEN );
       mPopup.Reset();
       return true;
     }
@@ -525,7 +526,7 @@ public:
   {
     if( mPopup )
     {
-      mPopup.Hide();
+      mPopup.SetDisplayState( Toolkit::Popup::HIDDEN );
       mPopup.Reset();
     }
   }
@@ -612,7 +613,7 @@ public:
       {
         if( mPopup && mPopup.IsVisible() )
         {
-          mPopup.Hide();
+          mPopup.SetDisplayState( Toolkit::Popup::HIDDEN );
           mPopup.Reset();
         }
         else
