@@ -1,0 +1,125 @@
+{
+  "constants": {
+    "CONFIG_SCRIPT_LOG_LEVEL": "Verbose"
+  },
+  "stage": [
+    // First Button
+    {
+      "type": "PushButton",
+      "parent-origin": "TOP_CENTER",
+      "anchor-point": "TOP_CENTER",
+      "position": [0, 0, 0],
+      "size": [0, 200, 0],
+      "normal-state-actor": {
+        "type": "ImageActor",
+        "image": {
+          "filename": "{DALI_IMAGE_DIR}blocks-brick-1.png"
+        }
+      },
+      "selected-state-actor": {
+        "type": "ImageActor",
+        "image": {
+          "filename": "{DALI_IMAGE_DIR}blocks-brick-2.png"
+        }
+      },
+      "label-actor": {
+        "type": "TextView",
+        "text": "Normal"
+      }
+    },
+    {
+      "type": "Popup",
+      "parent-origin": "BOTTOM_CENTER",
+      "anchor-point": "BOTTOM_CENTER",
+      "position": [0, 0, 0],
+      "size": [500, 400, 0],
+      "tail-displayed": false,
+      "tail-position": [0, 0, 0],
+      "display-state": "SHOWN",
+      "display-change-animation-duration": 2.0,
+      "contextual": false,
+      "title": {
+        "type": "TextView",
+        "text": "Title text"
+      },
+      "content": {
+        "type": "TextView",
+        "text": "Content text"
+      },
+      "controls": {
+        "type": "Control",
+        "actors": [
+          {
+            "type": "PushButton",
+            "parent-origin": "BOTTOM_CENTER",
+            "anchor-point": "BOTTOM_CENTER",
+            "position": [0, 0, 0],
+            "size": [100, 50, 0],
+            "normal-state-actor": {
+              "type": "ImageActor",
+              "image": {
+                "filename": "{DALI_IMAGE_DIR}blocks-brick-1.png"
+              }
+            },
+            "selected-state-actor": {
+              "type": "ImageActor",
+              "image": {
+                "filename": "{DALI_IMAGE_DIR}blocks-brick-2.png"
+              }
+            },
+            "label-actor": {
+              "type": "TextView",
+              "text": "Save"
+            }
+          },
+          {
+            "type": "PushButton",
+            "parent-origin": "BOTTOM_CENTER",
+            "anchor-point": "BOTTOM_CENTER",
+            "position": [150, 0, 0],
+            "size": [100, 50, 0],
+            "normal-state-actor": {
+              "type": "ImageActor",
+              "image": {
+                "filename": "{DALI_IMAGE_DIR}blocks-brick-1.png"
+              }
+            },
+            "selected-state-actor": {
+              "type": "ImageActor",
+              "image": {
+                "filename": "{DALI_IMAGE_DIR}blocks-brick-2.png"
+              }
+            },
+            "label-actor": {
+              "type": "TextView",
+              "text": "Discard"
+            }
+          },
+          {
+            "type": "PushButton",
+            "parent-origin": "BOTTOM_CENTER",
+            "anchor-point": "BOTTOM_CENTER",
+            "position": [300, 0, 0],
+            "size": [100, 50, 0],
+            "normal-state-actor": {
+              "type": "ImageActor",
+              "image": {
+                "filename": "{DALI_IMAGE_DIR}blocks-brick-1.png"
+              }
+            },
+            "selected-state-actor": {
+              "type": "ImageActor",
+              "image": {
+                "filename": "{DALI_IMAGE_DIR}blocks-brick-2.png"
+              }
+            },
+            "label-actor": {
+              "type": "TextView",
+              "text": "Cancel"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
