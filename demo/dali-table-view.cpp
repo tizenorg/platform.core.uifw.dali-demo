@@ -782,10 +782,10 @@ void DaliTableView::InitialiseBackgroundActors( Actor actor )
     child.SetPosition( childPos );
 
     // Define bubble horizontal parallax and vertical wrapping
-    Constraint animConstraint = Constraint::New < Vector3 > ( Actor::Property::POSITION, AnimateBubbleConstraint( childPos, Random::Range( -0.85f, 0.25f ), childSize.height ) );
+    Constraint animConstraint = Constraint::New < Vector3 > ( child, Actor::Property::POSITION, AnimateBubbleConstraint( childPos, Random::Range( -0.85f, 0.25f ), childSize.height ) );
     animConstraint.AddSource( Source( mScrollView, mScrollView.GetPropertyIndex( ScrollView::SCROLL_POSITION_PROPERTY_NAME ) ) );
     animConstraint.AddSource( Dali::ParentSource( Dali::Actor::Property::SIZE ) );
-    child.ApplyConstraint( animConstraint );
+    animConstraint.Apply();
 
     // Kickoff animation
     Animation animation = Animation::New( Random::Range( 40.0f, 80.0f ) );

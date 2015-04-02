@@ -232,14 +232,13 @@ public:
     overlay.Add( mMagnifier );
 
     // Apply constraint to animate the position of the magnifier.
-    Constraint constraint = Constraint::New<Vector3>(Actor::Property::POSITION, ConfinementConstraint(ParentOrigin::CENTER, Vector2::ONE * MAGNIFIER_INDENT, Vector2::ONE * MAGNIFIER_INDENT));
+    Constraint constraint = Constraint::New<Vector3>( mMagnifier, Actor::Property::POSITION, ConfinementConstraint(ParentOrigin::CENTER, Vector2::ONE * MAGNIFIER_INDENT, Vector2::ONE * MAGNIFIER_INDENT) );
     constraint.AddSource( LocalSource(Actor::Property::SIZE) );
     constraint.AddSource( LocalSource(Actor::Property::PARENT_ORIGIN) );
     constraint.AddSource( LocalSource(Actor::Property::ANCHOR_POINT) );
     constraint.AddSource( ParentSource(Actor::Property::SIZE) );
-
     constraint.SetRemoveAction(Constraint::Discard);
-    mMagnifier.ApplyConstraint( constraint );
+    constraint.Apply();
 
     // Create bouncing magnifier automatically bounces around screen.
     mBouncingMagnifier = Toolkit::Magnifier::New();
@@ -253,18 +252,16 @@ public:
     ContinueAnimation();
 
     // Apply constraint to animate the position of the magnifier.
-    constraint = Constraint::New<Vector3>( Actor::Property::POSITION, MagnifierPathConstraint(mStageSize, mStageSize * 0.5f) );
+    constraint = Constraint::New<Vector3>( mBouncingMagnifier, Actor::Property::POSITION, MagnifierPathConstraint(mStageSize, mStageSize * 0.5f) );
     constraint.AddSource( LocalSource(Actor::Property::SIZE) );
     constraint.AddSource( LocalSource(mAnimationTimeProperty) );
-
-    mBouncingMagnifier.ApplyConstraint( constraint );
+    constraint.Apply();
 
     // Apply constraint to animate the source of the magnifier.
-    constraint = Constraint::New<Vector3>( mBouncingMagnifier.GetPropertyIndex( Toolkit::Magnifier::SOURCE_POSITION_PROPERTY_NAME ), MagnifierPathConstraint(mStageSize) );
+    constraint = Constraint::New<Vector3>( mBouncingMagnifier, mBouncingMagnifier.GetPropertyIndex( Toolkit::Magnifier::SOURCE_POSITION_PROPERTY_NAME ), MagnifierPathConstraint(mStageSize) );
     constraint.AddSource( LocalSource(Actor::Property::SIZE) );
     constraint.AddSource( LocalSource(mAnimationTimeProperty) );
-
-    mBouncingMagnifier.ApplyConstraint( constraint );
+    constraint.Apply();
   }
 
   /**

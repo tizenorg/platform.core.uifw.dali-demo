@@ -257,9 +257,9 @@ public:
     handle.SetUniform( "uLightIntensity",  2.5f );
 
     Dali::Property::Index index = handle.RegisterProperty( "uSpinAngle", 0.f );
-    Constraint constraint = Constraint::New<Vector2>( handle.GetPropertyIndex("uLightSpinOffset"), LightOffsetConstraint(stageSize.x*0.1f) );
+    Constraint constraint = Constraint::New<Vector2>( handle, handle.GetPropertyIndex("uLightSpinOffset"), LightOffsetConstraint(stageSize.x*0.1f) );
     constraint.AddSource( LocalSource(index) );
-    handle.ApplyConstraint( constraint );
+    constraint.Apply();
 
     return handle;
   }
