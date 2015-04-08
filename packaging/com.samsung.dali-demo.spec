@@ -46,8 +46,9 @@ of the capability of the toolkit.
 ##############################
 %build
 PREFIX="/usr"
-CXXFLAGS+=" -Wall -g -O2"
-LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -fPIC"
+CXXFLAGS+=" -Wall -g -Os -fPIC"
+LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed"
+export LDFLAGS
 
 %ifarch %{arm}
 CXXFLAGS+=" -D_ARCH_ARM_"
