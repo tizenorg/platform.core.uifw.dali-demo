@@ -651,7 +651,7 @@ public:
 
         root.AddChild( text, Toolkit::TableView::CellPosition( 0, 1 ) );
 
-        content.AddChild( root, Toolkit::TableView::CellPosition( 1, 0, 0, 2 ) );  // Column span 2
+        content.AddChild( root, Toolkit::TableView::CellPosition( 1, 0 ) );
       }
 
       mPopup.Add( content );
