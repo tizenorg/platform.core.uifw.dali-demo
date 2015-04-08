@@ -43,7 +43,7 @@ of the capability of the toolkit.
 ##############################
 %build
 PREFIX="/usr"
-CXXFLAGS+=" -Wall -g -O2"
+CXXFLAGS+=" -Wall -g -Os"
 LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -fPIC"
 
 %ifarch %{arm}
