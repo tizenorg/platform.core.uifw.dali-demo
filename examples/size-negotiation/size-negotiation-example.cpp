@@ -445,7 +445,6 @@ public:
       text.SetProperty( TextLabel::Property::MULTI_LINE, true );
       text.SetProperty( TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
       text.SetProperty( TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
-      text.SetResizePolicy( FILL_TO_PARENT, Dali::HEIGHT );
       text.SetPadding( Padding( 20.0f, 20.0f, 20.0f, 20.0f ) );
 
       mPopup.Add( text );
@@ -533,6 +532,7 @@ public:
       text.SetName( "POPUP_CONTENT_TEXT" );
       text.SetResizePolicy( FILL_TO_PARENT, WIDTH );
       text.SetResizePolicy( DIMENSION_DEPENDENCY, HEIGHT );
+      text.SetProperty( TextLabel::Property::MULTI_LINE, true );
       text.SetPadding( Padding( 20.0f, 20.0f, 20.0f, 20.0f ) );
 
       mPopup.Add( text );
@@ -551,6 +551,7 @@ public:
       text.SetName( "POPUP_CONTENT_TEXT" );
       text.SetResizePolicy( FILL_TO_PARENT, WIDTH );
       text.SetResizePolicy( DIMENSION_DEPENDENCY, HEIGHT );
+      text.SetProperty( TextLabel::Property::MULTI_LINE, true );
       text.SetPadding( Padding( 10.0f, 10.0f, 20.0f, 0.0f ) );
 
       mPopup.Add( text );
@@ -599,6 +600,7 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Do you really want to quit?" );
         text.SetResizePolicy( FILL_TO_PARENT, WIDTH );
         text.SetResizePolicy( DIMENSION_DEPENDENCY, HEIGHT );
+        text.SetProperty( Toolkit::TextLabel::Property::MULTI_LINE, true );
 
         content.AddChild( text, Toolkit::TableView::CellPosition( 0, 0 ) );
       }
@@ -823,8 +825,10 @@ public:
         Actor backing = Toolkit::CreateSolidColorActor( Vector4( 1.0f, 0.0f, 0.0f, 1.0f ) );
         backing.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fixed" );
-        text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
         backing.Add( text );
         table.Add( backing );
       }
@@ -832,8 +836,10 @@ public:
         Actor backing = Toolkit::CreateSolidColorActor( Vector4( 1.0f, 1.0f, 0.0f, 1.0f ) );
         backing.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fill" );
-        text.SetAnchorPoint( AnchorPoint::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
         backing.Add( text );
         table.Add( backing );
       }
@@ -841,8 +847,10 @@ public:
         Actor backing = Toolkit::CreateSolidColorActor( Vector4( 0.0f, 1.0f, 0.0f, 1.0f ) );
         backing.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fill" );
-        text.SetAnchorPoint( AnchorPoint::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
         backing.Add( text );
         table.Add( backing );
       }
@@ -872,6 +880,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fixed" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
         table.Add( backing );
       }
@@ -881,6 +893,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fill" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
         table.Add( backing );
       }
@@ -890,6 +906,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fixed" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
         table.Add( backing );
       }
@@ -921,6 +941,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fit" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -932,6 +956,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fill" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -944,6 +972,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fit" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -973,6 +1005,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fill" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -983,6 +1019,10 @@ public:
         backing.SetSize( 0.0f, 200.0f );
 
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fit" );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
         backing.Add( text );
@@ -996,6 +1036,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fill" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -1030,6 +1074,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fit" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -1042,6 +1090,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fit" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -1054,6 +1106,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fit" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -1088,6 +1144,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fit" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -1100,6 +1160,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fit" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -1132,6 +1196,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fixed" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
@@ -1144,6 +1212,10 @@ public:
         Toolkit::TextLabel text = Toolkit::TextLabel::New( "Fit" );
         text.SetAnchorPoint( AnchorPoint::CENTER );
         text.SetParentOrigin( ParentOrigin::CENTER );
+        text.SetResizePolicy( FILL_TO_PARENT, ALL_DIMENSIONS );
+        text.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+        text.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
+
         backing.Add( text );
 
         table.Add( backing );
