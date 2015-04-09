@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,70 +27,85 @@ using namespace Dali;
 namespace
 {
 const char* MATERIAL_SAMPLE( DALI_IMAGE_DIR "gallery-small-48.jpg" );
+const char* MATERIAL_SAMPLE2( DALI_IMAGE_DIR "gallery-medium-19.jpg" );
 
 #define MAKE_SHADER(A)#A
 
 const char* VERTEX_SHADER = MAKE_SHADER(
 attribute mediump vec2    aPosition;
-attribute highp   vec2    aTexCoord;
+attribute highp   vec2    aHue;
 varying   mediump vec2    vTexCoord;
 uniform   mediump mat4    uMvpMatrix;
 uniform   mediump vec3    uSize;
 uniform   lowp    vec4    uFadeColor;
+varying   mediump vec3    vVertexColor;
+varying   mediump float   vHue;
+
+vec3 hsv2rgb(vec3 c)
+{
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
 
 void main()
 {
   mediump vec4 vertexPosition = vec4(aPosition, 0.0, 1.0);
   vertexPosition.xyz *= uSize;
   vertexPosition = uMvpMatrix * vertexPosition;
-  vTexCoord = aTexCoord;
+  vVertexColor = hsv2rgb( vec3( aHue.x, 0.4, 0.6 ) );
+  vHue = aHue.x;
+  gl_PointSize = 80.0;
   gl_Position = vertexPosition;
 }
 );
 
 const char* FRAGMENT_SHADER = MAKE_SHADER(
-varying mediump vec2  vTexCoord;
+varying mediump vec3  vVertexColor;
+varying mediump float vHue;
 uniform lowp  vec4    uColor;
-uniform sampler2D     sTexture;
-uniform   lowp    vec4    uFadeColor;
+uniform sampler2D     sTexture1;
+uniform sampler2D     sTexture2;
+uniform lowp vec4     uFadeColor;
 
 void main()
 {
-  gl_FragColor = texture2D( sTexture, vTexCoord ) * uColor * uFadeColor;
+  mediump vec4 texCol1 = texture2D(sTexture1, gl_PointCoord);
+  mediump vec4 texCol2 = texture2D(sTexture2, gl_PointCoord);
+  gl_FragColor = vec4(vVertexColor, 1.0) * ((texCol1*vHue) + (texCol2*(1.0-vHue)));
 }
 );
 
 Geometry CreateGeometry()
 {
-
   // Create vertices
-  const float halfQuadSize = .5f;
-  struct TexturedQuadVertex { Vector2 position; Vector2 textureCoordinates; };
-  TexturedQuadVertex texturedQuadVertexData[4] = {
-    { Vector2(-halfQuadSize, -halfQuadSize), Vector2(0.f, 0.f) },
-    { Vector2( halfQuadSize, -halfQuadSize), Vector2(1.f, 0.f) },
-    { Vector2(-halfQuadSize,  halfQuadSize), Vector2(0.f, 1.f) },
-    { Vector2( halfQuadSize,  halfQuadSize), Vector2(1.f, 1.f) } };
+  struct Vertex { Vector2 position; Vector2 hue; };
 
-  Property::Map texturedQuadVertexFormat;
-  texturedQuadVertexFormat["aPosition"] = Property::VECTOR2;
-  texturedQuadVertexFormat["aVertexCoord"] = Property::VECTOR2;
-  PropertyBuffer texturedQuadVertices = PropertyBuffer::New( PropertyBuffer::STATIC, texturedQuadVertexFormat, 4 );
-  texturedQuadVertices.SetData(texturedQuadVertexData);
+  unsigned int numSides = 20;
+  Vertex polyhedraVertexData[numSides];
+  float angle=0;
+  float sectorAngle = 2.0f * Math::PI / (float) numSides;
+  for(unsigned int i=0; i<numSides; ++i)
+  {
+    polyhedraVertexData[i].position.x = sinf(angle);
+    polyhedraVertexData[i].position.y = cosf(angle);
+    polyhedraVertexData[i].hue.x = angle / ( 2.0f * Math::PI);
+    polyhedraVertexData[i].hue.y = 0;
+    angle += sectorAngle;
+  }
 
-  // Create indices
-  unsigned short indexData[6] = { 0, 3, 1, 0, 2, 3 };
-  Property::Map indexFormat;
-  indexFormat["indices"] = Property::UNSIGNED_INTEGER;
-  PropertyBuffer indices = PropertyBuffer::New( PropertyBuffer::STATIC, indexFormat, 3 );
-  indices.SetData(indexData);
+  Property::Map polyhedraVertexFormat;
+  polyhedraVertexFormat["aPosition"] = Property::VECTOR2;
+  polyhedraVertexFormat["aHue"] = Property::VECTOR2;
+  PropertyBuffer polyhedraVertices = PropertyBuffer::New( PropertyBuffer::STATIC, polyhedraVertexFormat, numSides );
+  polyhedraVertices.SetData(polyhedraVertexData);
 
   // Create the geometry object
-  Geometry texturedQuadGeometry = Geometry::New();
-  texturedQuadGeometry.AddVertexBuffer( texturedQuadVertices );
-  texturedQuadGeometry.SetIndexBuffer( indices );
+  Geometry polyhedraGeometry = Geometry::New();
+  polyhedraGeometry.AddVertexBuffer( polyhedraVertices );
+  polyhedraGeometry.SetGeometryType( Geometry::POINTS );
 
-  return texturedQuadGeometry;
+  return polyhedraGeometry;
 }
 
 } // anonymous namespace
@@ -137,11 +152,15 @@ public:
     application.GetWindow().ShowIndicator( Dali::Window::INVISIBLE );
 
     mImage = ResourceImage::New( MATERIAL_SAMPLE );
-    mSampler = Sampler::New(mImage, "sTexture");
+    Image image = ResourceImage::New( MATERIAL_SAMPLE2 );
+    mSampler1 = Sampler::New(mImage, "sTexture1");
+    mSampler2 = Sampler::New(image, "sTexture2");
+
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
 
     mMaterial = Material::New( mShader );
-    mMaterial.AddSampler( mSampler );
+    mMaterial.AddSampler( mSampler1 );
+    mMaterial.AddSampler( mSampler2 );
 
     mGeometry = CreateGeometry();
 
@@ -149,7 +168,7 @@ public:
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
-    mMeshActor.SetSize(400, 400);
+    mMeshActor.SetSize(200, 200);
 
     Property::Index fadeColorIndex = mMeshActor.RegisterProperty( "fade-color", Color::GREEN );
     mMeshActor.AddUniformMapping( fadeColorIndex, std::string("uFadeColor") );
@@ -158,43 +177,17 @@ public:
     mRenderer.AddUniformMapping( fadeColorIndex, std::string("uFadeColor" ) );
     mRenderer.SetDepthIndex(0);
 
-    mMeshActor.SetParentOrigin( ParentOrigin::TOP_CENTER );
-    mMeshActor.SetAnchorPoint( AnchorPoint::TOP_CENTER );
+    mMeshActor.SetParentOrigin( ParentOrigin::CENTER );
+    mMeshActor.SetAnchorPoint( AnchorPoint::CENTER );
     stage.Add( mMeshActor );
 
-
-    mRenderer2 = Renderer::New( mGeometry, mMaterial );
-
-    mMeshActor2 = Actor::New();
-    mMeshActor2.AddRenderer( mRenderer2 );
-    mMeshActor2.SetSize(400, 400);
-
-    mMeshActor2.RegisterProperty( "a-n-other-property", Color::GREEN );
-    Property::Index fadeColorIndex2 = mMeshActor2.RegisterProperty( "another-fade-color", Color::GREEN );
-    mMeshActor2.AddUniformMapping( fadeColorIndex2, std::string("uFadeColor") );
-
-    mRenderer2.RegisterProperty( "a-n-other-property", Vector3::ZERO );
-    mRenderer2.RegisterProperty( "winning-formula", 8008.135f );
-    fadeColorIndex2 = mRenderer2.RegisterProperty( "another-fade-color", Color::GREEN );
-    mRenderer2.AddUniformMapping( fadeColorIndex2, std::string("uFadeColor" ) );
-    mRenderer2.SetDepthIndex(0);
-
-    mMeshActor2.SetParentOrigin( ParentOrigin::BOTTOM_CENTER );
-    mMeshActor2.SetAnchorPoint( AnchorPoint::BOTTOM_CENTER );
-    stage.Add( mMeshActor2 );
-
-
-    Animation  animation = Animation::New(5);
+    Animation  animation = Animation::New(15);
     KeyFrames keyFrames = KeyFrames::New();
     keyFrames.Add(0.0f, Vector4::ZERO);
     keyFrames.Add(1.0f, Vector4( 1.0f, 0.0f, 1.0f, 1.0f ));
 
-    KeyFrames keyFrames2 = KeyFrames::New();
-    keyFrames2.Add(0.0f, Vector4::ZERO);
-    keyFrames2.Add(1.0f, Color::GREEN);
+    animation.RotateBy( mMeshActor, Degree(360), Vector3::ZAXIS );
 
-    animation.AnimateBetween( Property( mRenderer, fadeColorIndex ), keyFrames, AlphaFunctions::Sin );
-    animation.AnimateBetween( Property( mRenderer2, fadeColorIndex2 ), keyFrames2, AlphaFunctions::Sin2x );
     animation.SetLooping(true);
     animation.Play();
 
@@ -229,7 +222,8 @@ private:
   Vector3 mStageSize;                                     ///< The size of the stage
 
   Image    mImage;
-  Sampler  mSampler;
+  Sampler  mSampler1;
+  Sampler  mSampler2;
   Shader   mShader;
   Material mMaterial;
   Geometry mGeometry;
@@ -237,6 +231,7 @@ private:
   Actor    mMeshActor;
   Renderer mRenderer2;
   Actor    mMeshActor2;
+  Timer    mChangeImageTimer;
 };
 
 void RunTest( Application& application )
