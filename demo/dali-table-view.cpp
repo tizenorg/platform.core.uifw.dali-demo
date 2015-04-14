@@ -267,7 +267,6 @@ void DaliTableView::Initialize( Application& application )
 
   // scrollview occupying the majority of the screen
   mScrollView = ScrollView::New();
-  mScrollView.SetRelayoutEnabled( true );
 
   mScrollView.SetAnchorPoint( AnchorPoint::CENTER );
   mScrollView.SetParentOrigin( ParentOrigin::CENTER );
@@ -297,7 +296,6 @@ void DaliTableView::Initialize( Application& application )
 
   // Populate background and bubbles - needs to be scrollViewLayer so scroll ends show
   Actor bubbleContainer = Actor::New();
-  bubbleContainer.SetRelayoutEnabled( true );
   bubbleContainer.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
   bubbleContainer.SetAnchorPoint( AnchorPoint::CENTER );
   bubbleContainer.SetParentOrigin( ParentOrigin::CENTER );
@@ -492,7 +490,6 @@ Actor DaliTableView::CreateTile( const std::string& name, const std::string& tit
   content.SetName( name );
   content.SetAnchorPoint( AnchorPoint::CENTER );
   content.SetParentOrigin( ParentOrigin::CENTER );
-  content.SetRelayoutEnabled( true );
   content.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
   content.SetSizeModeFactor( sizeMultiplier );
 
@@ -779,7 +776,6 @@ void DaliTableView::AddBackgroundActors( Actor layer, int count, BufferImage dis
     Vector4 randColour( hue, hue * 0.5, 0.0f, Random::Range( 0.3f, 0.6f ));
 
     ImageActor dfActor = ImageActor::New( distanceField );
-    dfActor.SetRelayoutEnabled( false );
     dfActor.SetSize( Vector2( randSize, randSize ) );
     dfActor.SetParentOrigin( ParentOrigin::CENTER );
 
@@ -1008,8 +1004,6 @@ void DaliTableView::OnLogoTapped( Dali::Actor actor, const Dali::TapGesture& tap
       mVersionPopup.HideTail();
       mVersionPopup.OutsideTouchedSignal().Connect( this, &DaliTableView::HideVersionPopup );
       mVersionPopup.HiddenSignal().Connect( this, &DaliTableView::PopupHidden );
-
-      mVersionPopup.MarkDirtyForRelayout();
     }
 
     mVersionPopup.Show();
