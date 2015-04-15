@@ -46,6 +46,10 @@ namespace
   const unsigned int KEY_S = 39;
   const unsigned int KEY_PLUS = 21;
   const unsigned int KEY_MINUS = 20;
+  const unsigned int KEY_R = 27;
+  const unsigned int KEY_T = 28;
+  const unsigned int KEY_Y = 29;
+  const unsigned int KEY_U = 30;
 
   const char* H_ALIGNMENT_STRING_TABLE[] =
   {
@@ -251,7 +255,28 @@ public:
             mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, mLabel.GetProperty<Vector2>( TextLabel::Property::SHADOW_OFFSET ) - Vector2( 1.0f, 1.0f ) );
             break;
           }
-
+          case KEY_U: // Toggle underline
+          {
+            bool underLine = mLabel.GetProperty<bool>( TextLabel::Property::UNDERLINE_ENABLED );
+            mLabel.SetProperty( TextLabel::Property::UNDERLINE_ENABLED, !underLine );
+            break;
+          }
+          case KEY_T: // Toggle single pixel line
+          {
+            float underLineHeight = mLabel.GetProperty<float>( TextLabel::Property::UNDERLINE_HEIGHT );
+            mLabel.SetProperty( TextLabel::Property::UNDERLINE_HEIGHT, underLineHeight > 0.0f ? 0.0f : 1.0f );
+            break;
+          }
+          case KEY_Y: // Force underline to yellow
+          {
+            mLabel.SetProperty( TextLabel::Property::UNDERLINE_COLOR, Color::YELLOW );
+            break;
+          }
+          case KEY_R: // Force text color to bright red
+          {
+            mLabel.SetProperty( TextLabel::Property::TEXT_COLOR, Vector4( 1.0f, 0.3f, 0.3f, 1.0f ) );
+            break;
+          }
         }
       }
     }
