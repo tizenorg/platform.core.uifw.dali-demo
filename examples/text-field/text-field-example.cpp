@@ -33,8 +33,6 @@ using namespace Dali::Toolkit;
 namespace
 {
 
-const char* const BACKGROUND_IMAGE = DALI_IMAGE_DIR "button-up.9.png";
-
 const float BORDER_WIDTH = 4.0f;
 
 } // unnamed namespace
@@ -75,7 +73,7 @@ public:
     mContainer.SetName( "Container" );
     mContainer.SetParentOrigin( ParentOrigin::CENTER );
     mContainer.SetSize( Vector2(stageSize.width*0.6f, stageSize.width*0.6f) );
-    mContainer.SetBackgroundImage( ResourceImage::New( BACKGROUND_IMAGE ) );
+    mContainer.SetBackgroundColor( Vector4(0.3f,0.3f,0.6f,1.0f) );
     mContainer.GetChildAt(0).SetZ(-1.0f);
     stage.Add( mContainer );
 
