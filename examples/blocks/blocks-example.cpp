@@ -600,8 +600,8 @@ private:
 
         mDragActor = actor;
         mDragAnimation = Animation::New(0.25f);
-        mDragAnimation.AnimateTo( Property(mDragActor, Actor::Property::SCALE), Vector3(1.1f, 1.1f, 1.0f), AlphaFunctions::EaseOut);
-        mDragAnimation.AnimateTo( Property(mPaddleHandle, Actor::Property::COLOR), Vector4(1.0f, 1.0f, 1.0f, 0.0f), AlphaFunctions::EaseOut);
+        mDragAnimation.AnimateTo( Property(mDragActor, Actor::Property::SCALE), Vector3(1.1f, 1.1f, 1.0f), AlphaFunction::EASE_OUT);
+        mDragAnimation.AnimateTo( Property(mPaddleHandle, Actor::Property::COLOR), Vector4(1.0f, 1.0f, 1.0f, 0.0f), AlphaFunction::EASE_OUT);
         mDragAnimation.Play();
       }
     }
@@ -626,8 +626,8 @@ private:
         if(point.state==TouchPoint::Up) // Stop dragging
         {
           mDragAnimation = Animation::New(0.25f);
-          mDragAnimation.AnimateTo( Property(mDragActor, Actor::Property::SCALE), Vector3(1.0f, 1.0f, 1.0f), AlphaFunctions::EaseIn);
-          mDragAnimation.AnimateTo( Property(mPaddleHandle, Actor::Property::COLOR), Vector4(1.0f, 1.0f, 1.0f, 1.0f), AlphaFunctions::EaseOut);
+          mDragAnimation.AnimateTo( Property(mDragActor, Actor::Property::SCALE), Vector3(1.0f, 1.0f, 1.0f), AlphaFunction::EASE_IN);
+          mDragAnimation.AnimateTo( Property(mPaddleHandle, Actor::Property::COLOR), Vector4(1.0f, 1.0f, 1.0f, 1.0f), AlphaFunction::EASE_OUT);
           mDragAnimation.Play();
           mDragActor.Reset();
         }
@@ -769,7 +769,7 @@ private:
 
     // fade brick (destroy)
     Animation destroyAnimation = Animation::New(0.5f);
-    destroyAnimation.AnimateTo( Property( brick, Actor::Property::COLOR_ALPHA ), 0.0f, AlphaFunctions::EaseIn );
+    destroyAnimation.AnimateTo( Property( brick, Actor::Property::COLOR_ALPHA ), 0.0f, AlphaFunction::EASE_IN );
     destroyAnimation.Play();
     destroyAnimation.FinishedSignal().Connect( this, &ExampleController::OnBrickDestroyed );
     mDestroyAnimationMap[destroyAnimation] = brick;
