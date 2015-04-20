@@ -355,8 +355,8 @@ private:
         mScrollViewEffect = ScrollViewDepthEffect::New();
         mScrollView.SetScrollSnapDuration(EFFECT_SNAP_DURATION);
         mScrollView.SetScrollFlickDuration(EFFECT_FLICK_DURATION);
-        mScrollView.SetScrollSnapAlphaFunction(AlphaFunctions::EaseOut);
-        mScrollView.SetScrollFlickAlphaFunction(AlphaFunctions::EaseOut);
+        mScrollView.SetScrollSnapAlphaFunction(AlphaFunction::EASE_OUT);
+        mScrollView.SetScrollFlickAlphaFunction(AlphaFunction::EASE_OUT);
         mScrollView.RemoveConstraintsFromChildren();
         break;
       }
@@ -366,8 +366,8 @@ private:
         mScrollViewEffect = ScrollViewCubeEffect::New();
         mScrollView.SetScrollSnapDuration(EFFECT_SNAP_DURATION);
         mScrollView.SetScrollFlickDuration(EFFECT_FLICK_DURATION);
-        mScrollView.SetScrollSnapAlphaFunction(AlphaFunctions::EaseOutBack);
-        mScrollView.SetScrollFlickAlphaFunction(AlphaFunctions::EaseOutBack);
+        mScrollView.SetScrollSnapAlphaFunction(AlphaFunction::EASE_OUT_BACK);
+        mScrollView.SetScrollFlickAlphaFunction(AlphaFunction::EASE_OUT_BACK);
         mScrollView.RemoveConstraintsFromChildren();
         break;
       }
@@ -377,8 +377,8 @@ private:
         mScrollViewEffect = ScrollViewPageCarouselEffect::New();
         mScrollView.SetScrollSnapDuration(EFFECT_SNAP_DURATION);
         mScrollView.SetScrollFlickDuration(EFFECT_FLICK_DURATION);
-        mScrollView.SetScrollSnapAlphaFunction(AlphaFunctions::EaseOut);
-        mScrollView.SetScrollFlickAlphaFunction(AlphaFunctions::EaseOut);
+        mScrollView.SetScrollSnapAlphaFunction(AlphaFunction::EASE_OUT);
+        mScrollView.SetScrollFlickAlphaFunction(AlphaFunction::EASE_OUT);
         mScrollView.RemoveConstraintsFromChildren();
         break;
       }
@@ -388,8 +388,8 @@ private:
         mScrollViewEffect = ScrollViewPageCubeEffect::New();
         mScrollView.SetScrollSnapDuration(EFFECT_SNAP_DURATION);
         mScrollView.SetScrollFlickDuration(EFFECT_FLICK_DURATION);
-        mScrollView.SetScrollSnapAlphaFunction(AlphaFunctions::EaseOut);
-        mScrollView.SetScrollFlickAlphaFunction(AlphaFunctions::EaseOut);
+        mScrollView.SetScrollSnapAlphaFunction(AlphaFunction::EASE_OUT);
+        mScrollView.SetScrollFlickAlphaFunction(AlphaFunction::EASE_OUT);
         mScrollView.RemoveConstraintsFromChildren();
         break;
       }
@@ -399,8 +399,8 @@ private:
         mScrollViewEffect = ScrollViewPageSpiralEffect::New();
         mScrollView.SetScrollSnapDuration(EFFECT_SNAP_DURATION);
         mScrollView.SetScrollFlickDuration(EFFECT_FLICK_DURATION);
-        mScrollView.SetScrollSnapAlphaFunction(AlphaFunctions::EaseOut);
-        mScrollView.SetScrollFlickAlphaFunction(AlphaFunctions::EaseOut);
+        mScrollView.SetScrollSnapAlphaFunction(AlphaFunction::EASE_OUT);
+        mScrollView.SetScrollFlickAlphaFunction(AlphaFunction::EASE_OUT);
         mScrollView.RemoveConstraintsFromChildren();
         break;
       }
@@ -615,7 +615,7 @@ private:
       {
         // Spin the Image a few times.
         Animation animation = Animation::New(SPIN_DURATION);
-        animation.AnimateBy( Property( actor, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f * SPIN_DURATION) ), Vector3::XAXIS ), AlphaFunctions::EaseOut );
+        animation.AnimateBy( Property( actor, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f * SPIN_DURATION) ), Vector3::XAXIS ), AlphaFunction::EASE_OUT );
         animation.Play();
       }
     }
