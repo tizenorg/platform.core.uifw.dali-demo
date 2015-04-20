@@ -99,7 +99,6 @@ public:
 
     // Create TextField
     TextField field = TextField::New();
-    field.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
     field.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
     field.SetPadding( Padding( 1.0f, 1.0f, 1.0f, 1.0f ) );
     field.SetAnchorPoint( AnchorPoint::TOP_LEFT );
