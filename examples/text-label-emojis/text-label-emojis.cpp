@@ -56,6 +56,7 @@ public:
   void Create( Application& application )
   {
     Stage stage = Stage::GetCurrent();
+    stage.SetBackgroundColor( Color::WHITE );
     stage.KeyEventSignal().Connect(this, &EmojiExample::OnKeyEvent);
 
     mTableView = Toolkit::TableView::New( NUMBER_OF_EMOJIS, 1 );
@@ -75,6 +76,7 @@ public:
       label.SetParentOrigin( ParentOrigin::TOP_CENTER );
       label.SetAnchorPoint( AnchorPoint::TOP_CENTER );
       label.SetProperty( TextLabel::Property::MULTI_LINE, true );
+      label.SetProperty( TextLabel::Property::TEXT_COLOR, Color::BLACK );
 
       mTableView.SetFitHeight( index );
       mTableView.AddChild( label, Toolkit::TableView::CellPosition( index, 0 ) );

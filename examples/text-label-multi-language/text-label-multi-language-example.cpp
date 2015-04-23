@@ -62,6 +62,7 @@ public:
     Stage stage = Stage::GetCurrent();
 
     stage.KeyEventSignal().Connect(this, &TextLabelMultiLanguageExample::OnKeyEvent);
+    stage.SetBackgroundColor( Color::WHITE );
 
     mTableView = Toolkit::TableView::New( NUMBER_OF_LANGUAGES, 1 );
     mTableView.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
@@ -77,6 +78,7 @@ public:
 
       TextLabel label = TextLabel::New();
       label.SetProperty( TextLabel::Property::MULTI_LINE, true );
+      label.SetProperty( TextLabel::Property::TEXT_COLOR, Color::BLACK );
 
       const std::string text = language.languageName + " " + language.languageRomanName + " " + language.text;
       label.SetProperty( TextLabel::Property::TEXT, text );
