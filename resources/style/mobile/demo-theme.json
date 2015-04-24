@@ -104,6 +104,24 @@ distributing this software or its derivatives.
     "buttonlabel":
     {
       "point-size":8
+    },
+    
+    "textfieldfolder":
+    {
+      "font-family":"HelveticaNeue",
+      "font-style":"Regular",
+      "point-size":8,
+      "max-length":21,
+      "text-color":[1.0, 1.0, 1.0, 1.0],
+      "placeholder-text-color":[0.5, 0.5, 0.5, 1.0]
+    },
+    
+    "textlabelfolder":
+    {
+      "font-family":"HelveticaNeue",
+      "font-style":"Regular",
+      "point-size":6,
+      "text-color":[0.0, 0.0, 0.0, 1.0]
     }
   }
 }
