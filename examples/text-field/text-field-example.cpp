@@ -35,7 +35,14 @@ using namespace MultiLanguageStrings;
 namespace
 {
 
-  const char* const BACKGROUND_IMAGE = DALI_IMAGE_DIR "button-up.9.png";
+const char* const BACKGROUND_IMAGE = DALI_IMAGE_DIR "button-up.9.png";
+const char* TOOLBAR_IMAGE( DALI_IMAGE_DIR "top-bar.png" ); // Background for toolbar
+const char* APPLICATION_TITLE( "Text Field" );
+
+const Size MAX_ITEM_SIZE = Size( 100.0f, 50.0f );
+const float LABEL_FONT_SIZE = 12.0f;
+const int MAX_FOLDER_LENGTH = 17;
+const DemoHelper::ViewStyle VIEW_STYLE( 0.1f, 0.7f, 80.f, 4.f );
 
   const float BORDER_WIDTH = 4.0f;
 
@@ -68,19 +75,37 @@ namespace
 
   const unsigned int V_ALIGNMENT_STRING_COUNT = sizeof( V_ALIGNMENT_STRING_TABLE ) / sizeof( V_ALIGNMENT_STRING_TABLE[0u] );
 
+const Size ACTIVATE_BUTTON_SIZE( 60.0f, 60.0f );
+
+const unsigned int NUMBER_OF_ITEMS = 4;
+
+const unsigned int GRID_COLUMNS = 4;
+const unsigned int GRID_ROWS = 1;
+
+const Vector3 OFFSET_FROM_EDGE = Vector3( 20.0f, -20.0f, 0.0f );
+
 } // unnamed namespace
 
 /**
  * @brief The main class of the demo.
+ * Demo shows a Text field appearing in a container after the start button is pressed.
+ * Touching outside of the text field and it's container hides them until the button is pressed again.
  */
 class TextFieldExample : public ConnectionTracker
 {
 public:
 
+  struct ItemData
+  {
+    std::string itemName;
+    TextLabel textLabel;
+  };
+
   TextFieldExample( Application& application )
   : mApplication( application ),
     mLanguageId( 0u ),
-    mAlignment( 0u )
+    mAlignment( 0u ),
+    mItems()
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect( this, &TextFieldExample::Create );
@@ -89,6 +114,230 @@ public:
   ~TextFieldExample()
   {
     // Nothing to do here.
+  }
+
+  void SetUpLayer( Layer& layer, Actor& parent )
+  {
+    if (!layer)
+    {
+      std::cout << "Creating Layer" << std::endl;
+      layer = Layer::New();
+      layer.SetAnchorPoint(Dali::AnchorPoint::CENTER);
+      layer.SetParentOrigin(Dali::ParentOrigin::CENTER);
+      layer.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+      layer.SetTouchConsumed( true ); // Touch Events will be blocked past this Layer.
+      parent.Add( mLayer );
+    }
+  }
+
+  void OnShrinkAnimationFinished( Animation& )
+  {
+    UnparentAndReset( mContainer );
+    UnparentAndReset( mLayer );
+    UnparentAndReset( mOutsideArea );
+    mActivationButton.SetOpacity(1.0f);
+  }
+
+  void OnEnlargeAnimationFinished( Animation&)
+  {
+  }
+
+  void OnTapGesture( Actor actor, const TapGesture& gesture )
+  {
+    Toolkit::TextLabel textLabel = Toolkit::TextLabel::DownCast( actor );
+
+    if ( actor == mOutsideArea )
+    {
+      Animation animation = Animation::New(.5f);
+      Vector3 halfSize(0.15f,0.15f,0.15f) ;
+      animation.AnimateTo(Property( mContainer, Actor::Property::SCALE ), halfSize, AlphaFunction::EASE_IN_OUT );
+      animation.FinishedSignal().Connect( this, &TextFieldExample::OnShrinkAnimationFinished );
+      mTapDetector.Detach(mContainer);
+      mTapDetector.Detach(mOutsideArea);
+      animation.Play();
+    }
+    else if ( textLabel )
+    {
+      std::cout << "TextLabel touched" << std::endl;
+      OpenFolderForEdit( textLabel );
+    }
+
+  }
+
+  void OpenFolderForEdit( TextLabel& textLabel )
+  {
+    for( std::vector< ItemData >::iterator iter = mItems.begin(); iter != mItems.end(); ++iter )
+    {
+      std::cout << "Iterating" << std::endl;
+      std::cout <<  (*iter).itemName << std::endl;
+      if ( (*iter).textLabel == textLabel )
+      {
+        std::cout << "Match found:" << (*iter).itemName << std::endl;
+        EditItemInGrid( iter );
+      }
+    }
+
+  }
+
+  void SetUpOutsideTouchArea( ImageActor& imageActor, Actor& parent )
+  {
+    if ( !imageActor )
+    {
+      std::cout << "SetUpOutsideTouchArea" << std::endl;
+      imageActor = Dali::Toolkit::CreateSolidColorActor(Color::BLUE);
+      imageActor.SetOpacity(0.2f);
+      imageActor.SetAnchorPoint( AnchorPoint::CENTER );
+      imageActor.SetParentOrigin( ParentOrigin::CENTER );
+      imageActor.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+      imageActor.SetZ( -1.0f );
+      parent.Add( imageActor );
+    }
+  }
+
+  void SetUpActivationButton( PushButton& button, Actor& parent )
+  {
+    button = PushButton::New();
+    button.SetButtonImage( ResourceImage::New( BACKGROUND_IMAGE ) );
+    button.SetParentOrigin( ParentOrigin::CENTER );
+    button.SetSize( ACTIVATE_BUTTON_SIZE );
+    button.SetParentOrigin( ParentOrigin::BOTTOM_LEFT );
+    button.SetAnchorPoint( AnchorPoint::BOTTOM_LEFT );
+    button.SetPosition( OFFSET_FROM_EDGE );
+    parent.Add( button );
+    button.ClickedSignal().Connect( this, &TextFieldExample::OnActivateButtonClicked );
+  }
+
+  void SetUpContainer( Control& control )
+  {
+    if ( !control )
+    {
+      control = Control::New();
+      control.SetParentOrigin( ParentOrigin::CENTER );
+      control.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
+      control.SetSizeModeFactor(Vector3( 0.6f, 0.6f, 1.0f ));
+      control.SetBackgroundImage( ResourceImage::New( BACKGROUND_IMAGE ) );
+      control.SetScale( 0.3f );
+    }
+  }
+
+  void TextFieldEditingEnded( Control control )
+  {
+
+    Property::Value textFieldText = control.GetProperty( TextLabel::Property::TEXT );
+    mActiveItem->itemName = textFieldText.Get< std::string >();
+    mActiveItem->textLabel.SetProperty( TextLabel::Property::TEXT, mActiveItem->itemName );
+
+    std::cout << "Displaying text: \"" << textFieldText.Get< std::string >() << "\"" << std::endl;
+  }
+
+  void SetUpTextField( Control& field, Size stageSize, Actor& parent, std::string& text )
+  {
+    if ( !field )
+    {
+      field = TextField::New();
+      field.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+      field.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
+      if ( text != "")
+      {
+        field.SetProperty( TextField::Property::TEXT, text );
+      }
+      else
+      {
+        field.SetProperty( TextField::Property::PLACEHOLDER_TEXT, "Enter folder name" );
+      }
+      field.SetProperty( TextField::Property::DECORATION_BOUNDING_BOX, Rect<int>( BORDER_WIDTH, BORDER_WIDTH, stageSize.width - BORDER_WIDTH*2, stageSize.height - BORDER_WIDTH*2 ) );
+      field.SetProperty( TextField::Property::MAX_LENGTH, MAX_FOLDER_LENGTH );
+      field.SetSize( Size(150.0f, 40.0f ));
+      field.SetBackgroundColor(Vector4( 0.0f, 0.0f, 0.0f, 0.25f));
+      field.SetParentOrigin( ParentOrigin::CENTER );
+      field.SetAnchorPoint( AnchorPoint::BOTTOM_CENTER );
+      field.KeyInputFocusLostSignal().Connect( this, &TextFieldExample::TextFieldEditingEnded );
+      parent.Add( field );
+    }
+  }
+
+  void EnlargeAnimation( Control& control, Animation& animation, Vector3 destinationPosition = Vector3::ZERO )
+  {
+    Vector3 fullSize(1.0f, 1.0f, 1.0f);
+
+    animation.AnimateTo(Property(control, Actor::Property::SCALE ), fullSize, AlphaFunction::EASE_IN_OUT );
+    animation.AnimateTo(Property(control, Actor::Property::POSITION ), destinationPosition, AlphaFunction::EASE_OUT );
+    animation.FinishedSignal().Connect( this, &TextFieldExample::OnEnlargeAnimationFinished );
+    animation.Play();
+  }
+
+  bool OnActivateButtonClicked( Button button )
+  {
+    std::cout << "OnActicateButtonClicked" << std::endl;
+    CreateNewItemAndAddToGrid( button );
+
+    return true;
+  }
+
+  void SetUpGrid( Actor& parent )
+  {
+    mGrid = TableView::New( GRID_ROWS , GRID_COLUMNS ); // 1 Row, 4 Columns
+    mGrid.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
+    mGrid.SetFitHeight( 0 );
+    mGrid.SetParentOrigin( ParentOrigin::TOP_CENTER );
+    mGrid.SetAnchorPoint( AnchorPoint::TOP_CENTER );
+    mGrid.SetPosition( 0.0f, VIEW_STYLE.mToolBarHeight*1.1 );
+    parent.Add( mGrid );
+  }
+
+  void CreateNewItemAndAddToGrid( Button& buttonToHide )
+  {
+    if ( mItems.size() < NUMBER_OF_ITEMS )
+    {
+      buttonToHide.SetOpacity(0.0f);
+      TextLabel newLabel = TextLabel::New();
+      ItemData newItem;
+      newItem.itemName = ""; // Initially set the name to empty so placeholder text used
+      newItem.textLabel = newLabel;
+      newLabel.SetBackgroundColor(Vector4( 1.0f, 1.0f, 1.0f, 0.25f));
+      newLabel.SetProperty( TextLabel::Property::TEXT, newItem.itemName );
+      newLabel.SetProperty( TextLabel::Property::TEXT_COLOR, Color::WHITE );
+      newLabel.SetProperty( TextLabel::Property::MULTI_LINE, true );
+      newLabel.SetProperty( TextLabel::Property::POINT_SIZE, LABEL_FONT_SIZE );
+      newLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+      newLabel.SetParentOrigin( ParentOrigin::CENTER );
+      newLabel.SetAnchorPoint( AnchorPoint::CENTER );
+      mTapDetector.Attach( newLabel );
+
+      Control container = Control::New();
+      container.SetName( "Container" );
+      container.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
+      container.SetSize( MAX_ITEM_SIZE );
+      container.Add( newLabel );
+
+      mGrid.Add( container );
+
+      // Push new item into end of vector and start edit mode on that item
+      mItems.push_back( newItem );
+      EditItemInGrid( mItems.end()-1 );
+    }
+  }
+
+  void EditItemInGrid( std::vector<TextFieldExample::ItemData>::iterator item)
+  {
+    // Create layer for dimmed background image and to parent popup
+    SetUpLayer( mLayer, mView );
+    mLayer.RaiseToTop(); // Can be done on demand but this demo has nothing else to raise above
+    // touch area to close folder when touched
+    SetUpOutsideTouchArea( mOutsideArea, mLayer );
+
+    // container to hold text field
+    SetUpContainer( mContainer );
+
+    TextField textField;
+    SetUpTextField( textField, mStageSize, mContainer, (*item).itemName );
+
+    mActiveItem = item;
+    mLayer.Add( mContainer );
+    Animation animation = Animation::New(.5f);
+    EnlargeAnimation( mContainer, animation );
+    mTapDetector.Attach(mOutsideArea);
+    mTapDetector.Attach(mContainer);
   }
 
   /**
@@ -100,39 +349,28 @@ public:
 
     Stage stage = Stage::GetCurrent();
 
-    mTapGestureDetector = TapGestureDetector::New();
-    mTapGestureDetector.Attach( stage.GetRootLayer() );
-    mTapGestureDetector.DetectedSignal().Connect( this, &TextFieldExample::OnTap );
+    mTapDetector = TapGestureDetector::New();
+    mTapDetector.DetectedSignal().Connect(this, &TextFieldExample::OnTapGesture);
 
     stage.KeyEventSignal().Connect(this, &TextFieldExample::OnKeyEvent);
+    mStageSize = stage.GetSize();
 
-    Vector2 stageSize = stage.GetSize();
 
-    Control container = Control::New();
-    container.SetName( "Container" );
-    container.SetParentOrigin( ParentOrigin::CENTER );
-    container.SetSize( Vector2(stageSize.width*0.6f, stageSize.width*0.6f) );
-    container.SetBackgroundColor( Color::WHITE );
-    container.GetChildAt(0).SetZ(-1.0f);
-    stage.Add( container );
+    // Create toolbar & view
+    Toolkit::ToolBar toolBar;
+    mViewLayer = DemoHelper::CreateView( mApplication,
+                                         mView,
+                                         toolBar,
+                                         "",
+                                         TOOLBAR_IMAGE,
+                                         APPLICATION_TITLE,
+                                         VIEW_STYLE);
 
-    mField = TextField::New();
-    mField.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    mField.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
-    mField.SetResizePolicy( ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT );
-    mField.SetProperty( TextField::Property::PLACEHOLDER_TEXT, "Unnamed folder" );
-    mField.SetProperty( TextField::Property::DECORATION_BOUNDING_BOX, Rect<int>( BORDER_WIDTH, BORDER_WIDTH, stageSize.width - BORDER_WIDTH*2, stageSize.height - BORDER_WIDTH*2 ) );
 
-    container.Add( mField );
+    // button to show text field
+    SetUpActivationButton( mActivationButton, mView );
 
-    Property::Value fieldText = mField.GetProperty( TextField::Property::TEXT );
-
-    std::cout << "Displaying text: " << fieldText.Get< std::string >() << std::endl;
-  }
-
-  void OnTap( Actor actor, const TapGesture& tapGesture )
-  {
-    mField.ClearKeyInputFocus();
+    SetUpGrid( mView );
   }
 
   /**
@@ -144,6 +382,7 @@ public:
     {
       if( IsKey( event, DALI_KEY_ESCAPE) || IsKey( event, DALI_KEY_BACK ) )
       {
+        mTapDetector.DetectedSignal().Disconnect(this, &TextFieldExample::OnTapGesture );
         mApplication.Quit();
       }
       else if( event.IsCtrlModifier() )
@@ -154,7 +393,7 @@ public:
           case KEY_ZERO: // fall through
           case KEY_ONE:
           {
-            mField.SetProperty( TextField::Property::RENDERING_BACKEND, event.keyCode - 10 );
+            //mTextField.SetProperty( TextField::Property::RENDERING_BACKEND, event.keyCode - 10 );
             break;
           }
           case KEY_H: // Horizontal alignment
@@ -164,7 +403,7 @@ public:
               mAlignment = 0u;
             }
 
-            mField.SetProperty( TextField::Property::HORIZONTAL_ALIGNMENT, H_ALIGNMENT_STRING_TABLE[ mAlignment ] );
+            //mTextField.SetProperty( TextField::Property::HORIZONTAL_ALIGNMENT, H_ALIGNMENT_STRING_TABLE[ mAlignment ] );
             break;
           }
           case KEY_V: // Vertical alignment
@@ -174,14 +413,14 @@ public:
               mAlignment = 0u;
             }
 
-            mField.SetProperty( TextField::Property::VERTICAL_ALIGNMENT, V_ALIGNMENT_STRING_TABLE[ mAlignment ] );
+            //mTextField.SetProperty( TextField::Property::VERTICAL_ALIGNMENT, V_ALIGNMENT_STRING_TABLE[ mAlignment ] );
             break;
           }
           case KEY_L: // Language
           {
-            const Language& language = LANGUAGES[ mLanguageId ];
+            //const Language& language = LANGUAGES[ mLanguageId ];
 
-            mField.SetProperty( TextField::Property::TEXT, language.text );
+            //mTextField.SetProperty( TextField::Property::TEXT, language.text );
 
             if( ++mLanguageId >= NUMBER_OF_LANGUAGES )
             {
@@ -191,24 +430,24 @@ public:
           }
           case KEY_S: // Shadow color
           {
-            if( Color::BLACK == mField.GetProperty<Vector4>( TextField::Property::SHADOW_COLOR ) )
-            {
-              mField.SetProperty( TextField::Property::SHADOW_COLOR, Color::RED );
-            }
-            else
-            {
-              mField.SetProperty( TextField::Property::SHADOW_COLOR, Color::BLACK );
-            }
+//            if( Color::BLACK == mTextField.GetProperty<Vector4>( TextField::Property::SHADOW_COLOR ) )
+//            {
+//              //mTextField.SetProperty( TextField::Property::SHADOW_COLOR, Color::RED );
+//            }
+//            else
+//            {
+//              //mTextField.SetProperty( TextField::Property::SHADOW_COLOR, Color::BLACK );
+//            }
             break;
           }
           case KEY_PLUS: // Increase shadow offset
           {
-            mField.SetProperty( TextField::Property::SHADOW_OFFSET, mField.GetProperty<Vector2>( TextField::Property::SHADOW_OFFSET ) + Vector2( 1.0f, 1.0f ) );
+            //mTextField.SetProperty( TextField::Property::SHADOW_OFFSET, mTextField.GetProperty<Vector2>( TextField::Property::SHADOW_OFFSET ) + Vector2( 1.0f, 1.0f ) );
             break;
           }
           case KEY_MINUS: // Decrease shadow offset
           {
-            mField.SetProperty( TextField::Property::SHADOW_OFFSET, mField.GetProperty<Vector2>( TextField::Property::SHADOW_OFFSET ) - Vector2( 1.0f, 1.0f ) );
+            //mTextField.SetProperty( TextField::Property::SHADOW_OFFSET, mTextField.GetProperty<Vector2>( TextField::Property::SHADOW_OFFSET ) - Vector2( 1.0f, 1.0f ) );
             break;
           }
         }
@@ -220,12 +459,23 @@ private:
 
   Application& mApplication;
 
-  TextField mField;
-
   TapGestureDetector mTapGestureDetector;
 
   unsigned int mLanguageId;
   unsigned int mAlignment;
+  Size mStageSize;
+  Layer mViewLayer;
+  Toolkit::Control mView;
+  Control mContainer;
+  Layer mLayer;
+  TableView mGrid;
+  ImageActor mOutsideArea;
+  PushButton mActivationButton;
+  TapGestureDetector mTapDetector;
+
+  std::vector<TextFieldExample::ItemData>::iterator mActiveItem;
+  //ItemData* mActiveItem;
+  std::vector<TextFieldExample::ItemData> mItems;
 };
 
 void RunTest( Application& application )
