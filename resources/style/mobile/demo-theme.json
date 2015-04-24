@@ -67,7 +67,8 @@ distributing this software or its derivatives.
     "textfield":
     {
       "font-family":"SamsungSans",
-      "font-style":"Regular"
+      "font-style":"Regular",
+      "text-color":[0.239, 0.725, 0.800, 1.0]
     },
 
     "textfield-font-size-0":
@@ -104,6 +105,11 @@ distributing this software or its derivatives.
     "buttonlabel":
     {
       "point-size":8
+    },
+
+    "folderlabel":
+    {
+      "point-size":6
     }
   }
 }
