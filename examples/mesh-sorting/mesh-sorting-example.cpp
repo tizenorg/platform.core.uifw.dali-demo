@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,29 +21,50 @@
 #include "shared/view.h"
 
 #include <dali-toolkit/dali-toolkit.h>
+#include <stdio.h>
+#include <sstream>
 
 using namespace Dali;
 
 namespace
 {
-const char* MATERIAL_SAMPLE( DALI_IMAGE_DIR "gallery-small-48.jpg" );
-const char* MATERIAL_SAMPLE2( DALI_IMAGE_DIR "gallery-medium-19.jpg" );
+
+const char* MATERIAL_SAMPLES[] =
+{
+  DALI_IMAGE_DIR "people-medium-1.jpg",
+  DALI_IMAGE_DIR "people-medium-4.jpg",
+  DALI_IMAGE_DIR "people-medium-11.jpg",
+  DALI_IMAGE_DIR "people-small-16.jpg",
+  DALI_IMAGE_DIR "people-medium-15.jpg",
+};
+const unsigned int NUMBER_OF_SAMPLES(sizeof(MATERIAL_SAMPLES)/sizeof(const char*));
+
 
 #define MAKE_SHADER(A)#A
 
 const char* VERTEX_SHADER = MAKE_SHADER(
+uniform   highp   float   uHue;
 attribute mediump vec2    aPosition;
 attribute highp   vec2    aTexCoord;
 varying   mediump vec2    vTexCoord;
 uniform   mediump mat4    uMvpMatrix;
 uniform   mediump vec3    uSize;
-uniform   lowp    vec4    uFadeColor;
+varying   mediump vec3    vGlobColor;
+
+vec3 hsv2rgb(vec3 c)
+{
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
 
 void main()
 {
   mediump vec4 vertexPosition = vec4(aPosition, 0.0, 1.0);
   vertexPosition.xyz *= uSize;
   vertexPosition = uMvpMatrix * vertexPosition;
+  vGlobColor = hsv2rgb( vec3( clamp(uHue, 0.0, 1.0), 1.0, 1.0 ) );
+
   vTexCoord = aTexCoord;
   gl_Position = vertexPosition;
 }
@@ -51,13 +72,13 @@ void main()
 
 const char* FRAGMENT_SHADER = MAKE_SHADER(
 varying mediump vec2  vTexCoord;
+varying mediump vec3  vGlobColor;
 uniform lowp    vec4  uColor;
 uniform sampler2D     sTexture;
-uniform lowp    vec4  uFadeColor;
 
 void main()
 {
-  gl_FragColor = texture2D( sTexture, vTexCoord ) * uColor * uFadeColor;
+  gl_FragColor = texture2D( sTexture, vTexCoord ) * uColor * vec4(vGlobColor, 1.0) ;
 }
 );
 
@@ -82,7 +103,7 @@ Geometry CreateGeometry()
   unsigned int indexData[6] = { 0, 3, 1, 0, 2, 3 };
   Property::Map indexFormat;
   indexFormat["indices"] = Property::UNSIGNED_INTEGER;
-  PropertyBuffer indices = PropertyBuffer::New( PropertyBuffer::STATIC, indexFormat, sizeof(indexData)/sizeof(indexData[0]) );
+  PropertyBuffer indices = PropertyBuffer::New( PropertyBuffer::STATIC, indexFormat, 6 );
   indices.SetData(indexData);
 
   // Create the geometry object
@@ -91,13 +112,6 @@ Geometry CreateGeometry()
   texturedQuadGeometry.SetIndexBuffer( indices );
 
   return texturedQuadGeometry;
-}
-
-/*
- */
-float AlphaFunctionSineX2(float progress)
-{
-  return 0.5f - cosf(progress * 4.0f * Math::PI) * 0.5f;
 }
 
 } // anonymous namespace
@@ -143,104 +157,96 @@ public:
     // Hide the indicator bar
     application.GetWindow().ShowIndicator( Dali::Window::INVISIBLE );
 
-    mImage = ResourceImage::New( MATERIAL_SAMPLE, ResourceImage::ON_DEMAND, Image::NEVER );
-    mSampler1 = Sampler::New(mImage, "sTexture");
-
-    Image image = ResourceImage::New( MATERIAL_SAMPLE2 );
-    //image = CreateBufferImage();
-    mSampler2 = Sampler::New(image, "sTexture");
-
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
-    mMaterial1 = Material::New( mShader );
-    mMaterial1.AddSampler( mSampler1 );
-
-    mMaterial2 = Material::New( mShader );
-    mMaterial2.AddSampler( mSampler2 );
-
     mGeometry = CreateGeometry();
 
-    mRenderer = Renderer::New( mGeometry, mMaterial1 );
+    for( unsigned i=0; i<NUMBER_OF_SAMPLES; ++i)
+    {
+      Image image = ResourceImage::New( MATERIAL_SAMPLES[4-i] );
+      Sampler sampler = Sampler::New(image, "sTexture");
+      Material material = Material::New( mShader );
+      material.AddSampler( sampler );
+      Renderer renderer = Renderer::New( mGeometry, material );
+      Actor meshActor = Actor::New();
+      meshActor.AddRenderer( renderer );
+      meshActor.SetSize(175, 175);
 
-    mMeshActor = Actor::New();
-    mMeshActor.AddRenderer( mRenderer );
-    mMeshActor.SetSize(400, 400);
+      renderer.SetDepthIndex(0);
+      // Test with actor alpha
+      meshActor.SetParentOrigin( ParentOrigin::CENTER );
+      meshActor.SetAnchorPoint( AnchorPoint::CENTER );
+      meshActor.SetPosition( 40.0f*(i-(NUMBER_OF_SAMPLES*0.5f)), 40.0f*(i-(NUMBER_OF_SAMPLES*0.5f)), i*10 );
 
-    Property::Index fadeColorIndex = mMeshActor.RegisterProperty( "fade-color", Color::GREEN );
-    mMeshActor.AddUniformMapping( fadeColorIndex, std::string("uFadeColor") );
+      meshActor.SetOpacity( i>0?0.7f:1.0f );
 
-    fadeColorIndex = mRenderer.RegisterProperty( "fade-color", Color::MAGENTA );
-    mRenderer.AddUniformMapping( fadeColorIndex, std::string("uFadeColor" ) );
-    mRenderer.SetDepthIndex(0);
+      Property::Index index=meshActor.RegisterProperty("hue", i/(float)NUMBER_OF_SAMPLES);
+      meshActor.AddUniformMapping( index, "uHue" );
 
-    mMeshActor.SetParentOrigin( ParentOrigin::TOP_CENTER );
-    mMeshActor.SetAnchorPoint( AnchorPoint::TOP_CENTER );
-    stage.Add( mMeshActor );
-
-    mRenderer2 = Renderer::New( mGeometry, mMaterial2 );
-
-    mMeshActor2 = Actor::New();
-    mMeshActor2.AddRenderer( mRenderer2 );
-    mMeshActor2.SetSize(400, 400);
-
-    mMeshActor2.RegisterProperty( "a-n-other-property", Color::GREEN );
-    Property::Index fadeColorIndex2 = mMeshActor2.RegisterProperty( "another-fade-color", Color::GREEN );
-    mMeshActor2.AddUniformMapping( fadeColorIndex2, std::string("uFadeColor") );
-
-    mRenderer2.RegisterProperty( "a-n-other-property", Vector3::ZERO );
-    mRenderer2.RegisterProperty( "a-coefficient", 0.008f );
-    fadeColorIndex2 = mRenderer2.RegisterProperty( "another-fade-color", Color::BLUE );
-    mRenderer2.AddUniformMapping( fadeColorIndex2, std::string("uFadeColor" ) );
-    mRenderer2.SetDepthIndex(0);
-
-    mMeshActor2.SetParentOrigin( ParentOrigin::BOTTOM_CENTER );
-    mMeshActor2.SetAnchorPoint( AnchorPoint::BOTTOM_CENTER );
-    stage.Add( mMeshActor2 );
-
-    Animation  animation = Animation::New(5);
-    KeyFrames keyFrames = KeyFrames::New();
-    keyFrames.Add(0.0f, Vector4::ZERO);
-    keyFrames.Add(1.0f, Vector4( Color::GREEN ));
-
-    KeyFrames keyFrames2 = KeyFrames::New();
-    keyFrames2.Add(0.0f, Vector4::ZERO);
-    keyFrames2.Add(1.0f, Color::MAGENTA);
-
-    animation.AnimateBetween( Property( mRenderer, fadeColorIndex ), keyFrames, AlphaFunction(AlphaFunction::SIN) );
-    animation.AnimateBetween( Property( mRenderer2, fadeColorIndex2 ), keyFrames2, AlphaFunction(AlphaFunctionSineX2) );
-    animation.SetLooping(true);
-    animation.Play();
-
-    stage.SetBackgroundColor(Vector4(0.0f, 0.2f, 0.2f, 1.0f));;
+      meshActor.TouchedSignal().Connect(this, &ExampleController::OnTouched);
+      std::ostringstream oss;
+      oss << "Mesh Actor " << i;
+      meshActor.SetName(oss.str());
+      stage.Add( meshActor );
+    }
+    stage.GetRootLayer().TouchedSignal().Connect(this, &ExampleController::OnStageTouched);
   }
 
-  BufferImage CreateBufferImage()
+  bool OnTouched( Actor actor, const TouchEvent& event )
   {
-    BufferImage image = BufferImage::New( 200, 200, Pixel::RGB888 );
-    PixelBuffer* pixelBuffer = image.GetBuffer();
-    unsigned int stride = image.GetBufferStride();
-    for( unsigned int x=0; x<200; x++ )
+    if( event.GetPoint(0).state == TouchPoint::Finished )
     {
-      for( unsigned int y=0; y<200; y++ )
+      Renderer renderer = actor.GetRendererAt(0);
+      int depthIndex = renderer.GetCurrentDepthIndex();
+      int newDepthIndex = (depthIndex + 10) % 30;
+      renderer.SetDepthIndex(newDepthIndex);
+      printf("Actor %s depth index was %d, now set to %d\n", actor.GetName().c_str(), depthIndex, newDepthIndex);
+    }
+    return true;
+  }
+
+  bool OnStageTouched( Actor rootLayer, const TouchEvent& event )
+  {
+    static int mode = 0;
+    if( event.GetPoint(0).state == TouchPoint::Finished )
+    {
+      switch( mode )
       {
-        PixelBuffer* pixel = pixelBuffer + y*stride + x*3;
-        if( ((int)(x/20.0f))%2 + ((int)(y/20.0f)%2) == 1 )
+        case 0:
         {
-          pixel[0]=255;
-          pixel[1]=0;
-          pixel[2]=0;
-          pixel[3]=255;
+          printf("All children set to same Z=0\n");
+          mode = 1;
+          for(unsigned int i=1; i < rootLayer.GetChildCount(); ++i)
+          {
+            Actor child = rootLayer.GetChildAt(i);
+            child.SetZ( 0.0f );
+          }
+          break;
         }
-        else
+        case 1:
         {
-          pixel[0]=0;
-          pixel[1]=0;
-          pixel[2]=255;
-          pixel[3]=255;
+          printf("Children Z ordered front to back\n");
+          mode = 2;
+          for(unsigned int i=1; i < rootLayer.GetChildCount(); ++i)
+          {
+            Actor child = rootLayer.GetChildAt(i);
+            child.SetZ( 100-i*10 );
+          }
+          break;
+        }
+        case 2:
+        {
+          printf("Children Z ordered back to front\n");
+          mode = 0;
+          for(unsigned int i=1; i < rootLayer.GetChildCount(); ++i)
+          {
+            Actor child = rootLayer.GetChildAt(i);
+            child.SetZ( i*10 );
+          }
+          break;
         }
       }
     }
-    image.Update();
-    return image;
+    return true;
   }
 
   /**
@@ -270,18 +276,8 @@ private:
   Application&  mApplication;                             ///< Application instance
   Vector3 mStageSize;                                     ///< The size of the stage
 
-  Image    mImage;
-  Sampler  mSampler1;
-  Sampler  mSampler2;
   Shader   mShader;
-  Material mMaterial1;
-  Material mMaterial2;
   Geometry mGeometry;
-  Renderer mRenderer;
-  Actor    mMeshActor;
-  Renderer mRenderer2;
-  Actor    mMeshActor2;
-  Timer    mChangeImageTimer;
 };
 
 void RunTest( Application& application )
