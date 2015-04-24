@@ -104,6 +104,11 @@ distributing this software or its derivatives.
     "buttonlabel":
     {
       "point-size":8
+    },
+
+    "folderlabel":
+    {
+      "point-size":6
     }
   }
 }
