@@ -58,6 +58,56 @@ public:
     // Nothing to do here.
   }
 
+  void SetUpLayer( Layer& layer, Size size )
+  {
+    layer = Layer::New();
+    layer.SetAnchorPoint(Dali::AnchorPoint::CENTER);
+    layer.SetParentOrigin(Dali::ParentOrigin::CENTER);
+    layer.SetSize( size );
+  }
+
+  void SetUpOutsideTouchArea( ImageActor& imageActor )
+  {
+    imageActor = Dali::Toolkit::CreateSolidColorActor(Color::BLUE);
+    imageActor.SetOpacity(0.0f);
+    imageActor.SetAnchorPoint( AnchorPoint::CENTER );
+    imageActor.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+    imageActor.SetZ( -1.0f );
+  }
+
+  void SetUpContainer( Control& control, Size stageSize )
+  {
+    control = Control::New();
+    control.SetName( "Container" );
+    control.SetParentOrigin( ParentOrigin::CENTER );
+    control.SetSize( Vector2(stageSize.width*0.6f, stageSize.width*0.6f) );
+    control.SetBackgroundImage( ResourceImage::New( BACKGROUND_IMAGE ) );
+    control.GetChildAt(0).SetZ(-1.0f);
+    control.SetScale( 0.3f );
+  }
+
+  void SetUpTextField( Control& field, Size stageSize )
+  {
+    field = TextField::New();
+    field.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    field.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
+    field.SetProperty( TextField::Property::TEXT, "Unnamed folder" );
+    field.SetProperty( TextField::Property::DECORATION_BOUNDING_BOX, Rect<int>( BORDER_WIDTH, BORDER_WIDTH, stageSize.width - BORDER_WIDTH*2, stageSize.height - BORDER_WIDTH*2 ) );
+    field.SetSize( Size(150.0f, 40.0f ));
+    field.SetBackgroundColor(Vector4( 0.0f, 0.0f, 0.0f, 0.25f));
+    field.SetParentOrigin( ParentOrigin::CENTER );
+    field.SetAnchorPoint( AnchorPoint::BOTTOM_CENTER );
+  }
+
+  void EnlargeAnimation( Control& control, Animation& animation, Vector3 destinationPosition = Vector3::ZERO )
+  {
+    Vector3 fullSize(1.0f,1.0f,1.0f) ;
+
+    animation.AnimateTo(Property(control, Actor::Property::SCALE ), fullSize, AlphaFunction::EASE_IN_OUT );
+    animation.AnimateTo(Property(control, Actor::Property::POSITION ), destinationPosition, AlphaFunction::EASE_OUT );
+    animation.Play();
+  }
+
   /**
    * One-time setup in response to Application InitSignal.
    */
@@ -69,29 +119,32 @@ public:
 
     stage.KeyEventSignal().Connect(this, &TextFieldExample::OnKeyEvent);
 
-    Vector2 stageSize = stage.GetSize();
+    Size stageSize = stage.GetSize();
 
-    mContainer = Control::New();
-    mContainer.SetName( "Container" );
-    mContainer.SetParentOrigin( ParentOrigin::CENTER );
-    mContainer.SetSize( Vector2(stageSize.width*0.6f, stageSize.width*0.6f) );
-    mContainer.SetBackgroundImage( ResourceImage::New( BACKGROUND_IMAGE ) );
-    mContainer.GetChildAt(0).SetZ(-1.0f);
-    stage.Add( mContainer );
+    // Create layer for dimmed background image and to parent popup
+    Layer layer;
+    SetUpLayer( layer, stageSize );
 
-    TextField field = TextField::New();
-    field.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    field.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
-    field.SetResizePolicy( ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT );
+    stage.Add(layer);
+    layer.RaiseToTop(); // Can be done on demand but this demo has nothing else to raise above
 
-    mContainer.Add( field );
+    // touch area to close folder with dimmed color
+    ImageActor outsideFolderArea;
+    SetUpOutsideTouchArea( outsideFolderArea );
+    layer.Add(outsideFolderArea);
+    //mFolderTapDetector.Attach(outsideFolderArea); todo
 
-    field.SetProperty( TextField::Property::TEXT, "Hello" );
-    field.SetProperty( TextField::Property::DECORATION_BOUNDING_BOX, Rect<int>( BORDER_WIDTH, BORDER_WIDTH, stageSize.width - BORDER_WIDTH*2, stageSize.height - BORDER_WIDTH*2 ) );
+    SetUpContainer( mContainer, stageSize );
+    layer.Add( mContainer );
 
-    Property::Value fieldText = field.GetProperty( TextField::Property::TEXT );
+    TextField textField;
+    SetUpTextField( textField, stageSize );
 
-    std::cout << "Displaying text: " << fieldText.Get< std::string >() << std::endl;
+    mContainer.Add( textField );
+
+    Animation animation = Animation::New(.9f);
+    EnlargeAnimation( mContainer, animation );
+
   }
 
   /**
