@@ -53,7 +53,7 @@ void main()
   mediump vec4 vertexPosition = vec4(aPosition, 0.0, 1.0);
   vertexPosition.xyz *= uSize;
   vertexPosition = uMvpMatrix * vertexPosition;
-  vVertexColor = hsv2rgb( vec3( aHue, 0.6, 0.7 ) );
+  vVertexColor = hsv2rgb( vec3( aHue, 0.7, 1.0 ) );
   vHue = aHue;
   gl_PointSize = 80.0;
   gl_Position = vertexPosition;
@@ -87,8 +87,8 @@ Geometry CreateGeometry()
   float sectorAngle = 2.0f * Math::PI / (float) numSides;
   for(unsigned int i=0; i<numSides; ++i)
   {
-    polyhedraVertexData[i].position.x = sinf(angle);
-    polyhedraVertexData[i].position.y = cosf(angle);
+    polyhedraVertexData[i].position.x = sinf(angle)/2;
+    polyhedraVertexData[i].position.y = cosf(angle)/2;
     polyhedraVertexData[i].hue = angle / ( 2.0f * Math::PI);
     angle += sectorAngle;
   }
@@ -167,7 +167,7 @@ public:
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
-    mMeshActor.SetSize(200, 200);
+    mMeshActor.SetSize(400, 400);
 
     Property::Index fadeColorIndex = mMeshActor.RegisterProperty( "fade-color", Color::GREEN );
     mMeshActor.AddUniformMapping( fadeColorIndex, std::string("uFadeColor") );
