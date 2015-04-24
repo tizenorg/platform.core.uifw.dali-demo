@@ -48,7 +48,8 @@ distributing this software or its derivatives.
     {
       "font-family":"HelveticaNeue",
       "font-style":"Regular",
-      "point-size":18
+      "point-size":18,
+      "text-color":[0.239, 0.725, 0.800, 1.0]
     },
 
     "scrollview":
