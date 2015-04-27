@@ -76,6 +76,7 @@ const char* const TABLEVIEW_BUTTON_FIT2_ID = "TABLEVIEW_BUTTON_FIT2";
 const char* const TABLEVIEW_BUTTON_NATURAL1_ID = "TABLEVIEW_BUTTON_NATURAL1";
 const char* const TABLEVIEW_BUTTON_NATURAL2_ID = "TABLEVIEW_BUTTON_NATURAL2";
 const char* const TABLEVIEW_BUTTON_NATURAL3_ID = "TABLEVIEW_BUTTON_NATURAL3";
+const char* const TABLEVIEW_ALIGNMENT_ID = "TABLEVIEW_ALIGNMENT";
 
 const char* const OKAY_BUTTON_ID = "OKAY_BUTTON";
 const char* const CANCEL_BUTTON_ID = "CANCEL_BUTTON";
@@ -124,6 +125,7 @@ const ButtonItem TABLEVIEW_BUTTON_ITEMS[] = {
     { TABLEVIEW_BUTTON_NATURAL1_ID,                 "Natural 1" },
     { TABLEVIEW_BUTTON_NATURAL2_ID,                 "Natural 2" },
     { TABLEVIEW_BUTTON_NATURAL3_ID,                 "Natural 3" },
+    { TABLEVIEW_ALIGNMENT_ID,                       "Alignment" }
 };
 
 const unsigned int TABLEVIEW_BUTTON_ITEMS_COUNT = sizeof( TABLEVIEW_BUTTON_ITEMS ) / sizeof( TABLEVIEW_BUTTON_ITEMS[0] );
@@ -1152,6 +1154,72 @@ public:
         backing.Add( text );
 
         table.Add( backing );
+      }
+
+      mPopup.Add( table );
+
+      mPopup.Show();
+    }
+    else if( button.GetName() == TABLEVIEW_ALIGNMENT_ID )
+    {
+      mPopup = CreatePopup();
+      mPopup.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
+      mPopup.SetSizeModeFactor( Vector3( 0.75f, 0.75f, 1.0f ) );
+
+      Toolkit::TableView table = Toolkit::TableView::New( 7, 2 );
+      table.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+
+      {
+        Toolkit::TextLabel text = Toolkit::TextLabel::New( "Default" );
+        text.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+        text.SetBackgroundColor( Vector4( 1.0f, 0.0f, 0.0f, 1.0f ) );
+
+        table.AddChild( text, Toolkit::TableView::CellPosition( 0, 0 ) );
+      }
+
+      {
+        Toolkit::TextLabel text = Toolkit::TextLabel::New( "Left, Top" );
+        text.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+        text.SetBackgroundColor( Vector4( 1.0f, 0.0f, 0.0f, 1.0f ) );
+
+        table.AddChild( text, Toolkit::TableView::CellPosition( 1, 0 ) );
+        table.SetCellAlignment( Toolkit::TableView::CellPosition( 1, 0 ), HorizontalAlignment::LEFT, VerticalAlignment::TOP );
+      }
+
+      {
+        Toolkit::TextLabel text = Toolkit::TextLabel::New( "Center, Center" );
+        text.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+        text.SetBackgroundColor( Vector4( 1.0f, 0.0f, 0.0f, 1.0f ) );
+
+        table.AddChild( text, Toolkit::TableView::CellPosition( 2, 0 ) );
+        table.SetCellAlignment( Toolkit::TableView::CellPosition( 2, 0 ), HorizontalAlignment::CENTER, VerticalAlignment::CENTER );
+      }
+
+      {
+        Toolkit::TextLabel text = Toolkit::TextLabel::New( "Right, Bottom" );
+        text.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+        text.SetBackgroundColor( Vector4( 1.0f, 0.0f, 0.0f, 1.0f ) );
+
+        table.AddChild( text, Toolkit::TableView::CellPosition( 3, 0 ) );
+        table.SetCellAlignment( Toolkit::TableView::CellPosition( 3, 0 ), HorizontalAlignment::RIGHT, VerticalAlignment::BOTTOM );
+      }
+
+      {
+        Toolkit::TextLabel text = Toolkit::TextLabel::New( "Center, Center 2 columns" );
+        text.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+        text.SetBackgroundColor( Vector4( 1.0f, 0.0f, 0.0f, 1.0f ) );
+
+        table.AddChild( text, Toolkit::TableView::CellPosition( 4, 0, 1, 2 ) );
+        table.SetCellAlignment( Toolkit::TableView::CellPosition( 4, 0 ), HorizontalAlignment::CENTER, VerticalAlignment::CENTER );
+      }
+
+      {
+        Toolkit::TextLabel text = Toolkit::TextLabel::New( "Right, Bottom 2 columns" );
+        text.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+        text.SetBackgroundColor( Vector4( 1.0f, 0.0f, 0.0f, 1.0f ) );
+
+        table.AddChild( text, Toolkit::TableView::CellPosition( 5, 0, 2, 2 ) );
+        table.SetCellAlignment( Toolkit::TableView::CellPosition( 5, 0 ), HorizontalAlignment::RIGHT, VerticalAlignment::BOTTOM );
       }
 
       mPopup.Add( table );
