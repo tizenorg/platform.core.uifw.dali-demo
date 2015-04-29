@@ -50,6 +50,7 @@ const char* const PUSHBUTTON_PRESS_IMAGE = DALI_IMAGE_DIR "button-down.9.png";
 
 const char* const POPUPS_MENU_ID = "POPUPS_MENU";
 const char* const TABLEVIEW_MENU_ID = "TABLEVIEW_MENU";
+const char* const ANIMATION_MENU_ID = "ANIMATION_MENU";
 
 const char* const POPUP_BUTTON_EMPTY_ID = "POPUP_BUTTON_EMPTY";
 const char* const POPUP_BUTTON_TITLE_ID = "POPUP_BUTTON_TITLE";
@@ -77,8 +78,12 @@ const char* const TABLEVIEW_BUTTON_NATURAL1_ID = "TABLEVIEW_BUTTON_NATURAL1";
 const char* const TABLEVIEW_BUTTON_NATURAL2_ID = "TABLEVIEW_BUTTON_NATURAL2";
 const char* const TABLEVIEW_BUTTON_NATURAL3_ID = "TABLEVIEW_BUTTON_NATURAL3";
 
+const char* const ANIMATION_BUTTON_EXAMPLE_ID = "ANIMATION_BUTTON_EXAMPLE";
+
 const char* const OKAY_BUTTON_ID = "OKAY_BUTTON";
 const char* const CANCEL_BUTTON_ID = "CANCEL_BUTTON";
+
+const char* const ANIMATE_BUTTON_ID = "ANIMATE_BUTTON";
 
 const char* const CONTENT_TEXT = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 const char* const IMAGE1 = DALI_IMAGE_DIR "gallery-medium-5.jpg";
@@ -88,7 +93,8 @@ const char* const CHECKBOX_CHECKED_IMAGE = DALI_IMAGE_DIR "checkbox-selected.png
 
 const ButtonItem MENU_ITEMS[] = {
     { POPUPS_MENU_ID,        "Popups" },
-    { TABLEVIEW_MENU_ID,     "TableView" }
+    { TABLEVIEW_MENU_ID,     "TableView" },
+    { ANIMATION_MENU_ID,     "Animation" }
 };
 
 const unsigned int MENU_ITEMS_COUNT = sizeof( MENU_ITEMS ) / sizeof( MENU_ITEMS[0] );
@@ -128,9 +134,13 @@ const ButtonItem TABLEVIEW_BUTTON_ITEMS[] = {
 
 const unsigned int TABLEVIEW_BUTTON_ITEMS_COUNT = sizeof( TABLEVIEW_BUTTON_ITEMS ) / sizeof( TABLEVIEW_BUTTON_ITEMS[0] );
 
+const ButtonItem ANIMATION_BUTTON_ITEMS[] = {
+    { ANIMATION_BUTTON_EXAMPLE_ID, "Example" }
+};
+
+const unsigned int ANIMATION_BUTTON_ITEMS_COUNT = sizeof( ANIMATION_BUTTON_ITEMS ) / sizeof( ANIMATION_BUTTON_ITEMS[0] );
+
 }  // namespace
-
-
 
 /**
  * This example shows the usage of size negotiation.
@@ -142,7 +152,8 @@ public:
   SizeNegotiationController( Application& application )
     : mApplication( application ),
       mMenuShown( false ),
-      mDemoState( POPUP )
+      mDemoState( POPUP ),
+      mAnimateOut( true )
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect( this, &SizeNegotiationController::Create );
@@ -228,6 +239,12 @@ public:
         break;
       }
 
+      case ANIMATION:
+      {
+        subTitle = "Animation";
+        break;
+      }
+
       default:
       {
         break;
@@ -306,6 +323,14 @@ public:
       {
         refresh = true;
         mDemoState = TABLEVIEW;
+      }
+    }
+    else if( button.GetName() == ANIMATION_MENU_ID )
+    {
+      if( mDemoState != ANIMATION )
+      {
+        refresh = true;
+        mDemoState = ANIMATION;
       }
     }
 
@@ -1158,6 +1183,55 @@ public:
 
       mPopup.Show();
     }
+    else if( button.GetName() == ANIMATION_BUTTON_EXAMPLE_ID )
+    {
+      mPopup = CreatePopup();
+      mPopup.SetSize( Vector2( 200.0f, 200.0f ) );
+
+      Toolkit::Control control = Toolkit::Control::New();
+      control.SetName( "YELLOW_BACKGROUND" );
+      control.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+      control.SetBackgroundColor( Vector4( 1.0f, 1.0f, 0.0f, 1.0f ) );
+
+      mPopup.Add( control );
+
+      Toolkit::PushButton okayButton = Toolkit::PushButton::New();
+      okayButton.SetName( ANIMATE_BUTTON_ID );
+      okayButton.SetAnchorPoint( AnchorPoint::CENTER );
+      okayButton.SetParentOrigin( ParentOrigin::CENTER );
+      okayButton.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
+      okayButton.SetSizeModeFactor( Vector3( 0.75f, 0.75f, 1.0f ) );
+      okayButton.SetLabel( "Animate" );
+      okayButton.SetSelectedImage( Dali::ResourceImage::New( PUSHBUTTON_PRESS_IMAGE ) );
+      okayButton.SetButtonImage( Dali::ResourceImage::New( PUSHBUTTON_BUTTON_IMAGE ) );
+
+      okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
+
+      control.Add( okayButton );
+
+      mAnimateOut = true;
+
+      mPopup.Show();
+    }
+    else if( button.GetName() == ANIMATE_BUTTON_ID )
+    {
+      mAnimation = Animation::New( 2.0f );
+
+      Vector3 size;
+      if( mAnimateOut )
+      {
+        size = Vector3( 400.0f, 600.0f, 1.0f );
+        mAnimateOut = false;
+      }
+      else
+      {
+        size = Vector3( 200.0f, 200.0f, 1.0f );
+        mAnimateOut = true;
+      }
+
+      mAnimation.AnimateTo( Property( mPopup, Actor::Property::SIZE ), size );
+      mAnimation.Play();
+    }
     else if( button.GetName() == OKAY_BUTTON_ID || button.GetName() == CANCEL_BUTTON_ID )
     {
       if( mPopup )
@@ -1210,6 +1284,11 @@ public: // From ItemFactory
         return TABLEVIEW_BUTTON_ITEMS_COUNT;
       }
 
+      case ANIMATION:
+      {
+        return ANIMATION_BUTTON_ITEMS_COUNT;
+      }
+
       default:
       {
         break;
@@ -1242,6 +1321,12 @@ public: // From ItemFactory
         break;
       }
 
+      case ANIMATION:
+      {
+        buttonDataArray = ANIMATION_BUTTON_ITEMS;
+        break;
+      }
+
       default:
       {
         break;
@@ -1271,7 +1356,8 @@ private:
   enum DemoState
   {
     POPUP,
-    TABLEVIEW
+    TABLEVIEW,
+    ANIMATION
   };
 
   Application&      mApplication;
@@ -1289,6 +1375,9 @@ private:
   Toolkit::ItemView mItemView;               ///< ItemView to hold test images
 
   DemoState mDemoState;
+
+  Animation mAnimation;
+  bool mAnimateOut;
 };
 
 void RunTest( Application& application )
