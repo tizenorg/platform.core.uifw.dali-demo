@@ -21,8 +21,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <stdlib.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/public-api/text-abstraction/text-abstraction.h>
+#include <dali/public-api/adaptor-framework/event-feeder.h>
 
 // INTERNAL INCLUDES
 #include "shared/multi-language-strings.h"
@@ -118,9 +120,12 @@ public:
 
     mField = TextField::New();
     mField.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    //mField.SetProperty( TextField::Property::RENDERING_BACKEND, 0 );
     mField.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
     mField.SetResizePolicy( ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT );
+    mField.SetProperty( TextField::Property::PRIMARY_CURSOR_COLOR, Color::RED );
     mField.SetProperty( TextField::Property::PLACEHOLDER_TEXT, "Unnamed folder" );
+    mField.SetProperty( TextField::Property::PLACEHOLDER_TEXT_FOCUSED, "Enter folder name." );
     mField.SetProperty( TextField::Property::DECORATION_BOUNDING_BOX, Rect<int>( BORDER_WIDTH, BORDER_WIDTH, stageSize.width - BORDER_WIDTH*2, stageSize.height - BORDER_WIDTH*2 ) );
 
     container.Add( mField );
@@ -128,11 +133,31 @@ public:
     Property::Value fieldText = mField.GetProperty( TextField::Property::TEXT );
 
     std::cout << "Displaying text: " << fieldText.Get< std::string >() << std::endl;
+
+    mTimer = Timer::New( 1000 );
+    mTimer.TickSignal().Connect( this, &TextFieldExample::OnTimerTick );
+    mTimer.Start();
   }
 
   void OnTap( Actor actor, const TapGesture& tapGesture )
   {
     mField.ClearKeyInputFocus();
+  }
+
+  bool OnTimerTick()
+  {
+    int letter = rand() % 26;
+    char keyString[2];
+    keyString[0] = 'A' + letter;
+    keyString[1] = 0;
+
+    std::cout << "OnTimerTick " << keyString << std::endl;
+
+    KeyEvent keyEvent("", keyString, 36+letter, 0, 0, KeyEvent::Down );
+
+    EventFeeder::FeedKeyEvent( keyEvent );
+
+    return true;
   }
 
   /**
@@ -223,6 +248,8 @@ private:
   TextField mField;
 
   TapGestureDetector mTapGestureDetector;
+
+  Timer mTimer;
 
   unsigned int mLanguageId;
   unsigned int mAlignment;
