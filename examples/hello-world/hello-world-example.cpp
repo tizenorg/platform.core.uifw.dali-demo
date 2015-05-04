@@ -15,10 +15,80 @@
  *
  */
 
+#include <stdio.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
-using Dali::Toolkit::TextLabel;
+using namespace Toolkit;
+
+#define BLUR_LEVELS 3
+
+const char* BLUR_IMAGES[BLUR_LEVELS] =
+{
+  DALI_IMAGE_DIR "blur_1.png",
+  DALI_IMAGE_DIR "blur_2.png",
+  DALI_IMAGE_DIR "blur_3.png"
+};
+
+#if 1
+struct ActorOpacityConstraint
+{
+  ActorOpacityConstraint(int totalImageNum, int currentImageIdx)
+  {
+    float rangeLength = 1.f / static_cast<float>( totalImageNum );
+    float index = static_cast<float>( currentImageIdx );
+    mRange = Vector2( index*rangeLength, (index+1.f)*rangeLength );
+  }
+
+  void operator()(float& current, const PropertyInputContainer& inputs)
+  {
+    const float& blurStrength = inputs[0]->GetFloat();
+    if (blurStrength <= mRange.x)
+    {
+      current = 1.f;
+    }
+    else if (blurStrength > mRange.y)
+    {
+      current = 0.f;
+    }
+    else
+    {
+      current = (mRange.y - blurStrength)/(mRange.y-mRange.x);
+    }
+  }
+
+  Vector2 mRange;
+};
+#else
+struct ActorOpacityConstraint
+{
+  ActorOpacityConstraint(int totalImageNum, int currentImageIdx)
+  {
+    float rangeLength = 1.f / static_cast<float>( totalImageNum );
+    float index = static_cast<float>( currentImageIdx );
+    mRange = Vector2( index*rangeLength, (index+1.f)*rangeLength );
+  }
+
+  float operator()( float current, const PropertyInput& blurProperty )
+  {
+    float blurStrength = blurProperty.GetFloat();
+    if(blurStrength <= mRange.x)
+    {
+      return 1.f;
+    }
+    else if(blurStrength > mRange.y)
+    {
+      return 0.f;
+    }
+    else
+    {
+      return (mRange.y - blurStrength)/(mRange.y-mRange.x);
+    }
+  }
+
+  Vector2 mRange;
+};
+#endif
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -43,12 +113,37 @@ public:
   {
     // Get a handle to the stage
     Stage stage = Stage::GetCurrent();
-    stage.SetBackgroundColor( Color::WHITE );
+    //stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "hello-world-label" );
-    stage.Add( textLabel );
+    mBaseActor = Actor::New();
+    mBaseActor.SetParentOrigin(ParentOrigin::CENTER);
+    mBaseActor.SetAnchorPoint(AnchorPoint::CENTER);
+    stage.Add(mBaseActor);
+
+    mBlurStrengthPropertyIndex = mBaseActor.RegisterProperty("blur-strength", 0.f);
+
+    for (int i = 0; i < BLUR_LEVELS; i++)
+    {
+      mBlurActors[i] = ImageActor::New(ResourceImage::New(BLUR_IMAGES[i])); // CreateSolidColorActor(Color::BLUE);
+      mBlurActors[i].SetBlendEquation(BlendingEquation::ADD);
+      mBlurActors[i].SetBlendFunc(Dali::BlendingFactor::SRC_ALPHA, Dali::BlendingFactor::DST_ALPHA,
+                                  Dali::BlendingFactor::ZERO, Dali::BlendingFactor::ONE);
+      mBlurActors[i].SetColor(Color::RED);
+      mBlurActors[i].SetParentOrigin(ParentOrigin::CENTER);
+      mBlurActors[i].SetAnchorPoint(AnchorPoint::CENTER);
+      stage.Add(mBlurActors[i]);
+
+      if (i)
+      {
+        mBlurActors[i].SetOpacity(0.f);
+      }
+
+      Constraint constraint = Constraint::New<float>(mBlurActors[i],
+                                                     Actor::Property::COLOR_ALPHA,
+                                                     ActorOpacityConstraint(BLUR_LEVELS, i));
+      constraint.AddSource(Source(mBaseActor, mBlurStrengthPropertyIndex));
+      constraint.Apply();
+    }
 
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
@@ -56,13 +151,34 @@ public:
 
   bool OnTouch( Actor actor, const TouchEvent& touch )
   {
-    // quit the application
-    mApplication.Quit();
+    if (TouchPoint::Down == touch.GetPoint(0).state)
+    {
+      printf("Touched down \n");
+
+      Animation anim = Animation::New(1.f);
+      anim.SetEndAction(Animation::Discard);
+      anim.AnimateTo(Property(mBaseActor, mBlurStrengthPropertyIndex), Property::Value(1.f), AlphaFunction::LINEAR);
+
+      for (int i = 0; i < BLUR_LEVELS; i++)
+      {
+        anim.AnimateTo(Property(mBlurActors[i], Actor::Property::COLOR_ALPHA), Property::Value(0.f), AlphaFunction::LINEAR);
+        anim.AnimateTo(Property(mBlurActors[i], Actor::Property::SIZE), Property::Value(Vector3(300.f, 300.f, 1.f)), AlphaFunction::LINEAR);
+      }
+
+      anim.Play();
+
+      //Animation
+    }
+
     return true;
   }
 
 private:
-  Application&  mApplication;
+  Application&    mApplication;
+
+  Actor           mBaseActor;
+  ImageActor      mBlurActors[BLUR_LEVELS];
+  Property::Index mBlurStrengthPropertyIndex;
 };
 
 void RunTest( Application& application )
