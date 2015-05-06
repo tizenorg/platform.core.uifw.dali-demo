@@ -18,7 +18,9 @@
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
-using Dali::Toolkit::TextLabel;
+using namespace Toolkit;
+
+const char* TEST_IMAGE(DALI_IMAGE_DIR "com.samsung.shealth.png");
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -45,10 +47,11 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "hello-world-label" );
-    stage.Add( textLabel );
+    ImageActor actor = ImageActor::New(ResourceImage::New(TEST_IMAGE));
+    actor.SetParentOrigin(ParentOrigin::CENTER);
+    actor.SetAnchorPoint(AnchorPoint::CENTER);
+    actor.SetSize(58.f, 58.f);
+    stage.Add(actor);
 
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
