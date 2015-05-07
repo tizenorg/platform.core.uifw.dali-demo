@@ -335,9 +335,6 @@ public:
     mScrollView.ScrollStartedSignal().Connect( this, &ImageScalingIrregularGridController::OnScrollStarted );
     mScrollView.ScrollCompletedSignal().Connect( this, &ImageScalingIrregularGridController::OnScrollCompleted );
 
-    mScrollView.EnableScrollComponent( Scrollable::VerticalScrollBar );
-    mScrollView.EnableScrollComponent( Scrollable::HorizontalScrollBar );
-
     mScrollView.SetAnchorPoint(AnchorPoint::CENTER);
     mScrollView.SetParentOrigin(ParentOrigin::CENTER);
 
@@ -359,8 +356,22 @@ public:
     mScrollView.Add( imageField );
     mGridActor = imageField;
 
+    // Create the scroll bar
+    mScrollBarVertical = ScrollBar::New(Toolkit::ScrollBar::Vertical);
+    mScrollBarVertical.SetParentOrigin(ParentOrigin::TOP_RIGHT);
+    mScrollBarVertical.SetAnchorPoint(AnchorPoint::TOP_RIGHT);
+    mScrollBarVertical.SetSize(18.0f, stage.GetSize().height, 0.0f);
+    mScrollView.Add(mScrollBarVertical);
+
+    mScrollBarHorizontal = ScrollBar::New(Toolkit::ScrollBar::Horizontal);
+    mScrollBarHorizontal.SetParentOrigin(ParentOrigin::BOTTOM_LEFT);
+    mScrollBarHorizontal.SetAnchorPoint(AnchorPoint::TOP_LEFT);
+    mScrollBarHorizontal.SetSize(18.0f, stage.GetSize().width, 0.0f);
+    mScrollBarHorizontal.SetOrientation(Quaternion(Radian( 1.5f * Math::PI ), Vector3::ZAXIS));
+    mScrollView.Add(mScrollBarHorizontal);
+
     // Scroll to top of grid so first images loaded are on-screen:
-    mScrollView.ScrollTo( Vector3( 0, -1000000, 0 ) );
+    mScrollView.ScrollTo( Vector2( 0, -1000000 ) );
   }
 
   /**
@@ -549,7 +560,7 @@ public:
    * note this state (mScrolling = true)
    * @param[in] position Current Scroll Position
    */
-  void OnScrollStarted( const Vector3& position )
+  void OnScrollStarted( const Vector2& position )
   {
     mScrolling = true;
   }
@@ -559,7 +570,7 @@ public:
    * note this state (mScrolling = false).
    * @param[in] position Current Scroll Position
    */
-  void OnScrollCompleted( const Vector3& position )
+  void OnScrollCompleted( const Vector2& position )
   {
     mScrolling = false;
   }
@@ -573,6 +584,8 @@ private:
   TextLabel mTitleActor;               ///< The Toolbar's Title.
   Actor mGridActor;                   ///< The container for the grid of images
   ScrollView mScrollView;             ///< ScrollView UI Component
+  ScrollBar mScrollBarVertical;
+  ScrollBar mScrollBarHorizontal;
   bool mScrolling;                    ///< ScrollView scrolling state (true = scrolling, false = stationary)
   std::map<unsigned, Dali::FittingMode::Type> mFittingModes; ///< Stores the current scaling mode of each image, keyed by image actor id.
   std::map<unsigned, Vector2> mSizes; ///< Stores the current size of each image, keyed by image actor id.
