@@ -258,18 +258,21 @@ private:
     const Vector3 stageSize(stage.GetSize());
 
     // Ball setup
+    const Vector2 ballSize = BALL_SIZE * stageSize.width;
     mBallStartPosition = stageSize * Vector3( BALL_START_POSITION );
-    mBall = CreateImage(BALL_IMAGE);
+    mBall = CreateImage( BALL_IMAGE, ballSize );
     mBall.SetPosition( mBallStartPosition );
-    mBall.SetSize( BALL_SIZE * stageSize.width );
+    mBall.SetSize( ballSize );
     mContentLayer.Add(mBall);
     mBallVelocity = Vector3::ZERO;
 
     // Paddle setup
+    const Vector2 paddleHandleSize = PADDLE_HANDLE_SIZE * stageSize.width;
+    mPaddleFullSize = PADDLE_SIZE * stageSize.width;
     mPaddleHitMargin = Vector2(stageSize) * PADDLE_HIT_MARGIN;
     mPaddle = Actor::New();
-    mPaddleHandle = CreateImage(PADDLE_HANDLE_IMAGE);
-    mPaddleImage = CreateImage(PADDLE_IMAGE);
+    mPaddleHandle = CreateImage( PADDLE_HANDLE_IMAGE, paddleHandleSize );
+    mPaddleImage = CreateImage( PADDLE_IMAGE, mPaddleFullSize );
     mPaddle.Add( mPaddleHandle );
     mPaddle.Add( mPaddleImage );
     mPaddleHandle.SetParentOrigin( ParentOrigin::TOP_CENTER );
@@ -279,9 +282,8 @@ private:
     mPaddleImage.SetAnchorPoint( AnchorPoint::TOP_CENTER );
     mPaddle.SetParentOrigin( ParentOrigin::TOP_LEFT );
     mPaddle.SetAnchorPoint( AnchorPoint::CENTER );
-    mPaddleFullSize = PADDLE_SIZE * stageSize.width;
     mPaddle.SetSize( mPaddleFullSize + mPaddleHitMargin );
-    mPaddleHandle.SetSize( PADDLE_HANDLE_SIZE * stageSize.width );
+    mPaddleHandle.SetSize( paddleHandleSize );
     mPaddleImage.SetSize( mPaddleFullSize );
 
     mWobbleProperty = mPaddle.RegisterProperty(WOBBLE_PROPERTY_NAME, 0.0f);
@@ -552,10 +554,11 @@ private:
    * Creates an Image (Helper)
    *
    * @param[in] filename the path of the image.
+   * @param[in] imageSize Dimensions to downscale the image to during load.
    */
-  ImageActor CreateImage(const std::string& filename)
+  ImageActor CreateImage( const std::string& filename, Vector2 imageSize )
   {
-    Image img = ResourceImage::New(filename);
+    Image img = ResourceImage::New( filename, ImageDimensions::FromFloatVec2( imageSize ) );
     ImageActor actor = ImageActor::New(img);
     actor.SetParentOrigin(ParentOrigin::TOP_LEFT);
     actor.SetAnchorPoint(AnchorPoint::CENTER);
