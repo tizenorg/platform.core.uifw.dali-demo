@@ -57,111 +57,74 @@ using namespace Dali::Demo;
 
 namespace
 {
-
-/** Controls the output of application logging. */
-//#define DEBUG_PRINT_DIAGNOSTICS;
-
 const char* BACKGROUND_IMAGE( DALI_IMAGE_DIR "background-gradient.jpg" );
 const char* TOOLBAR_IMAGE( DALI_IMAGE_DIR "top-bar.png" );
-const char* APPLICATION_TITLE( "Image Scaling Modes" );
+const char* APPLICATION_TITLE( "Sampling Mode" );
 const char* TOGGLE_SCALING_IMAGE( DALI_IMAGE_DIR "icon-change.png" );
 const char* TOGGLE_SCALING_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-change-selected.png" );
+const char* TOGGLE_IMAGE_IMAGE( DALI_IMAGE_DIR "icon-replace.png" );
+const char* TOGGLE_IMAGE_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-replace-selected.png" );
 
 /** The width of the grid in whole grid cells. */
 const unsigned GRID_WIDTH = 9;
 /** Limit the grid to be no higher than this in units of a cell. */
-const unsigned GRID_MAX_HEIGHT = 600;
+const unsigned GRID_MAX_HEIGHT = 100;
 
 /** The space between the edge of a grid cell and the image embedded within it. */
 const unsigned GRID_CELL_PADDING = 4;
 
 /** The aspect ratio of cells in the image grid. */
-const float CELL_ASPECT_RATIO = 1.33333333333333333333f;
+const float CELL_ASPECT_RATIO = 4.f/3;
 
-const Dali::FittingMode::Type DEFAULT_SCALING_MODE = Dali::FittingMode::SCALE_TO_FILL;
+const Dali::FittingMode::Type FITTING_MODE = Dali::FittingMode::SCALE_TO_FILL;
+const Dali::SamplingMode::Type DEFAULT_SAMPLING_MODE = Dali::SamplingMode::BOX_THEN_LINEAR;
 
 /** The number of times to spin an image on touching, each spin taking a second.*/
-const float SPIN_DURATION = 1.0f;
+const float SPIN_DURATION = 4.0f;
 
 /** The target image sizes in grid cells. */
 const Vector2 IMAGE_SIZES[] = {
  Vector2( 1, 1 ),
+ Vector2( 1, 1 ),
+ Vector2( 1, 1 ),
  Vector2( 2, 1 ),
  Vector2( 3, 1 ),
+ Vector2( 3, 2 ),
+ Vector2( 4, 2 ),
  Vector2( 1, 2 ),
  Vector2( 1, 3 ),
  Vector2( 2, 3 ),
- Vector2( 3, 2 ),
- // Large, tall configuration:
+ Vector2( 2, 4 ),
+ // Large, tall configurations:
  Vector2( GRID_WIDTH / 2, GRID_WIDTH + GRID_WIDTH / 2 ),
+ //Vector2( GRID_WIDTH / 2, GRID_WIDTH * 2 ),
  // Large, square-ish images to show shrink-to-fit well with wide and tall images:
  Vector2( GRID_WIDTH / 2, GRID_WIDTH / 2.0f * CELL_ASPECT_RATIO + 0.5f ),
  Vector2( GRID_WIDTH - 2, (GRID_WIDTH - 2) * CELL_ASPECT_RATIO + 0.5f ),
+ // Large, wide configurations:
+ Vector2( GRID_WIDTH - 2, 2 ),
+ //Vector2( GRID_WIDTH - 1, 1 ),
 };
 const unsigned NUM_IMAGE_SIZES = sizeof(IMAGE_SIZES) / sizeof(IMAGE_SIZES[0]);
 
 /** Images to load into the grid. These are mostly large and non-square to
  *  show the scaling. */
 const char* IMAGE_PATHS[] = {
+  DALI_IMAGE_DIR "gallery-large-2.jpg",
 
-  DALI_IMAGE_DIR "dali-logo.png",
-  DALI_IMAGE_DIR "com.samsung.dali-demo.ico",
-  DALI_IMAGE_DIR "square_primitive_shapes.bmp",
+  // The hardest image to downscale that we have (2048*2048, 1BPP black and white):
   DALI_IMAGE_DIR "gallery-large-14.wbmp",
 
-  // Images that show aspect ratio changes clearly in primitive shapes:
-
-  DALI_IMAGE_DIR "portrait_screen_primitive_shapes.gif",
-  DALI_IMAGE_DIR "landscape_screen_primitive_shapes.gif",
-
   // Images from other demos that are tall, wide or just large:
-
-  DALI_IMAGE_DIR "gallery-large-1.jpg",
-  DALI_IMAGE_DIR "gallery-large-2.jpg",
-  DALI_IMAGE_DIR "gallery-large-3.jpg",
-  DALI_IMAGE_DIR "gallery-large-4.jpg",
-  DALI_IMAGE_DIR "gallery-large-5.jpg",
-  DALI_IMAGE_DIR "gallery-large-6.jpg",
-  DALI_IMAGE_DIR "gallery-large-7.jpg",
-  DALI_IMAGE_DIR "gallery-large-8.jpg",
-  DALI_IMAGE_DIR "gallery-large-9.jpg",
-  DALI_IMAGE_DIR "gallery-large-10.jpg",
-  DALI_IMAGE_DIR "gallery-large-11.jpg",
-  DALI_IMAGE_DIR "gallery-large-12.jpg",
-  DALI_IMAGE_DIR "gallery-large-13.jpg",
-  DALI_IMAGE_DIR "gallery-large-14.jpg",
-  DALI_IMAGE_DIR "gallery-large-15.jpg",
-  DALI_IMAGE_DIR "gallery-large-16.jpg",
-  DALI_IMAGE_DIR "gallery-large-17.jpg",
-  DALI_IMAGE_DIR "gallery-large-18.jpg",
-  DALI_IMAGE_DIR "gallery-large-19.jpg",
   DALI_IMAGE_DIR "gallery-large-20.jpg",
-  DALI_IMAGE_DIR "gallery-large-21.jpg",
-
   DALI_IMAGE_DIR "background-1.jpg",
-  DALI_IMAGE_DIR "background-2.jpg",
-  DALI_IMAGE_DIR "background-3.jpg",
   DALI_IMAGE_DIR "background-4.jpg",
   DALI_IMAGE_DIR "background-5.jpg",
   DALI_IMAGE_DIR "background-blocks.jpg",
   DALI_IMAGE_DIR "background-magnifier.jpg",
-
-  DALI_IMAGE_DIR "background-1.jpg",
-  DALI_IMAGE_DIR "background-2.jpg",
-  DALI_IMAGE_DIR "background-3.jpg",
-  DALI_IMAGE_DIR "background-4.jpg",
-  DALI_IMAGE_DIR "background-5.jpg",
-  DALI_IMAGE_DIR "background-blocks.jpg",
-  DALI_IMAGE_DIR "background-magnifier.jpg",
-
   DALI_IMAGE_DIR "book-landscape-cover-back.jpg",
   DALI_IMAGE_DIR "book-landscape-cover.jpg",
   DALI_IMAGE_DIR "book-landscape-p1.jpg",
-  DALI_IMAGE_DIR "book-landscape-p2.jpg",
-
-  DALI_IMAGE_DIR "book-portrait-cover.jpg",
-  DALI_IMAGE_DIR "book-portrait-p1.jpg",
-  DALI_IMAGE_DIR "book-portrait-p2.jpg",
   NULL
 };
 const unsigned NUM_IMAGE_PATHS = sizeof(IMAGE_PATHS) / sizeof(IMAGE_PATHS[0]) - 1u;
@@ -175,12 +138,9 @@ const unsigned NUM_IMAGE_PATHS = sizeof(IMAGE_PATHS) / sizeof(IMAGE_PATHS[0]) - 
  * @param[in] height The height of the image in pixels.
  * @param[in] fittingMode The mode to use when scaling the image to fit the desired dimensions.
  */
-Image CreateImage(const std::string& filename, unsigned int width, unsigned int height, Dali::FittingMode::Type fittingMode )
+Image CreateImage(const std::string& filename, unsigned int width, unsigned int height, Dali::FittingMode::Type fittingMode, Dali::SamplingMode::Type samplingMode )
 {
-#ifdef DEBUG_PRINT_DIAGNOSTICS
-    fprintf( stderr, "CreateImage(%s, %u, %u, fittingMode=%u)\n", filename.c_str(), width, height, unsigned( fittingMode ) );
-#endif
-  Image image = ResourceImage::New( filename, ImageDimensions( width, height ), fittingMode, Dali::SamplingMode::BOX_THEN_LINEAR );
+  Image image = ResourceImage::New( filename, ImageDimensions( width, height ), fittingMode, samplingMode );
 
   return image;
 }
@@ -193,9 +153,9 @@ Image CreateImage(const std::string& filename, unsigned int width, unsigned int 
  * @param[in] height The height of the image in pixels.
  * @param[in] fittingMode The mode to use when scaling the image to fit the desired dimensions.
  */
-ImageActor CreateImageActor(const std::string& filename, unsigned int width, unsigned int height, Dali::FittingMode::Type fittingMode )
+ImageActor CreateImageActor(const std::string& filename, unsigned int width, unsigned int height, Dali::FittingMode::Type fittingMode, Dali::SamplingMode::Type samplingMode )
 {
-  Image img = CreateImage( filename, width, height, fittingMode );
+  Image img = CreateImage( filename, width, height, fittingMode, samplingMode );
   ImageActor actor = ImageActor::New( img );
   actor.SetName( filename );
   actor.SetParentOrigin(ParentOrigin::CENTER);
@@ -205,25 +165,40 @@ ImageActor CreateImageActor(const std::string& filename, unsigned int width, uns
 }
 
 /** Cycle the scaling mode options. */
-Dali::FittingMode::Type NextMode( const Dali::FittingMode::Type oldMode )
+Dali::SamplingMode::Type NextMode( const Dali::SamplingMode::Type oldMode )
 {
-  Dali::FittingMode::Type newMode = FittingMode::SHRINK_TO_FIT;
+  Dali::SamplingMode::Type newMode = SamplingMode::NEAREST;
   switch ( oldMode )
   {
-    case FittingMode::SHRINK_TO_FIT:
-      newMode = FittingMode::SCALE_TO_FILL;
+    case SamplingMode::NEAREST:
+      newMode = SamplingMode::LINEAR;
       break;
-    case FittingMode::SCALE_TO_FILL:
-      newMode = FittingMode::FIT_WIDTH;
+    case SamplingMode::LINEAR:
+      newMode = SamplingMode::BOX;
       break;
-    case FittingMode::FIT_WIDTH:
-      newMode = FittingMode::FIT_HEIGHT;
+    case SamplingMode::BOX:
+      newMode = SamplingMode::BOX_THEN_NEAREST;
       break;
-    case FittingMode::FIT_HEIGHT:
-      newMode = FittingMode::SHRINK_TO_FIT;
+    case SamplingMode::BOX_THEN_NEAREST:
+      newMode = SamplingMode::BOX_THEN_LINEAR;
+      break;
+    case SamplingMode::BOX_THEN_LINEAR:
+      newMode = SamplingMode::NO_FILTER;
+      break;
+    case SamplingMode::NO_FILTER:
+      newMode = SamplingMode::NEAREST;
+      break;
+    case SamplingMode::DONT_CARE:
+      newMode = SamplingMode::NEAREST;
       break;
   }
   return newMode;
+}
+
+std::string SamplingModeToString( Dali::SamplingMode::Type mode )
+{
+  std::string name = mode == SamplingMode::NEAREST ? "NEAREST" : mode == SamplingMode::LINEAR ?  "LINEAR" : mode == SamplingMode::BOX ? "BOX" : mode == SamplingMode::BOX_THEN_NEAREST ? "BOX_THEN_NEAREST" : mode == SamplingMode::BOX_THEN_LINEAR ? "BOX_THEN_LINEAR" : mode == SamplingMode::NO_FILTER ? "NO_FILTER" : "???";
+  return name;
 }
 
 /**
@@ -268,7 +243,9 @@ public:
 
   ImageScalingIrregularGridController( Application& application )
   : mApplication( application ),
-    mScrolling( false )
+    mScrolling( false ),
+    mSamplingMode( DEFAULT_SAMPLING_MODE ),
+    mCurrentImagePath(0)
   {
     std::cout << "ImageScalingIrregularGridController::ImageScalingIrregularGridController" << std::endl;
 
@@ -314,10 +291,19 @@ public:
     toggleScalingButton.ClickedSignal().Connect( this, &ImageScalingIrregularGridController::OnToggleScalingTouched );
     mToolBar.AddControl( toggleScalingButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
 
-    SetTitle( APPLICATION_TITLE );
+    // Create an image switching button. (left of toolbar)
+    Image switchImageImage = ResourceImage::New( TOGGLE_IMAGE_IMAGE );
+    Image switchImageImageSelected = ResourceImage::New( TOGGLE_IMAGE_IMAGE_SELECTED );
+    Toolkit::PushButton switchImageButton = Toolkit::PushButton::New();
+    switchImageButton.SetButtonImage( switchImageImage );
+    switchImageButton.SetSelectedImage( switchImageImageSelected );
+    switchImageButton.ClickedSignal().Connect( this, &ImageScalingIrregularGridController::OnSwitchImageTouched );
+    mToolBar.AddControl( switchImageButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
+
+    SetTitle( std::string(APPLICATION_TITLE) + ": " + SamplingModeToString( mSamplingMode ) );
 
     // Build the main content of the widow:
-    PopulateContentLayer( DEFAULT_SCALING_MODE );
+    PopulateContentLayer( FITTING_MODE );
   }
 
   /**
@@ -329,7 +315,7 @@ public:
     Vector2 stageSize = stage.GetSize();
 
     float fieldHeight;
-    Actor imageField = BuildImageField( stageSize.x, GRID_WIDTH, GRID_MAX_HEIGHT, fittingMode, fieldHeight );
+    Actor imageField = BuildImageField( IMAGE_PATHS[mCurrentImagePath], stageSize.x, GRID_WIDTH, GRID_MAX_HEIGHT, fittingMode, fieldHeight );
 
     mScrollView = ScrollView::New();
 
@@ -350,7 +336,7 @@ public:
     rulerX->SetDomain( RulerDomain( stageSize.width * -0.125f, stageSize.width * 1.125f ) ); //< Scroll slightly left/right of image field.
     mScrollView.SetRulerX ( rulerX );
 
-    RulerPtr rulerY = new DefaultRuler(); //< Snap in multiples of a screen / stage height
+    RulerPtr rulerY = new DefaultRuler(); //stageSize.height ); //< Snap in multiples of a screen / stage height
     rulerY->SetDomain( RulerDomain( - fieldHeight * 0.5f + stageSize.height * 0.5f - GRID_CELL_PADDING, fieldHeight * 0.5f + stageSize.height * 0.5f + GRID_CELL_PADDING ) );
     mScrollView.SetRulerY ( rulerY );
 
@@ -390,24 +376,27 @@ public:
    * through square, to very tall. The images are direct children of the Dali::Actor
    * returned.
    **/
-  Actor BuildImageField( const float fieldWidth,
-                           const unsigned gridWidth,
-                           const unsigned maxGridHeight,
-                           Dali::FittingMode::Type fittingMode,
-                           float & outFieldHeight )
+  Actor BuildImageField( const char * imagePath,
+                         const float fieldWidth,
+                         const unsigned gridWidth,
+                         const unsigned maxGridHeight,
+                         Dali::FittingMode::Type fittingMode,
+                         float & outFieldHeight )
   {
     // Generate the list of image configurations to be fitted into the field:
 
     std::vector<ImageConfiguration> configurations;
-    configurations.reserve( NUM_IMAGE_PATHS * NUM_IMAGE_SIZES );
-    for( unsigned imageIndex = 0; imageIndex < NUM_IMAGE_PATHS; ++imageIndex )
+    configurations.reserve( 8 * NUM_IMAGE_SIZES );
+    for( unsigned imageIndex = 0; imageIndex < 8; ++imageIndex )
     {
       for( unsigned dimensionsIndex = 0; dimensionsIndex < NUM_IMAGE_SIZES; ++ dimensionsIndex )
       {
-        configurations.push_back( ImageConfiguration( IMAGE_PATHS[imageIndex], IMAGE_SIZES[dimensionsIndex] ) );
+        configurations.push_back( ImageConfiguration( imagePath, IMAGE_SIZES[dimensionsIndex] ) );
       }
     }
     // Stir-up the list to get some nice irregularity in the generated field:
+    std::random_shuffle( configurations.begin(), configurations.end() );
+    std::random_shuffle( configurations.begin(), configurations.end() );
     std::random_shuffle( configurations.begin(), configurations.end() );
     std::random_shuffle( configurations.begin(), configurations.end() );
 
@@ -426,9 +415,6 @@ public:
       bool allocated = grid.AllocateRegion( config->dimensions, cellX, cellY, imageGridDims );
       if( !allocated )
       {
-#ifdef DEBUG_PRINT_DIAGNOSTICS
-          fprintf( stderr, "Failed to allocate image in grid with dims (%f, %f) and path: %s.\n", config->dimensions.x, config->dimensions.y, config->path );
-#endif
         continue;
       }
 
@@ -460,11 +446,10 @@ public:
       const Vector2 imageRegionCorner = gridOrigin + cellSize * Vector2( imageSource.cellX, imageSource.cellY );
       const Vector2 imagePosition = imageRegionCorner + Vector2( GRID_CELL_PADDING , GRID_CELL_PADDING ) + imageSize * 0.5f;
 
-      ImageActor image = CreateImageActor( imageSource.configuration.path, imageSize.x, imageSize.y, fittingMode );
+      ImageActor image = CreateImageActor( imageSource.configuration.path, imageSize.x, imageSize.y, fittingMode, mSamplingMode );
       image.SetPosition( Vector3( imagePosition.x, imagePosition.y, 0 ) );
       image.SetSize( imageSize );
       image.TouchedSignal().Connect( this, &ImageScalingIrregularGridController::OnTouchImage );
-      mFittingModes[image.GetId()] = fittingMode;
       mSizes[image.GetId()] = imageSize;
 
       gridActor.Add( image );
@@ -487,19 +472,8 @@ public:
       {
         // Spin the image a few times:
         Animation animation = Animation::New(SPIN_DURATION);
-        animation.AnimateBy( Property( actor, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f * SPIN_DURATION) ), Vector3::XAXIS ), AlphaFunction::EASE_OUT );
+        animation.AnimateBy( Property( actor, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f) ), Vector3::XAXIS ), AlphaFunction::EASE_OUT );
         animation.Play();
-
-        // Change the scaling mode:
-        const unsigned id = actor.GetId();
-        Dali::FittingMode::Type newMode = NextMode( mFittingModes[id] );
-        const Vector2 imageSize = mSizes[actor.GetId()];
-
-        ImageActor imageActor = ImageActor::DownCast( actor );
-        Image oldImage = imageActor.GetImage();
-        Image newImage = CreateImage( ResourceImage::DownCast(oldImage).GetUrl(), imageSize.width + 0.5f, imageSize.height + 0.5f, newMode );
-        imageActor.SetImage( newImage );
-        mFittingModes[id] = newMode;
       }
     }
     return false;
@@ -530,6 +504,9 @@ public:
   {
     const unsigned numChildren = mGridActor.GetChildCount();
 
+    Dali::SamplingMode::Type newMode = NextMode( mSamplingMode );
+    mSamplingMode = newMode;
+
     for( unsigned i = 0; i < numChildren; ++i )
     {
       ImageActor gridImageActor = ImageActor::DownCast( mGridActor.GetChildAt( i ) );
@@ -537,14 +514,36 @@ public:
       {
         // Cycle the scaling mode options:
         const Vector2 imageSize = mSizes[gridImageActor.GetId()];
-        Dali::FittingMode::Type newMode = NextMode( mFittingModes[gridImageActor.GetId()] );
         Image oldImage = gridImageActor.GetImage();
-        Image newImage = CreateImage(ResourceImage::DownCast(oldImage).GetUrl(), imageSize.width, imageSize.height, newMode );
+        Image newImage = CreateImage( ResourceImage::DownCast(oldImage).GetUrl(), imageSize.width, imageSize.height, FITTING_MODE, newMode );
         gridImageActor.SetImage( newImage );
+      }
+    }
 
-        mFittingModes[gridImageActor.GetId()] = newMode;
+    SetTitle( std::string(APPLICATION_TITLE) + ": " + SamplingModeToString( newMode ) );
+    return true;
+  }
 
-        SetTitle( std::string( newMode == FittingMode::SHRINK_TO_FIT ? "SHRINK_TO_FIT" : newMode == FittingMode::SCALE_TO_FILL ?  "SCALE_TO_FILL" : newMode == FittingMode::FIT_WIDTH ? "FIT_WIDTH" : "FIT_HEIGHT" ) );
+  /**
+   * Signal handler, called when the button to change images has been touched.
+   *
+   * @param[in] button The button that was pressed.
+   */
+  bool OnSwitchImageTouched( Button button )
+  {
+    mCurrentImagePath = (mCurrentImagePath + 1) % NUM_IMAGE_PATHS;
+
+    const unsigned numChildren = mGridActor.GetChildCount();
+    for( unsigned i = 0; i < numChildren; ++i )
+    {
+      ImageActor gridImageActor = ImageActor::DownCast( mGridActor.GetChildAt( i ) );
+      if( gridImageActor )
+      {
+        // Cycle the scaling mode options:
+        const Vector2 imageSize = mSizes[gridImageActor.GetId()];
+        Image oldImage = gridImageActor.GetImage();
+        Image newImage = CreateImage( IMAGE_PATHS[mCurrentImagePath], imageSize.width, imageSize.height, FITTING_MODE, mSamplingMode );
+        gridImageActor.SetImage( newImage );
       }
     }
     return true;
@@ -589,17 +588,18 @@ public:
 private:
   Application&  mApplication;
 
-  Layer mContentLayer;                ///< The content layer (contains non gui chrome actors)
-  Toolkit::Control mView;             ///< The View instance.
-  Toolkit::ToolBar mToolBar;          ///< The View's Toolbar.
-  TextLabel mTitleActor;               ///< The Toolbar's Title.
-  Actor mGridActor;                   ///< The container for the grid of images
-  ScrollView mScrollView;             ///< ScrollView UI Component
+  Layer mContentLayer;                    ///< The content layer (contains non gui chrome actors)
+  Toolkit::Control mView;                 ///< The View instance.
+  Toolkit::ToolBar mToolBar;              ///< The View's Toolbar.
+  TextLabel mTitleActor;                  ///< The Toolbar's Title.
+  Actor mGridActor;                       ///< The container for the grid of images
+  ScrollView mScrollView;                 ///< ScrollView UI Component
   ScrollBar mScrollBarVertical;
   ScrollBar mScrollBarHorizontal;
-  bool mScrolling;                    ///< ScrollView scrolling state (true = scrolling, false = stationary)
-  std::map<unsigned, Dali::FittingMode::Type> mFittingModes; ///< Stores the current scaling mode of each image, keyed by image actor id.
-  std::map<unsigned, Vector2> mSizes; ///< Stores the current size of each image, keyed by image actor id.
+  bool mScrolling;                        ///< ScrollView scrolling state (true = scrolling, false = stationary)
+  Dali::SamplingMode::Type mSamplingMode; ///< Sampling mode used to load images.
+  std::map<unsigned, Vector2> mSizes;     ///< Stores the current size of each image, keyed by image actor id.
+  unsigned int mCurrentImagePath;         ///< Index of currently displayed image in list of paths.
 };
 
 void RunTest( Application& application )
