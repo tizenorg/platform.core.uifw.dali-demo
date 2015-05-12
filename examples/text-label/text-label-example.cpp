@@ -27,6 +27,7 @@
 // INTERNAL INCLUDES
 #include "shared/multi-language-strings.h"
 #include "shared/view.h"
+#include "text-label-settings.h"
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -156,6 +157,100 @@ public:
 
       mContainer.SetSize( clampedSize );
     }
+  }
+
+  void ChangeLabelSetting( TextLabelSetting setting, int value = 0 )
+  {
+    switch( setting )
+    {
+      case SETTING_RENDERING_BACKEND:
+      {
+        mLabel.SetProperty( TextLabel::Property::RENDERING_BACKEND, value );
+        break;
+      }
+
+      case SETTING_FILL_VERTICALLY:
+      {
+        // Toggle vertical fill
+        if( ResizePolicy::DIMENSION_DEPENDENCY == mLabel.GetResizePolicy(Dimension::HEIGHT) )
+        {
+          mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT );
+        }
+        else
+        {
+          mLabel.SetResizePolicy( ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT );
+        }
+        break;
+      }
+
+      case SETTING_HORIZONTAL_ALIGNMENT:
+
+
+          case KEY_H: // Horizontal alignment
+          {
+            if( ++mAlignment >= H_ALIGNMENT_STRING_COUNT )
+            {
+              mAlignment = 0u;
+            }
+
+            mLabel.SetProperty( TextLabel::Property::HORIZONTAL_ALIGNMENT, H_ALIGNMENT_STRING_TABLE[ mAlignment ] );
+            break;
+          }
+          case KEY_V: // Vertical alignment
+          {
+            if( ++mAlignment >= V_ALIGNMENT_STRING_COUNT )
+            {
+              mAlignment = 0u;
+            }
+
+            mLabel.SetProperty( TextLabel::Property::VERTICAL_ALIGNMENT, V_ALIGNMENT_STRING_TABLE[ mAlignment ] );
+            break;
+          }
+          case KEY_M: // Multi-line
+          {
+            bool multiLine = mLabel.GetProperty<bool>( TextLabel::Property::MULTI_LINE );
+            mLabel.SetProperty( TextLabel::Property::MULTI_LINE, !multiLine );
+            break;
+          }
+          case KEY_L: // Language
+          {
+            const Language& language = LANGUAGES[ mLanguageId ];
+
+            mLabel.SetProperty( TextLabel::Property::TEXT, language.text );
+
+            if( ++mLanguageId >= NUMBER_OF_LANGUAGES )
+            {
+              mLanguageId = 0u;
+            }
+            break;
+          }
+          case KEY_S: // Shadow color
+          {
+            if( Color::BLACK == mLabel.GetProperty<Vector4>( TextLabel::Property::SHADOW_COLOR ) )
+            {
+              mLabel.SetProperty( TextLabel::Property::SHADOW_COLOR, Color::RED );
+            }
+            else
+            {
+              mLabel.SetProperty( TextLabel::Property::SHADOW_COLOR, Color::BLACK );
+            }
+            break;
+          }
+          case KEY_PLUS: // Increase shadow offset
+          {
+            mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, mLabel.GetProperty<Vector2>( TextLabel::Property::SHADOW_OFFSET ) + Vector2( 1.0f, 1.0f ) );
+            break;
+          }
+          case KEY_MINUS: // Decrease shadow offset
+          {
+            mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, mLabel.GetProperty<Vector2>( TextLabel::Property::SHADOW_OFFSET ) - Vector2( 1.0f, 1.0f ) );
+            break;
+          }
+  }
+
+  void Quit()
+  {
+    
   }
 
   /**
