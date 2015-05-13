@@ -37,11 +37,12 @@ attribute mediump vec2    aPosition2;
 uniform   mediump mat4    uMvpMatrix;
 uniform   mediump vec3    uSize;
 uniform   mediump float   uMorphAmount;
+uniform   mediump float   uTest;
 
 void main()
 {
   mediump vec2 morphPosition = mix(aPosition1, aPosition2, uMorphAmount);
-  mediump vec4 vertexPosition = vec4(morphPosition, 0.0, 1.0);
+  mediump vec4 vertexPosition = vec4(morphPosition, uTest, 1.0);
   vertexPosition.xyz *= uSize;
   vertexPosition = uMvpMatrix * vertexPosition;
   gl_Position = vertexPosition;
@@ -168,6 +169,9 @@ public:
 
     Property::Index morphAmountIndex = mMeshActor.RegisterProperty( "morph-amount", 0.0f );
     mMeshActor.AddUniformMapping( morphAmountIndex, std::string("uMorphAmount") );
+
+    Property::Index sizeIndex = mMeshActor.RegisterProperty( "test", 0.f );
+    mMeshActor.AddUniformMapping( sizeIndex, std::string("uTest") );
 
     mRenderer.SetDepthIndex(0);
 
