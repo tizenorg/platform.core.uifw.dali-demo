@@ -114,7 +114,7 @@ public:
     // Resize the center layout when the corner is grabbed
     mGrabCorner = Control::New();
     mGrabCorner.SetName( "GrabCorner" );
-    mGrabCorner.SetAnchorPoint( AnchorPoint::BOTTOM_RIGHT );
+    mGrabCorner.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     mGrabCorner.SetParentOrigin( ParentOrigin::BOTTOM_RIGHT );
     mGrabCorner.SetSize( Vector2(stageSize.width*0.1f, stageSize.width*0.1f) );
     mGrabCorner.SetZ(1.0f);
