@@ -20,7 +20,7 @@
 //
 //------------------------------------------------------------------------------
 
-#include "dali.h"
+#include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/public-api/builder/builder.h>
 #include <dali-toolkit/public-api/builder/tree-node.h>
@@ -36,6 +36,7 @@
 
 #include "sys/stat.h"
 #include <ctime>
+#include <cstring>
 
 #include <dali/integration-api/debug.h>
 #include "shared/view.h"
@@ -139,11 +140,6 @@ const std::string ShortName( const std::string& name )
   {
     return name;
   }
-}
-
-static Vector3 SetItemSize(unsigned int numberOfColumns, float layoutWidth, float sideMargin, float columnSpacing)
-{
-  return Vector3(layoutWidth, 50, 1);
 }
 
 //------------------------------------------------------------------------------
@@ -294,7 +290,7 @@ public:
     mGridLayout = GridLayout::New();
     mGridLayout->SetNumberOfColumns(1);
 
-    mGridLayout->SetItemSizeFunction(SetItemSize);
+    mGridLayout->SetItemSize( Vector3( stage.GetSize().width, 50, 1 ) );
 
     mGridLayout->SetTopMargin(DemoHelper::DEFAULT_VIEW_STYLE.mToolBarHeight);
 
