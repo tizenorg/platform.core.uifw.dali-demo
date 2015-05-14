@@ -65,6 +65,8 @@ const float EFFECT_SNAP_DURATION = 0.66f;                       ///< Scroll Snap
 const float EFFECT_FLICK_DURATION = 0.5f;                       ///< Scroll Flick Duration for Effects
 const Vector3 ANGLE_CUBE_PAGE_ROTATE(Math::PI * 0.5f, Math::PI * 0.5f, 0.0f);
 
+
+
 const int NUM_BACKGROUND_IMAGES = 18;
 const float BACKGROUND_SWIPE_SCALE = 0.025f;
 const float BACKGROUND_SPREAD_SCALE = 1.5f;
@@ -318,7 +320,7 @@ void DaliTableView::Initialize( Application& application )
   Populate();
 
   // Remove constraints for inner cube effect
-  ApplyCubeEffectToActors();
+  ApplyCubeEffectToPages();
 
   Dali::Window winHandle = application.GetWindow();
   winHandle.AddAvailableOrientation( Dali::Window::PORTRAIT );
@@ -346,21 +348,14 @@ void DaliTableView::Initialize( Application& application )
   KeyboardFocusManager::Get().FocusedActorActivatedSignal().Connect( this, &DaliTableView::OnFocusedActorActivated );
 }
 
-void DaliTableView::ApplyCubeEffectToActors()
+void DaliTableView::ApplyCubeEffectToPages()
 {
+  ScrollViewPagePathEffect effect = ScrollViewPagePathEffect::DownCast( mScrollViewEffect );
+  unsigned int pageCount(0);
   for( std::vector< Actor >::iterator pageIter = mPages.begin(); pageIter != mPages.end(); ++pageIter )
   {
     Actor page = *pageIter;
-
-    for( unsigned int i = 0, numChildren = page.GetChildCount(); i < numChildren; ++i)
-    {
-      // Remove old effect's manual constraints.
-      Actor child = page.GetChildAt(i);
-      if( child )
-      {
-        ApplyCubeEffectToActor( child );
-      }
-    }
+    effect.ApplyToPage( page, pageCount++ );
   }
 }
 
@@ -446,9 +441,9 @@ void DaliTableView::Populate()
   }
 
   // Update Ruler info.
-  mScrollRulerX = new FixedRuler( stageSize.width * TABLE_RELATIVE_SIZE.x );
+  mScrollRulerX = new FixedRuler( stageSize.width * TABLE_RELATIVE_SIZE.x * 0.5f );
   mScrollRulerY = new DefaultRuler();
-  mScrollRulerX->SetDomain( RulerDomain( 0.0f, mTotalPages * stageSize.width * TABLE_RELATIVE_SIZE.x, true ) );
+  mScrollRulerX->SetDomain( RulerDomain( 0.0f, (mTotalPages+1) * stageSize.width * TABLE_RELATIVE_SIZE.x * 0.5f, true ) );
   mScrollRulerY->Disable();
   mScrollView.SetRulerX( mScrollRulerX );
   mScrollView.SetRulerY( mScrollRulerY );
@@ -681,21 +676,29 @@ void DaliTableView::ApplyScrollViewEffect()
 
 void DaliTableView::SetupInnerPageCubeEffect()
 {
-  mScrollViewEffect = ScrollViewCubeEffect::New();
-  mScrollView.SetScrollSnapDuration( EFFECT_SNAP_DURATION );
-  mScrollView.SetScrollFlickDuration( EFFECT_FLICK_DURATION );
-  mScrollView.RemoveConstraintsFromChildren();
-}
+  const Vector2 stageSize = Stage::GetCurrent().GetSize();
 
-void DaliTableView::ApplyCubeEffectToActor( Actor actor )
-{
-  actor.RemoveConstraints();
+  Dali::Path path = Dali::Path::New();
+  Dali::Property::Array points;
+  points.resize(3);
+  points[0] = Vector3( stageSize.x*0.5, 0.0f,  stageSize.x*0.5f);
+  points[1] = Vector3( 0.0f, 0.0f, 0.0f );
+  points[2] = Vector3( -stageSize.x*0.5f, 0.0f, stageSize.x*0.5f);
+  path.SetProperty( Path::Property::POINTS, points );
 
-  ScrollViewCubeEffect cubeEffect = ScrollViewCubeEffect::DownCast(mScrollViewEffect);
-  cubeEffect.ApplyToActor( actor,
-                           ScalePointSize( ( rand() & 1 ) ? ANCHOR_3DEFFECT_STYLE0 : ANCHOR_3DEFFECT_STYLE1 ),
-                           ANGLE_SWING_3DEFFECT,
-                           POSITION_SWING_3DEFFECT * Vector2(Stage::GetCurrent().GetSize()));
+  Dali::Property::Array controlPoints;
+  controlPoints.resize(4);
+  controlPoints[0] = Vector3( stageSize.x*0.5f, 0.0f, stageSize.x*0.3f );
+  controlPoints[1] = Vector3( stageSize.x*0.3f, 0.0f, 0.0f );
+  controlPoints[2] = Vector3(-stageSize.x*0.3f, 0.0f, 0.0f );
+  controlPoints[3] = Vector3(-stageSize.x*0.5f, 0.0f,  stageSize.x*0.3f );
+  path.SetProperty( Path::Property::CONTROL_POINTS, controlPoints );
+
+
+  mScrollViewEffect = ScrollViewPagePathEffect::New(path,
+                                                    Vector3(-1.0f,0.0f,0.0f),
+                                                    Toolkit::ScrollView::Property::SCROLL_FINAL_X,
+                                                    Vector3(stageSize.x*TABLE_RELATIVE_SIZE.x,stageSize.y*TABLE_RELATIVE_SIZE.y,0.0f),mTotalPages);
 }
 
 void DaliTableView::OnKeyEvent( const KeyEvent& event )
