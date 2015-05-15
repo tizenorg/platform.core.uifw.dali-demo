@@ -15,16 +15,14 @@
  *
  */
 
-#include <dali-toolkit/dali-toolkit.h>
-#include "shared/view.h"
-
 #include <cstdio>
 #include <string>
 #include <vector>
 #include <sstream>
 #include <fstream>
 
-#include "BoneMesh.h"
+#include <dali-toolkit/dali-toolkit.h>
+#include "shared/view.h"
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -51,26 +49,21 @@ const bool BALLS_MOVING(true);
 const float MAX_ACTIVE_RADIUS(0.285f);
 const float MAX_STILL_RADIUS(0.165f);
 
-//const char* MESH_FILES[] =
-//{
-// DALI_MODEL_DIR "BoneBlob.dat"
-//};
-
 }
 
-const char*const VERTEX_SHADER = DALI_COMPOSE_SHADER (
-  uniform vec3 controlPoints[96+1];\n
-  uniform vec3 center;\n
-  uniform vec2 screenSize;
-  uniform float boneNumber;\n
-  uniform float vtxPerBone;\n
-  uniform float radius;
-  varying vec3 color;\n
-  varying vec2 newPointPos;\n
+const char * VERTEX_SHADER = DALI_COMPOSE_SHADER (
+  uniform vec3 uControlPoints[96+1];\n
+  uniform vec3 uCenter;\n
+  uniform vec2 uScreenSize;
+  uniform float uBoneNumber;\n
+  uniform float uVtxPerBone;\n
+  uniform float uRadius;
+  varying vec3 vColor;\n
+  varying vec2 vNewPointPos;\n
 
   vec3 CubicInterpolate( vec3 p0, vec3 p1, vec3  p2, vec3  p3, float progress )\n
   {\n
-    vec3 result;
+    vec3 result;\n
     vec3 a3 = p3*0.5 - p2*1.5 + p1*1.5 - p0*0.5;\n
     vec3 a2 = p0 - p1*2.5 + p2*2.0 - p3*0.5;\n
     vec3 a1 = (p2-p0)*0.5;\n
@@ -81,41 +74,41 @@ const char*const VERTEX_SHADER = DALI_COMPOSE_SHADER (
 
   void main()\n
   {\n
-    float thirdbone = mod(aTexCoord.x - 1.0, boneNumber);\n
-    float fourthbone = mod(aTexCoord.y + 1.0, boneNumber);\n
+    float thirdbone = mod(aTexCoord.x - 1.0, uBoneNumber);\n
+    float fourthbone = mod(aTexCoord.y + 1.0, uBoneNumber);\n
 
     if (aNormal.y > 0.0)\n
     {\n
-      float interp = aNormal.x / vtxPerBone;\n
+      float interp = aNormal.x / uVtxPerBone;\n
 
-      vec3 position = CubicInterpolate(controlPoints[int(thirdbone)], controlPoints[int(aTexCoord.x)],
-                                       controlPoints[int(aTexCoord.y)], controlPoints[int(fourthbone)],
+      vec3 position = CubicInterpolate(uControlPoints[int(thirdbone)], uControlPoints[int(aTexCoord.x)],
+                                       uControlPoints[int(aTexCoord.y)], uControlPoints[int(fourthbone)],
                                        interp);\n
-      newPointPos = position.xy;\n
+      vNewPointPos = position.xy;\n
     }\n
     else\n
     {\n
-      newPointPos = center.xy;\n
+      vNewPointPos = uCenter.xy;\n
     }\n
 
-    vTexCoord.x = (newPointPos.x + (screenSize.x * 0.5)) / screenSize.x;\n
-    vTexCoord.y = (newPointPos.y + (screenSize.y * 0.5)) / screenSize.y;\n
+    vTexCoord.x = (vNewPointPos.x + (uScreenSize.x * 0.5)) / uScreenSize.x;\n
+    vTexCoord.y = (vNewPointPos.y + (uScreenSize.y * 0.5)) / uScreenSize.y;\n
 
-    vec2 dif = newPointPos - center.xy;\n
+    vec2 dif = vNewPointPos - uCenter.xy;\n
     float len = length(dif);\n
     if (len > 0.5)\n
-      color = vec3(1.0);\n
+      vColor = vec3(1.0);\n
     else\n
-      color = vec3(0);\n
+      vColor = vec3(0);\n
 
-    gl_Position = uMvpMatrix * vec4( newPointPos.xy, 0.0, 1.0 );\n
+    gl_Position = uMvpMatrix * vec4( vNewPointPos.xy, 0.0, 1.0 );\n
   }\n
 );
 
-const char*const FRAG_SHADER = DALI_COMPOSE_SHADER (
+const char * FRAG_SHADER = DALI_COMPOSE_SHADER (
   precision mediump float;\n
-  varying vec3 color;\n
-  varying vec2 newPointPos;\n
+  varying vec3 vColor;\n
+  varying vec2 vNewPointPos;\n
 
   const float Eta = 0.95;\n
   const float FresnelPower = 0.7;\n
@@ -126,14 +119,14 @@ const char*const FRAG_SHADER = DALI_COMPOSE_SHADER (
     vec3 normal;
     vec2 zoomCoords = (vTexCoord - 0.5) * 1.1;\n
 
-    if (color.r > 0.8)\n
+    if (vColor.r > 0.8)\n
     {\n
-      float texInterp = mix( 1.1, 0.6, (color.r - 0.8) * 5.0);\n
+      float texInterp = mix( 1.1, 0.6, (vColor.r - 0.8) * 5.0);\n
       zoomCoords = (vTexCoord - 0.5) * texInterp;\n
 
-      float len = length(newPointPos);\n
-      float normInterp = mix(1.0, 0.0, (color.r - 0.80) * 5.0);\n
-      normal = vec3(newPointPos.x * (1.0 - normInterp)/ len, newPointPos.y * (1.0 - normInterp) / len, normInterp);\n
+      float len = length(vNewPointPos);\n
+      float normInterp = mix(1.0, 0.0, (vColor.r - 0.80) * 5.0);\n
+      normal = vec3(vNewPointPos.x * (1.0 - normInterp)/ len, vNewPointPos.y * (1.0 - normInterp) / len, normInterp);\n
       normal = normalize(normal);\n
     }\n
     else\n
@@ -146,7 +139,7 @@ const char*const FRAG_SHADER = DALI_COMPOSE_SHADER (
 
 
     vec3 lightPosition = vec3(-500,-750,1000);
-    vec3 vertex = vec3(newPointPos.x,newPointPos.y,0.0);
+    vec3 vertex = vec3(vNewPointPos.x,vNewPointPos.y,0.0);
 
     vec3 vecToLight = normalize( lightPosition - vertex );\n
 
@@ -181,22 +174,10 @@ const char*const FRAG_SHADER = DALI_COMPOSE_SHADER (
 
     gl_FragColor.xyz = ambientTerm * 0.7 + diffuseTerm * 0.3 * uMaterial.mDiffuse.rgb + vec3(specularFactor);\n
     gl_FragColor.a = tex.a;\n
-
-
-    //gl_FragColor = vec4(reflecColor.x, reflecColor.y, reflecColor.z, 1.0);\n
-
-    //gl_FragColor = vec4(lightDiffuse + 0.1 + specularFactor, lightDiffuse + 0.1 + specularFactor, lightDiffuse + 0.1 + specularFactor, 1.0);\n
-    //gl_FragColor = vec4(specularFactor, specularFactor, specularFactor, 1.0);\n
-
-    //gl_FragColor = vec4(normal.x*0.5+0.5, normal.y*0.5+0.5, normal.z*0.5+0.5, 1.0);\n
-    //gl_FragColor = vec4(Ratio, Ratio, Ratio, 1.0);\n
-	  //gl_FragColor = texture2D(sTexture, vTexCoord);\n
-    //gl_FragColor = vec4(uMaterial.mDiffuse.x,uMaterial.mDiffuse.y,uMaterial.mDiffuse.z,1.0);\n
-    //gl_FragColor = vec4(tex.r * uMaterial.mDiffuse.x,tex.g*uMaterial.mDiffuse.y,tex.b*uMaterial.mDiffuse.z,1.0);\n
   }\n
 );
 
-struct Joint_t
+struct Joint
 {
   int idx1;
   int idx2;
@@ -224,8 +205,6 @@ private:
 
   Vector2           mScreenSize;
 
-  Toolkit::View     mView;                              ///< The View instance.
-
   Image             mBackImage;
   Image             mReflectionImage;
   Dali::ImageActor  mCompositionActor;
@@ -241,13 +220,11 @@ private:
   std::vector<Vector3>  mStillControlPoints;
   std::vector<Vector3>  mNewStillControlPoints;
 
-  std::vector<Joint_t>  mActiveJoints;
-  std::vector<Joint_t>  mStillJoints;
+  std::vector<Joint>  mActiveJoints;
+  std::vector<Joint>  mStillJoints;
 
   ShaderEffect      mShaderActive;
   ShaderEffect      mShaderStill;
-
-  //BoneMesh          mData;
 
   //-----------------------------------
   // Prototyping
@@ -294,7 +271,7 @@ private:
   Mesh        CreateCircle(int numberOfVertices, float radius, Vector4 color);
   Mesh        CreateCircleWithBones(int numberOfVertices, int numberOfBones, float radius, Vector4 color,
                                     std::vector<Vector3>& controlPoints);
-  void        CreateJoints(std::vector<Joint_t>& joints, int boneNumber);
+  void        CreateJoints(std::vector<Joint>& joints, int boneNumber);
 
   //Simulation
 
@@ -314,11 +291,11 @@ private:
   bool        GetControlPointsAffectedByCollisions();
   bool        CalculateCollisionForces();
 
-  void        CalculateJointDistance(std::vector<Joint_t>& joints, float radius);
-  void        UpdateNeighbourJoints(std::vector<Joint_t>& joints, std::vector<Vector3>& controlPoints,
+  void        CalculateJointDistance(std::vector<Joint>& joints, float radius);
+  void        UpdateNeighbourJoints(std::vector<Joint>& joints, std::vector<Vector3>& controlPoints,
                                     std::vector<Vector3>& forces);
   void        UpdateSprings();
-  bool        CheckJointSize(int bone, float radius, std::vector<Vector3>& controlPoints, std::vector<Joint_t>& joints);
+  bool        CheckJointSize(int bone, float radius, std::vector<Vector3>& controlPoints, std::vector<Joint>& joints);
 
   void        ApplyInteria(int bone, std::vector<Vector3>& newControlPoints, std::vector<Vector3>& controlPoints,
                            std::vector<Vector3>& lastFrameSpeeds, std::vector<Vector3>& springForces);
@@ -355,6 +332,9 @@ PhysicsBallsController::~PhysicsBallsController()
 }
 
 // The Init signal is received once (only) during the Application lifetime
+/**
+ * Function to create main objects
+ */
 void PhysicsBallsController::Create( Application& application )
 {
   DemoHelper::RequestThemeChange();
@@ -363,11 +343,6 @@ void PhysicsBallsController::Create( Application& application )
   mScreenSize = stage.GetSize();
 
   stage.SetBackgroundColor(Color::BLACK);
-
-  //Create a view
-  mView = Dali::Toolkit::View::New();
-  mView.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
-  stage.Add( mView );
 
   //Set background image for the view
   mBackImage = ResourceImage::New( BACKGROUND_IMAGE );
@@ -380,7 +355,7 @@ void PhysicsBallsController::Create( Application& application )
   mCompositionActor.SetSize(mScreenSize.x, mScreenSize.y);
   //mCompositionActor.SetShaderEffect(mNormalShader);
 
-  mView.Add( mCompositionActor );
+  stage.Add( mCompositionActor );
 
   //Active circle
   //-------------
@@ -392,10 +367,10 @@ void PhysicsBallsController::Create( Application& application )
   mActive.SetParentOrigin( ParentOrigin::CENTER );
 
   mShaderActive = ShaderEffect::New( VERTEX_SHADER, FRAG_SHADER, GEOMETRY_TYPE_TEXTURED_MESH  );
-  mShaderActive.SetUniform( "boneNumber", BONE_NUMBER );
-  mShaderActive.SetUniform( "radius", mActiveRadius );
-  mShaderActive.SetUniform( "screenSize", mScreenSize );
-  mShaderActive.SetUniform( "vtxPerBone", VTX_NUMBER / BONE_NUMBER);
+  mShaderActive.SetUniform( "uBoneNumber", BONE_NUMBER );
+  mShaderActive.SetUniform( "uRadius", mActiveRadius );
+  mShaderActive.SetUniform( "uScreenSize", mScreenSize );
+  mShaderActive.SetUniform( "uVtxPerBone", VTX_NUMBER / BONE_NUMBER);
   mShaderActive.SetEffectImage( mReflectionImage );
   //Set control points to the shader and init other arrays
 
@@ -408,7 +383,7 @@ void PhysicsBallsController::Create( Application& application )
     mActiveLastFrameSpeeds.push_back(Vector3(0,0,0));
 
     std::ostringstream oss;
-    oss<< "controlPoints["<< uiCP << "]";
+    oss<< "uControlPoints["<< uiCP << "]";
     Vector3 position = mActiveControlPoints[uiCP];
     mShaderActive.SetUniform( oss.str(), position );
   }
@@ -417,7 +392,7 @@ void PhysicsBallsController::Create( Application& application )
 
   CreateJoints(mActiveJoints,BONE_NUMBER);
 
-  mView.Add( mActive );
+  stage.Add( mActive );
 
   //Still circle
   //------------
@@ -429,10 +404,10 @@ void PhysicsBallsController::Create( Application& application )
   mStill.SetParentOrigin( ParentOrigin::CENTER );
 
   mShaderStill = ShaderEffect::New( VERTEX_SHADER, FRAG_SHADER, GEOMETRY_TYPE_TEXTURED_MESH  );
-  mShaderStill.SetUniform( "boneNumber", BONE_NUMBER );
-  mShaderStill.SetUniform( "radius", mStillRadius );
-  mShaderStill.SetUniform( "screenSize", mScreenSize );
-  mShaderStill.SetUniform( "vtxPerBone", VTX_NUMBER / BONE_NUMBER);
+  mShaderStill.SetUniform( "uBoneNumber", BONE_NUMBER );
+  mShaderStill.SetUniform( "uRadius", mStillRadius );
+  mShaderStill.SetUniform( "uScreenSize", mScreenSize );
+  mShaderStill.SetUniform( "uVtxPerBone", VTX_NUMBER / BONE_NUMBER);
   mShaderStill.SetEffectImage( mReflectionImage );
   //Set control points to the shader and init other arrays
   for (unsigned int uiCP = 0 ; uiCP < mStillControlPoints.size() ; uiCP++)
@@ -444,7 +419,7 @@ void PhysicsBallsController::Create( Application& application )
     mStillLastFrameSpeeds.push_back(Vector3(0,0,0));
 
     std::ostringstream oss;
-    oss<< "controlPoints["<< uiCP << "]";
+    oss<< "uControlPoints["<< uiCP << "]";
     Vector3 position = mStillControlPoints[uiCP];
     mShaderStill.SetUniform( oss.str(), position );
   }
@@ -453,7 +428,7 @@ void PhysicsBallsController::Create( Application& application )
 
   CreateJoints(mStillJoints,BONE_NUMBER);
 
-  mView.Add( mStill );
+  stage.Add( mStill );
 
   //Watch
   mWatch = MeshActor::New( CreateCircle(VTX_NUMBER, mScreenSize.x * 0.5f, Vector4(0,0,1,1)) );
@@ -461,17 +436,10 @@ void PhysicsBallsController::Create( Application& application )
   mWatch.SetPosition(Vector3(0, 0.0f, 0.1f));
   mWatch.SetParentOrigin( ParentOrigin::CENTER );
 
-  //mView.Add( mWatch );
-
-
-  //Loaded circle
-  //mData.LoadDataFile(MESH_FILES[0]);
-  //mData.CreateActor();
-  //mView.Add( mData.GetActor() );
+  //stage.Add( mWatch );
 
   // Respond to a click anywhere on the stage
   stage.GetRootLayer().TouchedSignal().Connect( this, &PhysicsBallsController::OnTouch );
-
 
   //Inicializations
   mDirectionActive = Vector3(0,0,0);
@@ -502,8 +470,8 @@ void PhysicsBallsController::Create( Application& application )
   CalculateJointDistance(mActiveJoints, mActiveRadius);
   CalculateJointDistance(mStillJoints, mStillRadius);
 
-  mShaderActive.SetUniform( "center", mActivePos );
-  mShaderStill.SetUniform( "center", mStillPos );
+  mShaderActive.SetUniform( "uCenter", mActivePos );
+  mShaderStill.SetUniform( "uCenter", mStillPos );
 
   mTime = 0.f;
 
@@ -511,7 +479,9 @@ void PhysicsBallsController::Create( Application& application )
   mTimer.Start();
 }
 
-
+/**
+ * Function to create a circle made of triangles
+ */
 Mesh PhysicsBallsController::CreateCircle(int numberOfVertices, float radius, Vector4 color)
 {
   float aspect = (float)mScreenSize.y / (float)mScreenSize.x;
@@ -565,6 +535,9 @@ Mesh PhysicsBallsController::CreateCircle(int numberOfVertices, float radius, Ve
 
 }
 
+/**
+ * Function to create a circle made of triangles and control points
+ */
 Mesh PhysicsBallsController::CreateCircleWithBones(int numberOfVertices, int numberOfBones, float radius, Vector4 color,
                                           std::vector<Vector3>& controlPoints)
 {
@@ -637,11 +610,14 @@ Mesh PhysicsBallsController::CreateCircleWithBones(int numberOfVertices, int num
   return mesh;
 }
 
-void PhysicsBallsController::CreateJoints(std::vector<Joint_t>& joints, int boneNumber)
+/**
+ * Function to create joints between each external control point
+ */
+void PhysicsBallsController::CreateJoints(std::vector<Joint>& joints, int boneNumber)
 {
   for (int i = 0 ; i < boneNumber ; i++)
   {
-    Joint_t joint;
+    Joint joint;
     joint.idx1 = i;
     joint.idx2 = (i + 1) % BONE_NUMBER;
     joint.distMax = 1.2;
@@ -650,18 +626,6 @@ void PhysicsBallsController::CreateJoints(std::vector<Joint_t>& joints, int bone
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 //--------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------
@@ -669,6 +633,9 @@ void PhysicsBallsController::CreateJoints(std::vector<Joint_t>& joints, int bone
 //--------------------------------------------------------------------------------------------
 // Prototyping
 
+/**
+ * Function to intersect a circle and a segment
+ */
 bool IntersectCircle(Vector3 lineStart, Vector3 lineEnd, Vector3 circle, double radius, Vector3 & circleWhenHit)
 {
   //circleWhenHit = null;
@@ -706,6 +673,9 @@ bool IntersectCircle(Vector3 lineStart, Vector3 lineEnd, Vector3 circle, double 
   return true;
 }
 
+/**
+ * Function that verifies collision between a point and an array of control points
+ */
 bool PhysicsBallsController::VerifyCollisionForCP(Vector3 center, Vector3 centerPos, std::vector<Vector3> & controlPoints,
                                                   Vector3 cpPos, std::vector<int> & collisions)
 {
@@ -724,6 +694,9 @@ bool PhysicsBallsController::VerifyCollisionForCP(Vector3 center, Vector3 center
   return ret;
 }
 
+/**
+ * Function to verify collisions between the active and still array of control points
+ */
 bool PhysicsBallsController::VerifyCollision(std::vector<Vector2> & collisions)
 {
   bool ret = false;
@@ -747,6 +720,9 @@ bool PhysicsBallsController::VerifyCollision(std::vector<Vector2> & collisions)
   return ret;
 }
 
+/**
+ * Function to verify collisions between the active and still array of control points and segments
+ */
 bool PhysicsBallsController::VerifyEdgeCollision(std::vector<Vector3> & collisions, unsigned int & halflist)
 {
   bool ret = false;
@@ -793,6 +769,9 @@ bool PhysicsBallsController::VerifyEdgeCollision(std::vector<Vector3> & collisio
   return ret;
 }
 
+/**
+ * Function to reset frame forces
+ */
 void PhysicsBallsController::ResetFrame()
 {
   for (unsigned int ui = 0 ; ui < mActiveNeedsUpdate.size() ; ui++)
@@ -808,6 +787,9 @@ void PhysicsBallsController::ResetFrame()
   }
 }
 
+/**
+ * Function that calculates new movement position for the balls
+ */
 void PhysicsBallsController::MoveBalls()
 {
   if (BALLS_MOVING)
@@ -824,6 +806,9 @@ void PhysicsBallsController::MoveBalls()
   }
 }
 
+/**
+ * Function that applies some friction to the forces
+ */
 void PhysicsBallsController::DampenForces()
 {
   for (unsigned int ui = 0 ; ui < mActiveSpringForces.size() ; ui++)
@@ -845,6 +830,9 @@ void PhysicsBallsController::DampenForces()
   mStillPos = Vector3(0,0,0);
 }
 
+/**
+ * Function that scales the balls in the beginning of the demo
+ */
 void PhysicsBallsController::ScaleBalls()
 {
   if (mActiveRadius < mScreenSize.x * MAX_ACTIVE_RADIUS)
@@ -884,7 +872,10 @@ void PhysicsBallsController::ScaleBalls()
   }
 }
 
-void PhysicsBallsController::CalculateJointDistance(std::vector<Joint_t>& joints, float radius)
+/**
+ * Function to calculate distance between external joints
+ */
+void PhysicsBallsController::CalculateJointDistance(std::vector<Joint>& joints, float radius)
 {
   float angle = 0;
   float deltaPi = 2.0 * Math::PI / BONE_NUMBER;
@@ -908,7 +899,10 @@ void PhysicsBallsController::CalculateJointDistance(std::vector<Joint_t>& joints
   }
 }
 
-void PhysicsBallsController::UpdateNeighbourJoints(std::vector<Joint_t>& joints, std::vector<Vector3>& controlPoints,
+/**
+ * Function to update distance between external joints
+ */
+void PhysicsBallsController::UpdateNeighbourJoints(std::vector<Joint>& joints, std::vector<Vector3>& controlPoints,
                                                    std::vector<Vector3>& forces)
 {
   for (unsigned int ui = 0 ; ui < joints.size() ; ui++)
@@ -951,6 +945,9 @@ void PhysicsBallsController::UpdateNeighbourJoints(std::vector<Joint_t>& joints,
   }
 }
 
+/**
+ * Function to update all springs
+ */
 void PhysicsBallsController::UpdateSprings()
 {
   //Joint from CP to center of the ball
@@ -1008,7 +1005,10 @@ void PhysicsBallsController::UpdateSprings()
   UpdateNeighbourJoints(mStillJoints, mStillControlPoints, mStillSpringForces);
 }
 
-bool PhysicsBallsController::CheckJointSize(int bone, float radius, std::vector<Vector3>& controlPoints, std::vector<Joint_t>& joints)
+/**
+ * Function to check sizes for all external joints
+ */
+bool PhysicsBallsController::CheckJointSize(int bone, float radius, std::vector<Vector3>& controlPoints, std::vector<Joint>& joints)
 {
   //We verify this control point with the center
   Vector3 jointVector = controlPoints[bone] - controlPoints[BONE_NUMBER];
@@ -1039,6 +1039,9 @@ bool PhysicsBallsController::CheckJointSize(int bone, float radius, std::vector<
   return true;
 }
 
+/**
+ * Function that calculate the positions for each frame
+ */
 void PhysicsBallsController::CalculateNewPositions()
 {
   float maxForce = 5.f;
@@ -1090,6 +1093,9 @@ void PhysicsBallsController::CalculateNewPositions()
   mNewStillControlPoints[BONE_NUMBER] = mStillControlPoints[BONE_NUMBER] + mStillPos;
 }
 
+/**
+ * Function to calculate collision between two circles
+ */
 bool PhysicsBallsController::GetBallsCollision()
 {
   //Is there collision between the balls?
@@ -1102,6 +1108,9 @@ bool PhysicsBallsController::GetBallsCollision()
   return false;
 }
 
+/**
+ * Function to get witch control points have a collision
+ */
 bool PhysicsBallsController::GetControlPointsAffectedByCollisions()
 {
   bool ret = false;
@@ -1177,6 +1186,9 @@ bool PhysicsBallsController::GetControlPointsAffectedByCollisions()
   return ret;
 }
 
+/**
+ * Function to calculate forces between colliding control points
+ */
 bool PhysicsBallsController::CalculateCollisionForces()
 {
   if (GetBallsCollision())
@@ -1203,6 +1215,9 @@ bool PhysicsBallsController::CalculateCollisionForces()
   return true;
 }
 
+/**
+ * Function to apply some inertia
+ */
 void PhysicsBallsController::ApplyInteria(int bone, std::vector<Vector3>& newControlPoints, std::vector<Vector3>& controlPoints,
                                           std::vector<Vector3>& lastFrameSpeeds, std::vector<Vector3>& springForces)
 {
@@ -1221,6 +1236,9 @@ void PhysicsBallsController::ApplyInteria(int bone, std::vector<Vector3>& newCon
   lastFrameSpeeds[bone] = newControlPoints[bone] - controlPoints[bone];*/
 }
 
+/**
+ * Function to finally update control point positions
+ */
 bool PhysicsBallsController::SetNewPositionsToControlPoints()
 {
   bool ret = true;
@@ -1311,6 +1329,9 @@ bool PhysicsBallsController::SetNewPositionsToControlPoints()
   return ret;
 }
 
+/**
+ * Function to calculate the bounding box for the control points
+ */
 void PhysicsBallsController::CalculateBounding(std::vector<Vector3>& controlPoints, Vector3& pntMax, Vector3& pntMin)
 {
   pntMax = Vector3(-999999,-999999,-999999);
@@ -1330,6 +1351,9 @@ void PhysicsBallsController::CalculateBounding(std::vector<Vector3>& controlPoin
   }
 }
 
+/**
+ * Function to reposition the central control point to the centre of the bounding box
+ */
 void PhysicsBallsController::RepositionCenterOfCircle(std::vector<Vector3>& controlPoints)
 {
   Vector3 pntMax,pntMin,center;
@@ -1350,6 +1374,9 @@ void PhysicsBallsController::RepositionCenterOfCircle(std::vector<Vector3>& cont
   }
 }
 
+/**
+ * Function to create a small ripple in the external joint
+ */
 void PhysicsBallsController::CreateRipple(std::vector<Vector3>& controlPoints, std::vector<Vector3>& springForces)
 {
   for (unsigned int ui = 0 ; ui < BONE_NUMBER ; ui++)
@@ -1358,30 +1385,36 @@ void PhysicsBallsController::CreateRipple(std::vector<Vector3>& controlPoints, s
   }
 }
 
+/**
+ * Function to set info to the shader
+ */
 void PhysicsBallsController::SetShaderInfo()
 {
   //Set new control points positions
   for (unsigned int uiCP = 0 ; uiCP < mActiveControlPoints.size() ; uiCP++)
   {
     std::ostringstream oss;
-    oss<< "controlPoints["<< uiCP << "]";
+    oss<< "uControlPoints["<< uiCP << "]";
     Vector3 position = mActiveControlPoints[uiCP];
     mShaderActive.SetUniform( oss.str(), position );
   }
-  mShaderActive.SetUniform( "center", mActiveControlPoints[BONE_NUMBER] );
-  mShaderActive.SetUniform( "radius", mActiveRadius );
+  mShaderActive.SetUniform( "uCenter", mActiveControlPoints[BONE_NUMBER] );
+  mShaderActive.SetUniform( "uRadius", mActiveRadius );
 
   for (unsigned int uiCP = 0 ; uiCP < mStillControlPoints.size() ; uiCP++)
   {
     std::ostringstream oss;
-    oss<< "controlPoints["<< uiCP << "]";
+    oss<< "uControlPoints["<< uiCP << "]";
     Vector3 position = mStillControlPoints[uiCP];
     mShaderStill.SetUniform( oss.str(), position );
   }
-  mShaderStill.SetUniform( "center", mStillControlPoints[BONE_NUMBER] );
-  mShaderStill.SetUniform( "radius", mStillRadius );
+  mShaderStill.SetUniform( "uCenter", mStillControlPoints[BONE_NUMBER] );
+  mShaderStill.SetUniform( "uRadius", mStillRadius );
 }
 
+/**
+ * Update frame function
+ */
 bool PhysicsBallsController::OnTimerTick()
 {
   //Reset last frame vals
@@ -1418,7 +1451,9 @@ bool PhysicsBallsController::OnTimerTick()
 //--------------------------------------------------------------------------------------------
 
 
-
+/**
+ * Function to push control points in one direction
+ */
 void PhysicsBallsController::PushControlPoints(Vector3 movementVector, int ball)
 {
   if (GetBallsCollision())
@@ -1454,7 +1489,9 @@ void PhysicsBallsController::PushControlPoints(Vector3 movementVector, int ball)
   }
 }
 
-
+/**
+ * Function to move a ball in one direction
+ */
 bool PhysicsBallsController::MoveBallTo(Vector3 movementVector, int ball)
 {
   std::vector<Vector3>* controlPoints;
@@ -1507,6 +1544,9 @@ bool PhysicsBallsController::MoveBallTo(Vector3 movementVector, int ball)
 
 //--------------------------------------------------------------------------------------------
 
+/**
+ * Function to detect if I am clicking a ball
+ */
 int PhysicsBallsController::DetectHit(const TouchPoint& point)
 {
   int ret = 0;
@@ -1525,6 +1565,9 @@ int PhysicsBallsController::DetectHit(const TouchPoint& point)
   return ret;
 }
 
+/**
+ * Touch event
+ */
 bool PhysicsBallsController::OnTouch( Actor actor, const TouchEvent& touch )
 {
   const TouchPoint &point = touch.GetPoint(0);
@@ -1597,105 +1640,3 @@ int main( int argc, char **argv )
 
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-Mesh PhysicsBallsController::CreateCircle(int numberOfVertices, float radius, std::vector<Vector3>& controlPoints)
-{
-  //We create the meshdata for the metaballs
-  float aspect = (float)mScreenSize.y / (float)mScreenSize.x;
-
-  float X,Y,u,v;
-  // Create vertices and specify their color
-  float finalRadius = mScreenSize.x * 0.5 * radius;
-  float angle = 0.f, deltaPi = 2. * Math::PIi / (float)numberOfVertices;
-
-  //IdentityMatrix
-  float a16fData[16] = {1,0,0,0,
-                        0,1,0,0,
-                        0,0,1,0,
-                        0,0,0,1};
-  Bone root("root", Matrix(a16fData));
-
-  //Creation of all the bones
-  BoneContainer bones;
-  for (int i = 0 ; i < numberOfVertices ; i++)
-  {
-    X = finalRadius * sin(angle);
-    Y = finalRadius * cos(angle);
-    angle += deltaPi;
-
-    a16fData[12] = X;
-    a16fData[13] = Y * aspect;
-
-    Bone b("bone", Matrix(a16fData));
-
-    bones.push_back(b);
-    controlPoints.push_back(Vector3(X,Y,0.f));
-  }
-  bones.push_back(root);
-t
-  MeshData::VertexContainer vertices(numberOfVertices + 1);
-  //vertices of the circle
-  angle = 0;
-  for (int i = 0 ; i < numberOfVertices ; i++)
-  {
-    u = sin(angle) * 0.5 + 0.5;)
-    v = cos(angle) * 0.5 + 0.5;
-    angle += deltaPi;
-
-    vertices[i] = MeshData::Vertex( Vector3( 0.f, 0.f, 0.f ), Vector2(u, v), Vector3(0.0f, 0.0f, 1.0f) );
-    vertices[i].boneIndices[0] = i;
-    vertices[i].boneWeights[0] = 1.0;
-  }
-  //center of the circle
-  vertices[numberOfVertices] = MeshData::Vertex( Vector3( 0.0f, 0.0f, 0.0f ), Vector2(0.5f, 0.5f), Vector3(0.0f, 0.0f, 1.0f) );
-  vertices[numberOfVertices].boneIndices[0] = numberOfVertices;
-  vertices[numberOfVertices].boneWeights[0] = 1.0;
-
-  // Specify all the facesradius
-  int vtx, vtxnext;
-  MeshData::FaceIndices faces;
-  faces.reserve( numberOfVertices * 3 ); // 2 triangles in Quad
-  for (int i = 0 ; i < numberOfVertices ; i++)
-  {
-    vtx = i;
-    vtxnext = (i + 1) % numberOfVertices;
-    faces.push_back( numberOfVertices ); faces.push_back( vtx ); faces.push_back( vtxnext );
-  }
-
-  Material baseMaterial = Material::New( "Material1" );
-  baseMaterial.SetDiffuseColor( Vector4(1.0f,1.0f,1.0f,1.0f));
-  baseMaterial.SetDiffuseTexture( mBackImage );
-
-  // Create the mesh data from the vertices and faces
-  MeshData meshData;
-  meshData.SetData(vertices, faces, bones, baseMaterial);
-  meshData.SetHasTextureCoords( true );
-  //meshData.SetHasNormals( true );
-
-  int iBones = meshData.GetBoneCount();
-  iBones++;
-
-  // Create a mesh from the data
-  Dali::Mesh mesh = Mesh::New( meshData );
-  return mesh;
-}
-*/

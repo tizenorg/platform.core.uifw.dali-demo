@@ -15,11 +15,11 @@
  *
  */
 
-#include <dali-toolkit/dali-toolkit.h>
-#include "shared/view.h"
-
 #include <cstdio>
 #include <string>
+
+#include <dali-toolkit/dali-toolkit.h>
+#include "shared/view.h"
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -39,20 +39,20 @@ const float UNITY_RADIUS(0.0625);
 
 const char*const METABALL_FRAG_SHADER = DALI_COMPOSE_SHADER (
   precision mediump float;\n
-  uniform vec2 positionMetaball;\n
-  uniform vec2 positionVar;\n
-  uniform vec2 gravityVector;\n
-  uniform float radius;\n
-  uniform float radiusVar;\n
-  uniform float aspect;\n
+  uniform vec2 uPositionMetaball;\n
+  uniform vec2 uPositionVar;\n
+  uniform vec2 uGravityVector;\n
+  uniform float uRadius;\n
+  uniform float uRadiusVar;\n
+  uniform float uAspectRatio;\n
   void main()\n
   {\n
     vec2 adjustedCoords = vTexCoord * 2.0 - 1.0;\n
-    vec2 finalMetaballPosition = positionMetaball + gravityVector + positionVar;\n
+    vec2 finalMetaballPosition = uPositionMetaball + uGravityVector + uPositionVar;\n
 
     float distance = (adjustedCoords.x - finalMetaballPosition.x) * (adjustedCoords.x - finalMetaballPosition.x) +
                      (adjustedCoords.y - finalMetaballPosition.y) * (adjustedCoords.y - finalMetaballPosition.y);\n
-    float finalRadius = radius + radiusVar;\n
+    float finalRadius = uRadius + uRadiusVar;\n
     float color = finalRadius / sqrt( distance );\n
 
     gl_FragColor = vec4(color * uMaterial.mDiffuse.r,color * uMaterial.mDiffuse.g,color * uMaterial.mDiffuse.b,1.0);\n
@@ -61,8 +61,8 @@ const char*const METABALL_FRAG_SHADER = DALI_COMPOSE_SHADER (
 
 const char*const REFRACTION_FRAG_SHADER = DALI_COMPOSE_SHADER (
   precision highp float;\n
-  uniform vec2 positionMetaball;\n
-  uniform vec2 textureSize;\n
+  uniform vec2 uPositionMetaball;\n
+  uniform vec2 uTextureSize;\n
   void main()\n
   {\n
     vec2 zoomCoords;\n
@@ -116,7 +116,7 @@ const char*const REFRACTION_FRAG_SHADER = DALI_COMPOSE_SHADER (
       zoomCoords = zoomCoords + 0.5;\n
       bright = 1.2;\n
 
-      fakePos = (vTexCoord.xy - 0.5) - positionMetaball;
+      fakePos = (vTexCoord.xy - 0.5) - uPositionMetaball;
       float len = length(fakePos);\n
 
       float interpNormal = mix(1.0, 0.0, (0.85 - metaballIntensity) * 10.0);\n
@@ -175,7 +175,7 @@ struct MetaballInfo
 
 
 /***************************************************************************/
-/*Demo using Metaballs for Refraction when clicking the screen *************/
+/*Demo using Metaballs for collision and explosion of metaballs ************/
 /***************************************************************************/
 class MetaballDesintegrationController : public ConnectionTracker
 {
@@ -190,9 +190,6 @@ public:
 private:
   Application&      mApplication;
   Vector2           mScreenSize;
-
-  Toolkit::View     mView;                              ///< The View instance.
-  Toolkit::ToolBar  mToolBar;                           ///< The View's Toolbar.
 
   Layer             mContentLayer;
 
@@ -226,6 +223,16 @@ private:
 
   int               mSwipe;
   Vector2           mOldTouchPos;
+
+  Animation         mMovement[METABALL_NUMBER];
+  Animation         mResize[METABALL_NUMBER];
+  bool              mAnimating;
+  float             mResizeAmount;
+
+  float             mStrength;
+  float             mTimeMult;
+  float             mBaseMov;
+  float             mBaseRadius;
 
   Timer             mTimerDispersion;
 
@@ -287,9 +294,9 @@ void MetaballDesintegrationController::Create( Application& app )
   stage.SetBackgroundColor(Color::BLACK);
 
   //Create a view
-  mView = Dali::Toolkit::View::New();
-  mView.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
-  stage.Add( mView );
+  //mView = Dali::Toolkit::View::New();
+  //mView.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+  //stage.Add( mView );
 
   //Set background image for the view
   mBackImage = ResourceImage::New( BACKGROUND_IMAGE );
@@ -298,6 +305,14 @@ void MetaballDesintegrationController::Create( Application& app )
 
   mInitialPosition[0] = Vector2(0.5f,0.f);
   mInitialPosition[1] = Vector2(-0.5f,0.f);
+
+  mAnimating = false;
+  mResizeAmount = 1.0f;
+
+  mStrength = mResizeAmount * 1.5f + 1.f;
+  mTimeMult = 0.8f;
+  mBaseMov = 0.1f;
+  mBaseRadius = UNITY_RADIUS / 10.f;
 
   //Create internal data
   CreateMetaballActors();
@@ -321,11 +336,11 @@ void MetaballDesintegrationController::Create( Application& app )
   SetPositionToMetaballs(metaballCenter);
   metaballCenter.x = metaballCenter.x * 0.5;
   metaballCenter.y = metaballCenter.y * 0.5;
-  mRefractionShader.SetUniform("positionMetaball", metaballCenter);
+  mRefractionShader.SetUniform("uPositionMetaball", metaballCenter);
 
 
   // Connect the callback to the touch signal on the mesh actor
-  mView.TouchedSignal().Connect( this, &MetaballDesintegrationController::OnTouch );
+  stage.GetRootLayer().TouchedSignal().Connect( this, &MetaballDesintegrationController::OnTouch );
   stage.KeyEventSignal().Connect( this, &MetaballDesintegrationController::OnKeyDown );
 }
 
@@ -344,10 +359,7 @@ Mesh MetaballDesintegrationController::CreateMesh(int group)
   vertices[ 0 ] = MeshData::Vertex( Vector3( -xsize, -xsize * aspect, 0.0f ), Vector2(0.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f) );
   vertices[ 1 ] = MeshData::Vertex( Vector3(  xsize, -xsize * aspect, 0.0f ), Vector2(1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f) );
   vertices[ 2 ] = MeshData::Vertex( Vector3( -xsize,  xsize * aspect, 0.0f ), Vector2(0.0f, 1.0f * aspect), Vector3(0.0f, 0.0f, 1.0f) );
-  vertices[ 3 ] = MeshData::Vertex( Vector3(  xsize,  xsize * aspect,   //if (metaColor.r > 0.1)\n
-                                              //metaballIntensity = metaColor.r;
-                                            //else
- 0.0f ), Vector2(1.0f, 1.0f * aspect), Vector3(0.0f, 0.0f, 1.0f) );
+  vertices[ 3 ] = MeshData::Vertex( Vector3(  xsize,  xsize * aspect, 0.0f ), Vector2(1.0f, 1.0f * aspect), Vector3(0.0f, 0.0f, 1.0f) );
 
   // Specify all the facesradius
   MeshData::FaceIndices faces;
@@ -412,13 +424,13 @@ void MetaballDesintegrationController::CreateMetaballActors()
     mMetaballs[i].radius = mMetaballs[i].initRadius = radius;//randomNumber(radius,radius);
 
     mMetaballs[i].shader = ShaderEffect::New( "", METABALL_FRAG_SHADER, GEOMETRY_TYPE_TEXTURED_MESH  );
-    mMetaballs[i].shader.SetUniform("positionMetaball", mMetaballs[i].position);
-    mMetaballs[i].shader.SetUniform("positionVar", Vector2(0,0));
-    mMetaballs[i].shader.SetUniform("gravityVector", Vector2(0.f,0.f));
-    //mMetaballs[i].shader.SetUniform("gravityVector", Vector2(randomNumber(-0.1,0.1),randomNumber(-0.1,0.1)));
-    mMetaballs[i].shader.SetUniform("radius", mMetaballs[i].radius);
-    mMetaballs[i].shader.SetUniform("radiusVar", 0.f);
-    mMetaballs[i].shader.SetUniform("aspect", aspect);
+    mMetaballs[i].shader.SetUniform("uPositionMetaball", mMetaballs[i].position);
+    mMetaballs[i].shader.SetUniform("uPositionVar", Vector2(0,0));
+    mMetaballs[i].shader.SetUniform("uGravityVector", Vector2(0.f,0.f));
+    //mMetaballs[i].shader.SetUniform("uGravityVector", Vector2(randomNumber(-0.1,0.1),randomNumber(-0.1,0.1)));
+    mMetaballs[i].shader.SetUniform("uRadius", mMetaballs[i].radius);
+    mMetaballs[i].shader.SetUniform("uRadiusVar", 0.f);
+    mMetaballs[i].shader.SetUniform("uAspectRatio", aspect);
 
     mMetaballs[i].meshActor = MeshActor::New( CreateMesh(mMetaballs[i].group) );
     mMetaballs[i].meshActor.SetName("Metaball");
@@ -437,8 +449,6 @@ void MetaballDesintegrationController::CreateMetaballActors()
   {
     mMetaballRoot.Add( mMetaballs[i].meshActor );
   }
-
-  //mView.Add( mMetaballRoot );
 
   //Initialization of variables related to metaballs
   mMetaballPosVariation = Vector2(0,0);
@@ -488,7 +498,7 @@ void MetaballDesintegrationController::AddRefractionImage()
   //Creation of the composition image
   mRefractionShader = ShaderEffect::New( "", REFRACTION_FRAG_SHADER );
   mRefractionShader.SetEffectImage( fbo );
-  mRefractionShader.SetUniform("textureSize",mScreenSize);
+  mRefractionShader.SetUniform("uTextureSize",mScreenSize);
 
   mCompositionActor = ImageActor::New( mBackImage );
   mCompositionActor.SetParentOrigin(ParentOrigin::CENTER);
@@ -496,9 +506,13 @@ void MetaballDesintegrationController::AddRefractionImage()
   mCompositionActor.SetSize(mScreenSize.x, mScreenSize.y);
   mCompositionActor.SetShaderEffect(mRefractionShader);
 
-  mView.Add( mCompositionActor );
+  Stage stage = Stage::GetCurrent();
+  stage.Add( mCompositionActor );
 }
 
+/**
+ * Function to create animations for the small variations of position inside the metaball
+ */
 void MetaballDesintegrationController::CreateAnimations()
 {
   Vector2 direction;
@@ -524,12 +538,15 @@ void MetaballDesintegrationController::CreateAnimations()
     }
 
     mPositionVarAnimation[i] = Animation::New(3.f);
-    mPositionVarAnimation[i].AnimateBetween(Property( mMetaballs[i].shader, "positionVar" ), keySinCosVariation);
+    mPositionVarAnimation[i].AnimateBetween(Property( mMetaballs[i].shader, "uPositionVar" ), keySinCosVariation);
     mPositionVarAnimation[i].SetLooping( true );
     mPositionVarAnimation[i].Play();
  }
 }
 
+/**
+ * Function to reset metaball state
+ */
 void MetaballDesintegrationController::ResetMetaballs(bool resetAnims)
 {
   for (int i = 0 ; i < METABALL_NUMBER ; i++)
@@ -538,14 +555,14 @@ void MetaballDesintegrationController::ResetMetaballs(bool resetAnims)
       mDispersionAnimation[i].Clear();
 
     mMetaballs[i].position = mInitialPosition[mMetaballs[i].group];
-    mMetaballs[i].shader.SetUniform("positionMetaball", mMetaballs[i].position);
+    mMetaballs[i].shader.SetUniform("uPositionMetaball", mMetaballs[i].position);
   }
   mTimerDispersion.Stop();
   mDispersion = 0;
 }
 
 /**
- * Function to
+ * Function to create disperse each of the ball that compose the metaball
  */
 void MetaballDesintegrationController::DisperseBallAnimation(int ball)
 {
@@ -562,7 +579,7 @@ void MetaballDesintegrationController::DisperseBallAnimation(int ball)
   direction *= randomNumber(0.8f, 1.2f);
 
   mDispersionAnimation[ball] = Animation::New(1.f);
-  mDispersionAnimation[ball].AnimateBy(Property( mMetaballs[ball].shader, "positionMetaball" ), direction);
+  mDispersionAnimation[ball].AnimateBy(Property( mMetaballs[ball].shader, "uPositionMetaball" ), direction);
   mDispersionAnimation[ball].SetLooping( false );
   mDispersionAnimation[ball].Play();
 
@@ -579,12 +596,12 @@ void MetaballDesintegrationController::LaunchResetMetaballPosition(Animation &so
   for (int i = 0 ; i < METABALL_NUMBER * 0.5 ; i++)
   {
     mDispersionAnimation[i] = Animation::New(1.5f+i*0.25f);
-    mDispersionAnimation[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mInitialPosition[mMetaballs[i].group]);
+    mDispersionAnimation[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mInitialPosition[mMetaballs[i].group]);
     mDispersionAnimation[i].SetLooping( false );
     mDispersionAnimation[i].Play();
 
     mDispersionAnimation[i + int(METABALL_NUMBER * 0.5)] = Animation::New(1.5f+i*0.25f);
-    mDispersionAnimation[i + int(METABALL_NUMBER * 0.5)].AnimateTo(Property( mMetaballs[i + int(METABALL_NUMBER * 0.5)].shader, "positionMetaball" ),
+    mDispersionAnimation[i + int(METABALL_NUMBER * 0.5)].AnimateTo(Property( mMetaballs[i + int(METABALL_NUMBER * 0.5)].shader, "uPositionMetaball" ),
                                                                    mInitialPosition[mMetaballs[i + int(METABALL_NUMBER * 0.5)].group]);
     mDispersionAnimation[i + int(METABALL_NUMBER * 0.5)].SetLooping( false );
     mDispersionAnimation[i + int(METABALL_NUMBER * 0.5)].Play();
@@ -595,6 +612,9 @@ void MetaballDesintegrationController::LaunchResetMetaballPosition(Animation &so
   }
 }
 
+/**
+ * Function to set some states when dispersion finishes
+ */
 void MetaballDesintegrationController::EndMetaballAnimtaion(Animation &source)
 {
   ResetMetaballs(true);
@@ -603,7 +623,7 @@ void MetaballDesintegrationController::EndMetaballAnimtaion(Animation &source)
 
 
 /**
- * Function to
+ * Function to init dispersion of the metaballs one by one (not all at the same time)
  */
 bool MetaballDesintegrationController::OnTimerDispersionTick()
 {
@@ -628,10 +648,13 @@ void MetaballDesintegrationController::SetPositionToMetaballs(Vector2 & metaball
   for (int i = 0 ; i < METABALL_NUMBER ; i++)
   {
     //mMetaballs[i].position = metaballCenter;
-    mMetaballs[i].shader.SetUniform("positionMetaball", mMetaballs[i].position);
+    mMetaballs[i].shader.SetUniform("uPositionMetaball", mMetaballs[i].position);
   }
 }
 
+/**
+ * Touch Event
+ */
 bool MetaballDesintegrationController::OnTouch( Actor actor, const TouchEvent& touch )
 {
   const TouchPoint &point = touch.GetPoint(0);
@@ -645,10 +668,6 @@ bool MetaballDesintegrationController::OnTouch( Actor actor, const TouchEvent& t
       ResetMetaballs(true);
 
       mOldTouchPos = point.screen;
-
-      //Vector2 metaballCenter = Vector2((point.screen.x / mScreenSize.x) - 0.5, (aspectR * (mScreenSize.y - point.screen.y) / mScreenSize.y) - 0.5) * 2.0;
-      //SetPositionToMetaballs(metaballCenter);
-
       break;
     }
     case TouchPoint::Motion:
@@ -657,8 +676,6 @@ bool MetaballDesintegrationController::OnTouch( Actor actor, const TouchEvent& t
         mSwipe = 1;
       else if (point.screen.x - mOldTouchPos.x < 0)
         mSwipe = -1;
-      //Vector2 metaballCenter = Vector2((point.screen.x / mScreenSize.x) - 0.5, (aspectR * (mScreenSize.y - point.screen.y) / mScreenSize.y) - 0.5) * 2.0;
-      //SetPositionToMetaballs(metaballCenter);
       break;
     }
     case TouchPoint::Up:
@@ -681,63 +698,55 @@ bool MetaballDesintegrationController::OnTouch( Actor actor, const TouchEvent& t
 
 //-----------------------------------------------------------------------
 
-Animation mov[METABALL_NUMBER];
-Animation resize[METABALL_NUMBER];
-bool animating = false;
-float variance = 1.0f;
-
-float force = variance * 1.5f + 1.f;
-float timeMult = 0.8f;
-float baseMov = 0.1f;
-float baseRadius = UNITY_RADIUS / 10.f;
-
-
+/**
+ * Function to create resize animations (resize and internal movement of the metaballs)
+ */
 void MetaballDesintegrationController::ResizeAnimations()
 {
-  if (animating)
+  if (mAnimating)
     return;
 
-  animating = true;
+  mAnimating = true;
 
-  force = mMetaballs[0].radius * 150.f;
+  mStrength = mMetaballs[0].radius * 150.f;
 
   int i = 0;
   int init;
   int limit = int(METABALL_NUMBER * 0.125);
   for (i = 0 ; i < limit ; i++)
   {
-    mMetaballs[i].position.x -= (variance+force) * baseMov;
+    mMetaballs[i].position.x -= (mResizeAmount+mStrength) * mBaseMov;
 
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
   }
 
   limit = int(METABALL_NUMBER * 0.375);
   for ( ; i < limit ; i++)
   {
-    mMetaballs[i].position.x -= variance * baseMov;
+    mMetaballs[i].position.x -= mResizeAmount * mBaseMov;
 
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
 
   }
 
   limit = int(METABALL_NUMBER * 0.5);
   for ( ; i < limit ; i++)
   {
-    mMetaballs[i].position.x += (force - variance) * baseMov;
+    mMetaballs[i].position.x += (mStrength - mResizeAmount) * mBaseMov;
 
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
 
     if (i == limit - 1)
-      mov[i].FinishedSignal().Connect( this, &MetaballDesintegrationController::LaunchResizeAnimations );
+      mMovement[i].FinishedSignal().Connect( this, &MetaballDesintegrationController::LaunchResizeAnimations );
 
   }
 
@@ -747,91 +756,94 @@ void MetaballDesintegrationController::ResizeAnimations()
   limit = int(METABALL_NUMBER * 0.75);
   for ( i = init ; i < limit ; i++)
   {
-    mMetaballs[i].position.y -= force * 0.75 * baseMov;
+    mMetaballs[i].position.y -= mStrength * 0.75 * mBaseMov;
   }
 
   init = int(METABALL_NUMBER * 0.75);
   limit = int(METABALL_NUMBER * 0.875);
   for ( i = init ; i < limit ; i++)
   {
-    mMetaballs[i].position.y += force * 0.75 * baseMov;
+    mMetaballs[i].position.y += mStrength * 0.75 * mBaseMov;
   }
 
   for ( i = METABALL_NUMBER * 0.5 ; i < METABALL_NUMBER; i++)
   {
-    mMetaballs[i].position.x -= (force * 0.5) * baseMov;
+    mMetaballs[i].position.x -= (mStrength * 0.5) * mBaseMov;
 
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
   }
 
   init = int(METABALL_NUMBER * 0.5);
   limit = int(METABALL_NUMBER);
   for (int i = init ; i < limit ; i++)
   {
-    mMetaballs[i].radius -= baseRadius * variance * 0.5f;
+    mMetaballs[i].radius -= mBaseRadius * mResizeAmount * 0.5f;
 
-    resize[i] = Animation::New(0.25f * timeMult);
-    resize[i].AnimateTo(Property( mMetaballs[i].shader, "radius" ), mMetaballs[i].radius);
-    resize[i].SetLooping( false );
-    resize[i].Play();
+    mResize[i] = Animation::New(0.25f * mTimeMult);
+    mResize[i].AnimateTo(Property( mMetaballs[i].shader, "uRadius" ), mMetaballs[i].radius);
+    mResize[i].SetLooping( false );
+    mResize[i].Play();
   }
 
 }
 
+/**
+ * Function to set next step of the animation
+ */
 void MetaballDesintegrationController::LaunchResizeAnimations(Animation &source)
 {
   int init = 0;
   int limit = int(METABALL_NUMBER * 0.125);
   for (int i = init ; i < limit ; i++)
   {
-    mMetaballs[i].position.x += force * baseMov;
+    mMetaballs[i].position.x += mStrength * mBaseMov;
 
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
   }
 
   init = int(METABALL_NUMBER * 0.125);
   limit = int(METABALL_NUMBER * 0.25);
   for (int i = init ; i < limit ; i++)
   {
-    mMetaballs[i].position.y += force * baseMov;
+    mMetaballs[i].position.y += mStrength * mBaseMov;
 
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
   }
 
   init = int(METABALL_NUMBER * 0.25);
   limit = int(METABALL_NUMBER * 0.375);
   for (int i = init ; i < limit; i++)
   {
-    mMetaballs[i].position.y -= force * baseMov;
+    mMetaballs[i].position.y -= mStrength * mBaseMov;
 
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
   }
 
   init = int(METABALL_NUMBER * 0.375);
   limit = int(METABALL_NUMBER * 0.5);
   for (int i = init ; i < limit ; i++)
   {
-    mMetaballs[i].position.x -= force * baseMov;
+    mMetaballs[i].position.x -= mStrength * mBaseMov;
 
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
 
     if (i == limit - 1)
-      mov[i].FinishedSignal().Connect( this, &MetaballDesintegrationController::LaunchResizeAnimations2 );
+      mMovement[i].FinishedSignal().Connect( this, &MetaballDesintegrationController::LaunchResizeAnimations2 );
   }
 
 
@@ -844,21 +856,21 @@ void MetaballDesintegrationController::LaunchResizeAnimations(Animation &source)
   limit = int(METABALL_NUMBER * 0.625);
   for (int i = init ; i < limit ; i++)
   {
-    mMetaballs[i].position.x += force * baseMov;
+    mMetaballs[i].position.x += mStrength * mBaseMov;
   }
 
   init = int(METABALL_NUMBER * 0.625);
   limit = int(METABALL_NUMBER * 0.875);
   for (int i = init ; i < limit ; i++)
   {
-    mMetaballs[i].position.x += force * 0.5 * baseMov;
+    mMetaballs[i].position.x += mStrength * 0.5 * mBaseMov;
   }
 
   init = int(METABALL_NUMBER * 0.875);
   limit = int(METABALL_NUMBER);
   for (int i = init ; i < limit ; i++)
   {
-    mMetaballs[i].position.x += (force - variance - (force * 0.5)) * baseMov;
+    mMetaballs[i].position.x += (mStrength - mResizeAmount - (mStrength * 0.5)) * mBaseMov;
   }
 
   init = int(METABALL_NUMBER * 0.625);
@@ -870,26 +882,29 @@ void MetaballDesintegrationController::LaunchResizeAnimations(Animation &source)
 
   for (int i = METABALL_NUMBER * 0.5 ; i < METABALL_NUMBER; i++)
   {
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
   }
 
   init = int(METABALL_NUMBER * 0.5);
   limit = int(METABALL_NUMBER);
   for (int i = init ; i < limit ; i++)
   {
-    mMetaballs[i].radius -= baseRadius * variance * 0.5f;
+    mMetaballs[i].radius -= mBaseRadius * mResizeAmount * 0.5f;
 
-    resize[i] = Animation::New(0.25f * timeMult);
-    resize[i].AnimateTo(Property( mMetaballs[i].shader, "radius" ), mMetaballs[i].radius);
-    resize[i].SetLooping( false );
-    resize[i].Play();
+    mResize[i] = Animation::New(0.25f * mTimeMult);
+    mResize[i].AnimateTo(Property( mMetaballs[i].shader, "uRadius" ), mMetaballs[i].radius);
+    mResize[i].SetLooping( false );
+    mResize[i].Play();
   }
 
 }
 
+/**
+ * Function to set next step of the animation
+ */
 void MetaballDesintegrationController::LaunchResizeAnimations2(Animation &source)
 {
   int init = int(METABALL_NUMBER * 0.125);
@@ -898,23 +913,23 @@ void MetaballDesintegrationController::LaunchResizeAnimations2(Animation &source
   {
     mMetaballs[i].position.y = 0;
 
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
 
     if (i == limit - 1)
-      mov[i].FinishedSignal().Connect( this, &MetaballDesintegrationController::EndResizeAnimations );
+      mMovement[i].FinishedSignal().Connect( this, &MetaballDesintegrationController::EndResizeAnimations );
   }
 
   for (int i = 0 ; i < METABALL_NUMBER * 0.5; i++)
   {
-    mMetaballs[i].radius += baseRadius * variance;
+    mMetaballs[i].radius += mBaseRadius * mResizeAmount;
 
-    resize[i] = Animation::New(0.25f * timeMult);
-    resize[i].AnimateTo(Property( mMetaballs[i].shader, "radius" ), mMetaballs[i].radius);
-    resize[i].SetLooping( false );
-    resize[i].Play();
+    mResize[i] = Animation::New(0.25f * mTimeMult);
+    mResize[i].AnimateTo(Property( mMetaballs[i].shader, "uRadius" ), mMetaballs[i].radius);
+    mResize[i].SetLooping( false );
+    mResize[i].Play();
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -924,25 +939,28 @@ void MetaballDesintegrationController::LaunchResizeAnimations2(Animation &source
   limit = int(METABALL_NUMBER * 0.625);
   for (int i = init ; i < limit ; i++)
   {
-    mMetaballs[i].position.x = mInitialPosition[1].x - baseMov * variance;
+    mMetaballs[i].position.x = mInitialPosition[1].x - mBaseMov * mResizeAmount;
   }
   init = int(METABALL_NUMBER * 0.625);
   limit = int(METABALL_NUMBER * 0.875);
   for (int i = init ; i < limit ; i++)
   {
-    mMetaballs[i].position.x = mInitialPosition[1].x - baseMov * variance;
+    mMetaballs[i].position.x = mInitialPosition[1].x - mBaseMov * mResizeAmount;
   }
 
   for (int i = METABALL_NUMBER * 0.5 ; i < METABALL_NUMBER; i++)
   {
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
   }
 
 }
 
+/**
+ * End of the different animations
+ */
 void MetaballDesintegrationController::EndResizeAnimations(Animation &source)
 {
   mInitialPosition[0] = mMetaballs[0].position;
@@ -953,9 +971,12 @@ void MetaballDesintegrationController::EndResizeAnimations(Animation &source)
     printf("position %d %f %f\n", i, mMetaballs[i].position.x, mMetaballs[i].position.y);
   }*/
 
-  animating = false;
+  mAnimating = false;
 }
 
+/**
+ * Function to reset size and position of the two balls
+ */
 void MetaballDesintegrationController::ResetSize()
 {
   mInitialPosition[0] = Vector2(0.5f,0.f);
@@ -975,19 +996,21 @@ void MetaballDesintegrationController::ResetSize()
     float radius = UNITY_RADIUS / 10.f * 5.f;
     mMetaballs[i].radius = radius;
 
-    mov[i] = Animation::New(0.25f * timeMult);
-    mov[i].AnimateTo(Property( mMetaballs[i].shader, "positionMetaball" ), mMetaballs[i].position);
-    mov[i].SetLooping( false );
-    mov[i].Play();
+    mMovement[i] = Animation::New(0.25f * mTimeMult);
+    mMovement[i].AnimateTo(Property( mMetaballs[i].shader, "uPositionMetaball" ), mMetaballs[i].position);
+    mMovement[i].SetLooping( false );
+    mMovement[i].Play();
 
-    resize[i] = Animation::New(0.25f * timeMult);
-    resize[i].AnimateTo(Property( mMetaballs[i].shader, "radius" ), mMetaballs[i].radius);
-    resize[i].SetLooping( false );
-    resize[i].Play();
+    mResize[i] = Animation::New(0.25f * mTimeMult);
+    mResize[i].AnimateTo(Property( mMetaballs[i].shader, "uRadius" ), mMetaballs[i].radius);
+    mResize[i].SetLooping( false );
+    mResize[i].Play();
   }
 }
 
-
+/**
+ * Key Down event
+ */
 void MetaballDesintegrationController::OnKeyDown( const KeyEvent& event )
 {
   if( IsKey( event, Dali::DALI_KEY_ESCAPE) || IsKey( event, Dali::DALI_KEY_BACK) )
@@ -1004,39 +1027,6 @@ void MetaballDesintegrationController::OnKeyDown( const KeyEvent& event )
         ResetSize();
   }
 
-/*
-  float base = UNITY_RADIUS / 10.f * 1.f;
-  float variation = 0;
-  float newPosition = 0;
-  if ( event.keyCode == Dali::DALI_KEY_CURSOR_UP)
-  {
-    variation = base;
-    newPosition = 0.1f;
-  }
-  if ( event.keyCode == Dali::DALI_KEY_CURSOR_DOWN)
-  {
-    variation = -base;
-    newPosition = -0.1f;
-  }
-
-  mInitialPosition[0].x -= newPosition * 1/16.f;
-  mInitialPosition[1].x -= newPosition * 1/16.f;
-  for (int i = 0 ; i < METABALL_NUMBER ; i++)
-  {
-    if (i < METABALL_NUMBER * 0.5)
-    {
-      mMetaballs[i].position.x -= newPosition * 1/16.f;
-      mMetaballs[i].radius += variation * 1/16.f;
-    }
-    else
-    {
-      mMetaballs[i].position.x -= newPosition * 1/16.f;
-      mMetaballs[i].radius -= variation * 1/16.f;
-    }
-    mMetaballs[i].shader.SetUniform("positionMetaball", mMetaballs[i].position);
-    mMetaballs[i].shader.SetUniform("radius", mMetaballs[i].radius);
-  }
-  */
 }
 
 
@@ -1061,103 +1051,3 @@ int main( int argc, char **argv )
 
   return 0;
 }
-
-//----------------------------------------------------------------------------
-//   Old Func
-/*
-void MetaballDesintegrationController::UpdateMetaballsPosition()
-{
-  float radiusInc = 0.f;
-  //If the user just released the screen
-  if (mExitClick)
-  {
-    //we update gravity position
-    mGravityVar.x += mGravity.x * mTimerTime;
-    mGravityVar.y += mGravity.y * mTimerTime;
-
-    //we make the metaballs smaller
-    radiusInc = -0.004f * mTimerTime;
-
-    //If there are very small, we make them disappear and reset the state
-    if ((mMetaballs[0].radius + radiusInc) < 0.01)
-	{
-	  mExitClick = false;
-      ResetMetaballsState();
-	  return;
-	}
-  }
-  else
-  {
-    //When you begin clicking metaball gets bigger faster
-    if (mTimeScale < 1.0)
-    {
-	  radiusInc = 0.06f * mTimerTime;
-    }
-    //Later it get bigger slower
-    else
-    {
-	  radiusInc = 0.0005f * mTimerTime;
-    }
-  }
-
-  //We move one of the metaballs, using movement from the finger
-  //if (fabs(mMetaballPosVariationTo.x - mMetaballPosVariation.x) > 0.01 || fabs(mMetaballPosVariationTo.y - mMetaballPosVariation.y) > 0.01)
-  //{
-  //  mMetaballPosVariation.x += (mMetaballPosVariationTo.x - mMetaballPosVariation.x) * mTimerTime;
-  //  mMetaballPosVariation.y += (mMetaballPosVariationTo.y - mMetaballPosVariation.y) * mTimerTime;
-  //}
-  //else
-  //{
-  //  mMetaballPosVariationFrom = mMetaballPosVariationTo;
-  //  mMetaballPosVariationTo = Vector2(0,0);
-  //}
-
-  float fDuration = 2.000;
-  if (mTimePosition < fDuration)
-  {
-    mMetaballPosVariation.x = (mMetaballPosVariationTo.x - mMetaballPosVariationFrom.x) * (1.0 / fDuration) * mTimePosition + mMetaballPosVariationFrom.x;
-    mMetaballPosVariation.y = (mMetaballPosVariationTo.y - mMetaballPosVariationFrom.y) * (1.0 / fDuration) * mTimePosition + mMetaballPosVariationFrom.y;
-  }
-  else
-  {
-    mTimePosition = 0;
-    mMetaballPosVariationFrom = mMetaballPosVariation;
-    mMetaballPosVariationTo = Vector2(0,0);
-  }
-
-  Vector2 sinCosVariation(0,0);
-  sinCosVariation.x = (-sin(mTime*0.5)+cos(mTime*0.5)) * 0.03;
-  sinCosVariation.y = (sin(mTime*0.5)-cos(mTime*0.5)) * 0.03;
-
-  Vector2 sinCosVariation2(0,0);
-  sinCosVariation2.x = (-sin(mTime*0.5)-cos(mTime*0.5)) * 0.02;
-  sinCosVariation2.y = (sin(mTime*0.5)+cos(mTime*0.5)) * 0.02;
-
-  mMetaballs[0].radius += radiusInc;
-  mMetaballs[1].radius += radiusInc;
-  mMetaballs[2].radius += radiusInc + sin(mTime*0.5) * 0.0002f;
-  mMetaballs[3].radius += radiusInc + cos(mTime*0.5) * 0.0002f;
-
-  //We set all information for the shader
-  mMetaballs[0].shader.SetUniform("radius", mMetaballs[0].radius);
-  mMetaballs[0].shader.SetUniform("positionMetaball", mMetaballs[0].position);
-  mMetaballs[0].shader.SetUniform("gravityVector", mGravityVar);
-
-  mMetaballs[1].shader.SetUniform("radius", mMetaballs[1].radius);
-  mMetaballs[1].shader.SetUniform("positionMetaball", mMetaballs[1].position + mMetaballPosVariation);
-  mMetaballs[1].shader.SetUniform("gravityVector", mGravityVar);
-
-  mMetaballs[2].shader.SetUniform("radius", mMetaballs[2].radius);
-  mMetaballs[2].shader.SetUniform("positionMetaball", mMetaballs[2].position + sinCosVariation);
-  mMetaballs[2].shader.SetUniform("gravityVector", mGravityVar);
-
-  mMetaballs[3].shader.SetUniform("radius", mMetaballs[3].radius);
-  mMetaballs[3].shader.SetUniform("positionMetaball", mMetaballs[3].position + sinCosVariation2);
-  mMetaballs[3].shader.SetUniform("gravityVector", mGravityVar);
-
-  //We update the two different variables for time
-  mTime += mTimerTime;
-  mTimePosition += mTimerTime;
-  mTimeScale += mTimerTime;
-}
-*/
