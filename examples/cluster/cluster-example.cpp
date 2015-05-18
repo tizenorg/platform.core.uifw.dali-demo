@@ -21,6 +21,8 @@
 #include "shared/view.h"
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali-toolkit/public-api/shader-effects/carousel-effect.h>
+#include <dali-toolkit/public-api/shader-effects/shear-effect.h>
 
 #include "cluster.h"
 #include "cluster-style.h"
@@ -709,11 +711,11 @@ public:
           Vector3 position = i->mPosition;
           Vector3 size = i->mSize;
 
-          ShearEffect shaderEffect = ShearEffect::New();
+          ShaderEffect shaderEffect = Dali::Toolkit::CreateShearEffect();
           Vector3 shearAnchor = SHEAR_EFFECT_ANCHOR_POINT;
 
           Vector2 shearCenter( Vector2(position.x + size.width * shearAnchor.x, position.y + size.height * shearAnchor.y) );
-          Property::Index centerProperty = shaderEffect.GetPropertyIndex(shaderEffect.GetCenterPropertyName());
+          Property::Index centerProperty = shaderEffect.GetPropertyIndex("uCenter");
           Constraint constraint = Constraint::New<Vector2>( shaderEffect, centerProperty, ShearEffectCenterConstraint(stageSize, shearCenter) );
           constraint.AddSource( Source(mView, Actor::Property::SIZE) );
 
@@ -723,8 +725,8 @@ public:
 
           // Apply Constraint to Shader Effect
           Property::Index scrollOvershootProperty = /*targetGroup*/mScrollView.GetPropertyIndex(ScrollViewWobbleEffect::EFFECT_OVERSHOOT);
-          Property::Index angleXAxisProperty = shaderEffect.GetPropertyIndex(shaderEffect.GetAngleXAxisPropertyName());
-          Property::Index angleYAxisProperty = shaderEffect.GetPropertyIndex(shaderEffect.GetAngleYAxisPropertyName());
+          Property::Index angleXAxisProperty = shaderEffect.GetPropertyIndex("uAngleXAxis");
+          Property::Index angleYAxisProperty = shaderEffect.GetPropertyIndex("uAngleYAxis");
 
           constraint = Constraint::New<float>( shaderEffect, angleXAxisProperty, ShearEffectConstraint(stageSize, SHEAR_EFFECT_MAX_OVERSHOOT, Vector2::XAXIS) );
           constraint.AddSource( Source(mScrollView, scrollOvershootProperty) );
@@ -744,8 +746,8 @@ public:
       case CAROUSEL_EFFECT:
       {
         // Apply Carousel Shader Effect to scrollView
-        CarouselEffect shaderEffect = CarouselEffect::New();
-        shaderEffect.SetRadius( -CAROUSEL_EFFECT_RADIUS );
+        ShaderEffect shaderEffect = Toolkit::CreateCarouselEffect();
+        shaderEffect.SetUniform( "uRadius", -CAROUSEL_EFFECT_RADIUS );
         // dont apply shader effect to scrollview as it might override internal shaders for bounce effect etc
         for( std::vector<ClusterInfo>::iterator i = mClusterInfo.begin(); i != mClusterInfo.end(); ++i )
         {
@@ -757,7 +759,7 @@ public:
         const Vector2 angleSweep( CAROUSEL_EFFECT_ANGLE_SWEEP / stageSize.width,
                                   CAROUSEL_EFFECT_ANGLE_SWEEP / stageSize.width );
 
-        Property::Index anglePerUnit = shaderEffect.GetPropertyIndex( shaderEffect.GetAnglePerUnitPropertyName() );
+        Property::Index anglePerUnit = shaderEffect.GetPropertyIndex( "uAnglePerUnit" );
         Constraint constraint = Constraint::New<Vector2>( shaderEffect, anglePerUnit, CarouselEffectOrientationConstraint( angleSweep ) );
         constraint.AddSource( Source(mView, Actor::Property::ORIENTATION) );
         constraint.Apply();
@@ -779,10 +781,10 @@ public:
         mScrollView.SetRulerY(rulerY);
 
         // Apply Carousel Shader Effect to scrollView (Spherical style)
-        CarouselEffect shaderEffect = CarouselEffect::New();
+        ShaderEffect shaderEffect = Toolkit::CreateCarouselEffect();
 
-        shaderEffect.SetRadius( SPHERE_EFFECT_RADIUS );
-        shaderEffect.SetAnglePerUnit( Vector2( SPHERE_EFFECT_ANGLE_SWEEP / stageSize.y, SPHERE_EFFECT_ANGLE_SWEEP / stageSize.y ) );
+        shaderEffect.SetUniform( "uRadius", SPHERE_EFFECT_RADIUS );
+        shaderEffect.SetUniform( "uAnglePerUnit", Vector2( SPHERE_EFFECT_ANGLE_SWEEP / stageSize.y, SPHERE_EFFECT_ANGLE_SWEEP / stageSize.y ) );
         // dont apply shader effect to scrollview as it might override internal shaders for bounce effect etc
         for( std::vector<ClusterInfo>::iterator i = mClusterInfo.begin(); i != mClusterInfo.end(); ++i )
         {
