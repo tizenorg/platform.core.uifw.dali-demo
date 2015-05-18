@@ -21,6 +21,7 @@
 #include "shared/view.h"
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali-toolkit/public-api/shader-effects/motion-stretch-effect.h>
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -185,7 +186,12 @@ public:
     mContentLayer.Add( mMotionStretchImageActor );
 
     // Create shader used for doing motion stretch
-    mMotionStretchEffect = MotionStretchEffect::Apply(mMotionStretchImageActor);
+    mMotionStretchEffect = Toolkit::CreateMotionStretchEffect();
+    Dali::Property::Index uModelProperty = mMotionStretchEffect.GetPropertyIndex( "uModelLastFrame" );
+    Constraint constraint = Constraint::New<Matrix>( mMotionStretchEffect, uModelProperty, EqualToConstraint() );
+    constraint.AddSource( Source( mMotionStretchImageActor , Actor::Property::WORLD_MATRIX ) );
+    constraint.Apply();
+    mMotionStretchImageActor.SetShaderEffect( mMotionStretchEffect );
   }
 
   //////////////////////////////////////////////////////////////
@@ -409,7 +415,7 @@ private:
   PushButton                 mActorEffectsButton;     ///< The actor effects toggling Button.
 
   // Motion stretch
-  MotionStretchEffect mMotionStretchEffect;
+  ShaderEffect mMotionStretchEffect;
   ImageActor mMotionStretchImageActor;
 
   // animate actor to position where user taps screen
