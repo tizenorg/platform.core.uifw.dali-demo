@@ -120,8 +120,6 @@ NewWindowController::NewWindowController( Application& application )
 
 void NewWindowController::Create( Application& app )
 {
-  DemoHelper::RequestThemeChange();
-
   Stage stage = Stage::GetCurrent();
   stage.SetBackgroundColor(Color::YELLOW);
 
@@ -461,7 +459,7 @@ void RunTest(Application& app)
 
 int main(int argc, char **argv)
 {
-  gApplication = Application::New(&argc, &argv);
+  gApplication = Application::New(&argc, &argv, DALI_DEMO_THEME_PATH);
   RunTest(gApplication);
 
   return 0;
