@@ -492,8 +492,6 @@ public:
 
   void Create(Application& app)
   {
-    DemoHelper::RequestThemeChange();
-
     Stage stage = Stage::GetCurrent();
 
     Stage::GetCurrent().KeyEventSignal().Connect(this, &ExampleApp::OnKeyEvent);
@@ -617,7 +615,7 @@ int main(int argc, char **argv)
     }
   }
 
-  Application app = Application::New(&argc, &argv);
+  Application app = Application::New(&argc, &argv, DALI_DEMO_THEME_PATH);
 
   ExampleApp dali_app(app);
 

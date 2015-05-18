@@ -91,8 +91,6 @@ private:
   // The Init signal is received once (only) during the Application lifetime
   void Create(Application& app)
   {
-    DemoHelper::RequestThemeChange();
-
     Stage stage = Stage::GetCurrent();
     Vector2 stageSize = stage.GetSize();
 
@@ -319,7 +317,7 @@ RunTest(Application& app)
 int
 main(int argc, char **argv)
 {
-  Application app = Application::New(&argc, &argv);
+  Application app = Application::New(&argc, &argv, DALI_DEMO_THEME_PATH);
 
   RunTest(app);
 
