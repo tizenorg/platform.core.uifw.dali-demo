@@ -1,0 +1,17 @@
+# Add files to build with performance here
+
+# Add files to install here
+
+performance_image_files = \
+    $(performance_src_dir)/images/*.jpg \
+    $(performance_src_dir)/images/*.png \
+    $(performance_src_dir)/images/*.JPG
+
+performance_text_image_files = \
+    $(performance_src_dir)/images/text/*
+
+performance_list_image_files = \
+    $(performance_src_dir)/images/list/*
+
+performance_model_files = \
+    $(performance_src_dir)/models/*
