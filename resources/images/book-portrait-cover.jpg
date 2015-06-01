@@ -9,7 +9,7 @@
    tiff:Software="Kipi-plugins-2.5.0">
    <dc:rights>
     <rdf:Alt>
-     <rdf:li xml:lang="x-default">Copyright (c) 2014 Samsung Electronics, under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0</rdf:li>
+     <rdf:li xml:lang="x-default">Copyright (c) 2015 Samsung Electronics, under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0</rdf:li>
     </rdf:Alt>
    </dc:rights>
   </rdf:Description>
