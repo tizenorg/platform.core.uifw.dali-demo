@@ -14,6 +14,7 @@ Requires(postun): /sbin/ldconfig
 Requires: dali
 Requires: dali-adaptor
 Requires: dali-toolkit
+
 BuildRequires:  cmake
 BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(capi-appfw-application)
@@ -23,6 +24,7 @@ BuildRequires:  dali-adaptor-devel
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(egl)
 BuildRequires:  gettext-tools
+BuildRequires:  boost-devel
 
 %description
 The OpenGLES Canvas Core Demo is a collection of examples and demonstrations
