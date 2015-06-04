@@ -18,7 +18,10 @@
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
-using Dali::Toolkit::TextLabel;
+using namespace Toolkit;
+
+const char * const HEART_IMAGE(DALI_IMAGE_DIR "heart.png");
+const char * const LIGHT_IMAGE(DALI_IMAGE_DIR "light.png");
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -38,19 +41,66 @@ public:
     // Nothing to do here;
   }
 
+  ShaderEffect NewEffect()
+  {
+    std::string fragmentShader = DALI_COMPOSE_SHADER(
+      precision highp float;
+
+      uniform float uOffset;
+      uniform float uWidth;
+
+      void main()
+      {
+        float alpha = 1.0;
+
+        if (vTexCoord.x > uOffset / uWidth)
+        {
+          alpha = 0.3;
+        }
+
+        mediump vec4 color = texture2D(sTexture, vTexCoord) * uColor;
+        gl_FragColor = vec4(color.rgb, color.a * alpha);
+      }
+    );
+
+    ShaderEffect effect = ShaderEffect::New("", fragmentShader, GEOMETRY_TYPE_IMAGE, ShaderEffect::HINT_GRID);
+    effect.SetUniform("uOffset", 0.f);
+
+    return effect;
+  }
+
   // The Init signal is received once (only) during the Application lifetime
   void Create( Application& application )
   {
-    // Get a handle to the stage
     Stage stage = Stage::GetCurrent();
-    stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "hello-world-label" );
-    stage.Add( textLabel );
+    // Create heart actor
+    ImageDimensions heartDimension = ResourceImage::GetImageSize(HEART_IMAGE);
+    float heartWidth = heartDimension.GetWidth();
+    ImageActor heartAactor = ImageActor::New(ResourceImage::New(HEART_IMAGE));
+    heartAactor.SetParentOrigin(ParentOrigin::CENTER);
+    heartAactor.SetAnchorPoint(AnchorPoint::CENTER);
+    stage.Add(heartAactor);
 
-    // Respond to a click anywhere on the stage
+    // Create light actor
+    ImageActor lightActor = ImageActor::New(ResourceImage::New(LIGHT_IMAGE));
+    lightActor.SetParentOrigin(ParentOrigin::CENTER_LEFT);
+    lightActor.SetAnchorPoint(AnchorPoint::CENTER);
+    lightActor.SetZ(1.f);
+    heartAactor.Add(lightActor);
+
+    // Create effect and set its property
+    mEffect = NewEffect();
+    mEffect.SetUniform("uWidth", heartWidth);
+    heartAactor.SetShaderEffect(mEffect);
+
+    // Play animation
+    Animation anim = Animation::New(3.f);
+    anim.SetLooping(true);
+    anim.AnimateTo(Property(lightActor, Actor::Property::POSITION_X), heartWidth, AlphaFunction::BOUNCE);
+    anim.AnimateTo(Property(mEffect, "uOffset"), heartWidth, AlphaFunction::BOUNCE);
+    anim.Play();
+
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
   }
 
@@ -63,6 +113,8 @@ public:
 
 private:
   Application&  mApplication;
+
+  ShaderEffect  mEffect;
 };
 
 void RunTest( Application& application )
