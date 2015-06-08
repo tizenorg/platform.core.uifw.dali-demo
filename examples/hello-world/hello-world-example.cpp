@@ -16,6 +16,7 @@
  */
 
 #include <dali-toolkit/dali-toolkit.h>
+#include <iostream>
 
 using namespace Dali;
 using Dali::Toolkit::TextLabel;
@@ -45,24 +46,24 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "hello-world-label" );
+    textLabel = TextLabel::New( "Hello World" );
     stage.Add( textLabel );
 
-    // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
   }
 
   bool OnTouch( Actor actor, const TouchEvent& touch )
   {
-    // quit the application
-    mApplication.Quit();
+    Stage stage =  Stage::GetCurrent();
+    stage.Remove( textLabel );
+    stage.Add( textLabel );
+
     return true;
   }
 
 private:
   Application&  mApplication;
+  TextLabel textLabel;
 };
 
 void RunTest( Application& application )
