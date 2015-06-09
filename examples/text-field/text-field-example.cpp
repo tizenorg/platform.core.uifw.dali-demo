@@ -99,6 +99,7 @@ public:
     DemoHelper::RequestThemeChange();
 
     Stage stage = Stage::GetCurrent();
+    stage.SetBackgroundColor( Color::WHITE );
 
     mTapGestureDetector = TapGestureDetector::New();
     mTapGestureDetector.Attach( stage.GetRootLayer() );
@@ -113,7 +114,6 @@ public:
     container.SetParentOrigin( ParentOrigin::CENTER );
     container.SetSize( Vector2(stageSize.width*0.6f, stageSize.width*0.6f) );
     container.SetBackgroundColor( Color::WHITE );
-    container.GetChildAt(0).SetZ(-1.0f);
     stage.Add( container );
 
     mField = TextField::New();
