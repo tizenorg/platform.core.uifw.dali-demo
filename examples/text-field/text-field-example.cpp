@@ -43,6 +43,7 @@ namespace
 
   const Vector3 POPUP_SIZE_FACTOR_TO_PARENT = Vector3( 0.0, 0.25, 0.0 );
 
+  const unsigned int KEY_D = 40;
 } // unnamed namespace
 
 /**
@@ -196,6 +197,18 @@ public:
       if( IsKey( event, DALI_KEY_ESCAPE) || IsKey( event, DALI_KEY_BACK ) )
       {
         mApplication.Quit();
+      }
+      else if( event.IsCtrlModifier() )
+      {
+        switch( event.keyCode )
+        {
+          case KEY_D: // Fill vertically
+          {
+            mField.SetProperty( TextField::Property::TEXT, std::string("Hello worldddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd") );
+            mField.SetProperty( TextField::Property::TEXT, std::string() );
+            break;
+          }
+        }
       }
     }
   }
