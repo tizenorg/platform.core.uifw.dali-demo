@@ -171,10 +171,10 @@ public:
     mMeshActor.AddRenderer( mRenderer );
     mMeshActor.SetSize(400, 400);
 
-    mMeshActor.RegisterProperty( "fade-color", Color::GREEN );
+    mMeshActor.RegisterProperty( "uFadeColor", Color::GREEN );
 
-    mRenderer.RegisterProperty( "fade-color", Color::MAGENTA );
-    mRenderer.RegisterProperty( "point-size", 80.0f );
+    mRenderer.RegisterProperty( "uFadeColor", Color::MAGENTA );
+    mRenderer.RegisterProperty( "uPointSize", 80.0f );
     mRenderer.SetDepthIndex(0);
 
     mMeshActor.SetParentOrigin( ParentOrigin::CENTER );

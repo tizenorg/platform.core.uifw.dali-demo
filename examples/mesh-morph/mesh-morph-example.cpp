@@ -302,7 +302,7 @@ public:
     mMeshActor.AddRenderer( mRenderer );
     mMeshActor.SetSize(400, 400);
 
-    Property::Index morphDeltaIndex = mMeshActor.RegisterProperty( "delta", 0.f );
+    Property::Index morphDeltaIndex = mMeshActor.RegisterProperty( "uDelta", 0.f );
 
     mRenderer.SetDepthIndex(0);
 
