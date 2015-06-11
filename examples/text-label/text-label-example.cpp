@@ -135,6 +135,27 @@ public:
     mLabel.SetBackgroundColor( Color::WHITE );
     mContainer.Add( mLabel );
 
+    PushButton button = PushButton::New();
+    button.SetBackgroundColor( Color::RED );
+
+    button.SetParentOrigin( ParentOrigin::BOTTOM_CENTER );
+    button.SetAnchorPoint( AnchorPoint::BOTTOM_CENTER );
+    button.SetSize( 100.f, 30.f );
+
+    button.ClickedSignal().Connect( this, &TextLabelExample::OnButtonClick );
+
+    PushButton button2 = PushButton::New();
+    button2.SetBackgroundColor( Color::BLUE );
+
+    button2.SetParentOrigin( ParentOrigin::TOP_CENTER );
+    button2.SetAnchorPoint( AnchorPoint::BOTTOM_CENTER );
+    button2.SetSize( 100.f, 30.f );
+
+    button2.ClickedSignal().Connect( this, &TextLabelExample::OnButtonClick2 );
+
+    button.Add( button2 );
+    stage.Add( button );
+
     Property::Value labelText = mLabel.GetProperty( TextLabel::Property::TEXT );
     std::cout << "Displaying text: \"" << labelText.Get< std::string >() << "\"" << std::endl;
   }
@@ -254,6 +275,32 @@ public:
         }
       }
     }
+  }
+
+  bool OnButtonClick( Button button )
+  {
+    if( ++mAlignment >= H_ALIGNMENT_STRING_COUNT )
+    {
+      mAlignment = 0u;
+    }
+
+    mLabel.SetProperty( TextLabel::Property::HORIZONTAL_ALIGNMENT, H_ALIGNMENT_STRING_TABLE[ mAlignment ] );
+
+    return true;
+  }
+
+  bool OnButtonClick2( Button button )
+  {
+    const Language& language = LANGUAGES[ mLanguageId ];
+
+    mLabel.SetProperty( TextLabel::Property::TEXT, language.text );
+
+    if( ++mLanguageId >= NUMBER_OF_LANGUAGES )
+    {
+      mLanguageId = 0u;
+    }
+
+    return true;
   }
 
 private:
