@@ -116,7 +116,7 @@ public:
     mGrabCorner.SetAnchorPoint( AnchorPoint::TOP_CENTER );
     mGrabCorner.SetParentOrigin( ParentOrigin::BOTTOM_RIGHT );
     mGrabCorner.SetBackgroundImage( ResourceImage::New( BACKGROUND_IMAGE ) );
-    mGrabCorner.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+    mGrabCorner.SetSize(59.0f,86.0f,1.0f);
     mContainer.Add( mGrabCorner );
 
     mPanGestureDetector = PanGestureDetector::New();
