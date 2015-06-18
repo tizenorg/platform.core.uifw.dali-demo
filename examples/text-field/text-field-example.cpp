@@ -38,6 +38,7 @@ namespace
 {
 
   const char* const FOLDER_ICON_IMAGE = DALI_IMAGE_DIR "folder_appicon_empty_bg.png";
+  const char* const DELETE_IMAGE      = DALI_IMAGE_DIR "text-field-delete.png";
 
   const float BORDER_WIDTH = 4.0f;
 
@@ -98,10 +99,27 @@ public:
     Stage stage = Stage::GetCurrent();
     Vector2 stageSize = stage.GetSize();
 
-    // Launch a pop-up containing TextField
+    // Launch a pop-up containing TextField & Delete button
+    TableView table = TableView::New( 1, 2 );
+    table.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
+    table.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::HEIGHT );
+    table.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+
     mField = CreateTextField( stageSize, mButtonLabel );
+    mField.KeyInputFocusGainedSignal().Connect( this, &TextFieldExample::OnKeyInputFocusGained );
+    mField.KeyInputFocusLostSignal().Connect(   this, &TextFieldExample::OnKeyInputFocusLost );
+    table.AddChild( mField, TableView::CellPosition( 0, 0 ) );
+
+    Image deleteImage = ResourceImage::New( DELETE_IMAGE );
+    mDeleteButton = ImageActor::New( deleteImage );
+    mDeleteButton.TouchedSignal().Connect( this, &TextFieldExample::OnDeleteButtonTouched );
+    mDeleteButton.SetVisible( false );
+    table.AddChild( mDeleteButton, TableView::CellPosition( 0, 1 ) );
+    table.SetFitWidth( 1 );
+
     mPopup = CreatePopup( stageSize.width * 0.8f );
-    mPopup.Add( mField );
+    mPopup.Add( table );
+    mPopup.TouchedSignal().Connect( this, &TextFieldExample::OnPopupTouched );
     mPopup.OutsideTouchedSignal().Connect( this, &TextFieldExample::OnPopupOutsideTouched );
     mPopup.Show();
 
@@ -123,6 +141,22 @@ public:
     return field;
   }
 
+  void OnKeyInputFocusGained( Dali::Toolkit::Control textField )
+  {
+    if( mDeleteButton )
+    {
+      mDeleteButton.SetVisible( true );
+    }
+  }
+
+  void OnKeyInputFocusLost( Dali::Toolkit::Control textField )
+  {
+    if( mDeleteButton )
+    {
+      mDeleteButton.SetVisible( false );
+    }
+  }
+
   Popup CreatePopup( float width )
   {
     Popup popup = Popup::New();
@@ -132,9 +166,24 @@ public:
     popup.HideTail();
     popup.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::HEIGHT );
     popup.SetSizeModeFactor( POPUP_SIZE_FACTOR_TO_PARENT );
-    popup.TouchedSignal().Connect( this, &TextFieldExample::OnPopupTouched );
 
     return popup;
+  }
+
+  bool OnDeleteButtonTouched( Actor actor, const TouchEvent& event )
+  {
+    if( mField )
+    {
+      mField.SetProperty( TextField::Property::TEXT, "" );
+    }
+
+    mButtonLabel = "";
+    if( mButton )
+    {
+      mButton.SetLabel( mButtonLabel );
+    }
+
+    return true; // Consume events to avoid reaching OnPopupTouched()
   }
 
   void OnPopupOutsideTouched()
@@ -210,6 +259,7 @@ private:
 
   // Pop-up contents
   TextField mField;
+  ImageActor mDeleteButton;
   Popup mPopup;
 };
 
