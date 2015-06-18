@@ -115,8 +115,9 @@ public:
     Image deleteImage = ResourceImage::New( DELETE_IMAGE );
     mDeleteButton = PushButton::New();
     mDeleteButton.TouchedSignal().Connect( this, &TextFieldExample::OnDeleteButtonTouched );
+//    mDeleteButton.SetVisible( false );
     mDeleteButton.SetButtonImage( deleteImage );
-    SetDeleteButtonVisibility( mField );
+//    mTable.AddChild( mDeleteButton, TableView::CellPosition( 0, 1 ) );
 
     mPopup = CreatePopup( stageSize.width * 0.8f );
     mPopup.Add( mTable );
