@@ -38,6 +38,7 @@ namespace
 {
 
   const char* const FOLDER_ICON_IMAGE = DALI_IMAGE_DIR "folder_appicon_empty_bg.png";
+  const char* const DELETE_IMAGE      = DALI_IMAGE_DIR "text-field-delete.png";
 
   const float BORDER_WIDTH = 4.0f;
 
@@ -98,10 +99,28 @@ public:
     Stage stage = Stage::GetCurrent();
     Vector2 stageSize = stage.GetSize();
 
-    // Launch a pop-up containing TextField
+    // Launch a pop-up containing TextField & Delete button
+    mTable = TableView::New( 1, 2 );
+    mTable.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
+    mTable.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::HEIGHT );
+    mTable.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    mTable.SetFitWidth( 1 );
+
     mField = CreateTextField( stageSize, mButtonLabel );
+    mField.KeyInputFocusGainedSignal().Connect( this, &TextFieldExample::OnKeyInputFocusGained );
+    mField.KeyInputFocusLostSignal().Connect(   this, &TextFieldExample::OnKeyInputFocusLost );
+    mField.TextChangedSignal().Connect( this, &TextFieldExample::SetDeleteButtonVisibility );
+    mTable.AddChild( mField, TableView::CellPosition( 0, 0 ) );
+
+    Image deleteImage = ResourceImage::New( DELETE_IMAGE );
+    mDeleteButton = PushButton::New();
+    mDeleteButton.TouchedSignal().Connect( this, &TextFieldExample::OnDeleteButtonTouched );
+    mDeleteButton.SetButtonImage( deleteImage );
+    SetDeleteButtonVisibility( mField );
+
     mPopup = CreatePopup( stageSize.width * 0.8f );
-    mPopup.Add( mField );
+    mPopup.Add( mTable );
+    mPopup.TouchedSignal().Connect( this, &TextFieldExample::OnPopupTouched );
     mPopup.OutsideTouchedSignal().Connect( this, &TextFieldExample::OnPopupOutsideTouched );
     mPopup.Show();
 
@@ -116,11 +135,39 @@ public:
     field.SetResizePolicy( ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT );
     field.SetProperty( TextField::Property::TEXT, text );
     field.SetProperty( TextField::Property::TEXT_COLOR, Vector4( 0.0f, 1.0f, 1.0f, 1.0f ) ); // CYAN
+    field.SetProperty( TextField::Property::PRIMARY_CURSOR_COLOR, Color::WHITE );
     field.SetProperty( TextField::Property::PLACEHOLDER_TEXT, "Unnamed folder" );
     field.SetProperty( TextField::Property::PLACEHOLDER_TEXT_FOCUSED, "Enter folder name." );
     field.SetProperty( TextField::Property::DECORATION_BOUNDING_BOX, Rect<int>( BORDER_WIDTH, BORDER_WIDTH, stageSize.width - BORDER_WIDTH*2, stageSize.height - BORDER_WIDTH*2 ) );
+    field.SetProperty( TextField::Property::VERTICAL_ALIGNMENT, "CENTER" );
+    field.SetProperty( TextField::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
 
     return field;
+  }
+
+  void OnKeyInputFocusGained( Control textField )
+  {
+    SetDeleteButtonVisibility( TextField::DownCast(textField) );
+  }
+
+  void OnKeyInputFocusLost( Control textField )
+  {
+    mTable.RemoveChildAt( TableView::CellPosition( 0, 1 ) );
+  }
+
+  void SetDeleteButtonVisibility( TextField textField )
+  {
+    std::string str = textField.GetProperty<std::string>(TextField::Property::TEXT);
+    int textCount = str.size();
+
+    if( textCount > 0 )
+    {
+      mTable.AddChild( mDeleteButton, TableView::CellPosition( 0, 1 ) );
+    }
+    else
+    {
+      mTable.RemoveChildAt( TableView::CellPosition( 0, 1 ) );
+    }
   }
 
   Popup CreatePopup( float width )
@@ -132,9 +179,28 @@ public:
     popup.HideTail();
     popup.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::HEIGHT );
     popup.SetSizeModeFactor( POPUP_SIZE_FACTOR_TO_PARENT );
-    popup.TouchedSignal().Connect( this, &TextFieldExample::OnPopupTouched );
 
     return popup;
+  }
+
+  bool OnDeleteButtonTouched( Actor actor, const TouchEvent& event )
+  {
+    if( event.points.size() > 0 &&
+        TouchPoint::Up == event.points[0].state )
+    {
+      if( mField )
+      {
+        mField.SetProperty( TextField::Property::TEXT, "" );
+      }
+
+      mButtonLabel = "";
+      if( mButton )
+      {
+        mButton.SetLabel( mButtonLabel );
+      }
+    }
+
+    return true; // Consume events to avoid reaching OnPopupTouched()
   }
 
   void OnPopupOutsideTouched()
@@ -209,7 +275,9 @@ private:
   std::string mButtonLabel;
 
   // Pop-up contents
+  TableView mTable;
   TextField mField;
+  PushButton mDeleteButton;
   Popup mPopup;
 };
 
