@@ -17,6 +17,7 @@
 
 #include <dali-toolkit/dali-toolkit.h>
 
+using namespace std;
 using namespace Dali;
 using Dali::Toolkit::TextLabel;
 
@@ -45,14 +46,44 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "hello-world-label" );
-    stage.Add( textLabel );
+    mTextLabel = TextLabel::New( "Hello World" );
+    mTextLabel.SetAnchorPoint(AnchorPoint::CENTER);
+    mTextLabel.SetParentOrigin(ParentOrigin::CENTER);
+    mTextLabel.SetName( "hello-world-label" );
+    stage.Add( mTextLabel );
 
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
+
+    mTimer = Timer::New(1000);
+    mTimer.TickSignal().Connect(this, &HelloWorldController::OnTimerTick);
+    mTimer.Start();
   }
+
+  bool OnTimerTick()
+  {
+    static int i = 0;
+
+    string title[5] =
+    {
+      "Seoul",
+      "Beijing",
+      "London",
+      ""
+      "Paris"
+    };
+
+    mTextLabel.SetProperty( TextLabel::Property::TEXT, title[i] );
+
+    i++;
+    if (i >= 5)
+    {
+       i = 0;
+    }
+
+    return true;
+  }
+
 
   bool OnTouch( Actor actor, const TouchEvent& touch )
   {
@@ -63,6 +94,9 @@ public:
 
 private:
   Application&  mApplication;
+
+  TextLabel     mTextLabel;
+  Timer         mTimer;
 };
 
 void RunTest( Application& application )
