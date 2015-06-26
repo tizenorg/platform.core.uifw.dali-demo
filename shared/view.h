@@ -26,6 +26,13 @@
 namespace DemoHelper
 {
 
+enum ControlDepthIndexRanges
+{
+    BACKGROUND_DEPTH_INDEX    = -10000000,
+    CONTENT_DEPTH_INDEX       =  0,
+    DECORATION_DEPTH_INDEX    =  10000000
+};
+
 /**
  * Provide a style for the view and its tool bar.
  */
@@ -68,6 +75,7 @@ Dali::Layer CreateToolbar( Dali::Toolkit::ToolBar& toolBar,
   Dali::Stage stage = Dali::Stage::GetCurrent();
 
   Dali::Layer toolBarLayer = Dali::Layer::New();
+  toolBarLayer.SetBehavior( Dali::Layer::LAYER_3D );
   toolBarLayer.SetName( "TOOLBAR_LAYER" );
   toolBarLayer.SetAnchorPoint( Dali::AnchorPoint::TOP_CENTER );
   toolBarLayer.SetParentOrigin( Dali::ParentOrigin::TOP_CENTER );
@@ -94,7 +102,6 @@ Dali::Layer CreateToolbar( Dali::Toolkit::ToolBar& toolBar,
   {
     Dali::Toolkit::TextLabel label = Dali::Toolkit::TextLabel::New();
     label.SetAnchorPoint( Dali::AnchorPoint::TOP_LEFT );
-    label.SetDrawMode( Dali::DrawMode::OVERLAY );
     label.SetProperty( Dali::Toolkit::Control::Property::STYLE_NAME, "toolbarlabel" );
     label.SetProperty( Dali::Toolkit::TextLabel::Property::TEXT, title );
     label.SetProperty( Dali::Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
@@ -160,7 +167,6 @@ Dali::Toolkit::TextLabel CreateToolBarLabel( const std::string& text )
 {
   Dali::Toolkit::TextLabel label = Dali::Toolkit::TextLabel::New( text );
   label.SetProperty( Dali::Toolkit::Control::Property::STYLE_NAME, "toolbarlabel" );
-  label.SetDrawMode( Dali::DrawMode::OVERLAY );
   label.SetProperty( Dali::Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
   label.SetProperty( Dali::Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
   label.SetResizePolicy( Dali::ResizePolicy::FILL_TO_PARENT, Dali::Dimension::HEIGHT );
