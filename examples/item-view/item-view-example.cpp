@@ -116,6 +116,8 @@ const char* INSERT_IMAGE( DALI_IMAGE_DIR "icon-insert.png" );
 const char* SELECTED_IMAGE( DALI_IMAGE_DIR "item-select-check.png" );
 const char* APPLICATION_TITLE( "ItemView" );
 
+const char* SCROLL_INDICATOR_IMAGE( DALI_IMAGE_DIR "scroll-indicator.png" );
+
 const char* SPIRAL_LABEL("Spiral");
 const char* GRID_LABEL("Grid");
 const char* DEPTH_LABEL("Depth");
@@ -287,6 +289,35 @@ public:
     // Display item view on the stage
     stage.Add( mItemView );
 
+    // Create the scroll indicator
+    mScrollBar = ScrollBar::New(Toolkit::ScrollBar::Vertical);
+    mScrollBar.SetParentOrigin(ParentOrigin::TOP_RIGHT);
+    mScrollBar.SetAnchorPoint(AnchorPoint::TOP_RIGHT);
+    mScrollBar.SetResizePolicy(Dali::ResizePolicy::FILL_TO_PARENT, Dali::Dimension::HEIGHT);
+    mScrollBar.SetResizePolicy(Dali::ResizePolicy::FIT_TO_CHILDREN, Dali::Dimension::WIDTH);
+    mScrollBar.SetIndicatorHeightPolicy(Toolkit::ScrollBar::Fixed);
+    mScrollBar.SetIndicatorFixedHeight(60.0f);
+
+    mItemView.Add(mScrollBar);
+
+    Dali::Vector<float> positionIntervals;
+    size_t positionCount( GetNumberOfItems() / 2 );
+    positionIntervals.Resize( positionCount );
+    for( size_t i = 0; i != positionCount; ++i )
+    {
+      positionIntervals[i] = -2.0f * i;
+    }
+
+    mScrollBar.SetScrollPositionIntervals(positionIntervals);
+
+    mScrollIndicatorImage = ResourceImage::New( SCROLL_INDICATOR_IMAGE );
+    mFastScrollIndicator = ImageActor::New(mScrollIndicatorImage);
+    mFastScrollIndicator.SetParentOrigin( ParentOrigin::CENTER_LEFT );
+    mFastScrollIndicator.SetAnchorPoint( AnchorPoint::CENTER_RIGHT );
+    Actor scrollIndicator = mScrollBar.GetScrollIndicator();
+    scrollIndicator.Add(mFastScrollIndicator);
+    mScrollBar.SetScrollIndicator(scrollIndicator);
+	
     // Create the layouts
     mSpiralLayout = DefaultItemLayout::New( DefaultItemLayout::SPIRAL );
     mDepthLayout = DefaultItemLayout::New( DefaultItemLayout::DEPTH );
@@ -970,6 +1001,10 @@ private:
   ItemLayoutPtr mSpiralLayout;
   ItemLayoutPtr mDepthLayout;
   ItemLayoutPtr mGridLayout;
+
+  ScrollBar mScrollBar;
+  Image mScrollIndicatorImage;
+  ImageActor mFastScrollIndicator;
 
   TapGestureDetector mTapDetector;
   Toolkit::PushButton mLayoutButton;
