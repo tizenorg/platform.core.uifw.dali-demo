@@ -41,9 +41,13 @@ const char * const BACKGROUND_IMAGE( DALI_IMAGE_DIR "background-default.png" );
 const char * const TOOLBAR_IMAGE( DALI_IMAGE_DIR "top-bar.png" );
 const char * const APPLICATION_TITLE( "Clusters" );
 const char * const LAYOUT_NONE_IMAGE( DALI_IMAGE_DIR "icon-cluster-none.png" );
+const char * const LAYOUT_NONE_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-cluster-none-selected.png" );
 const char * const LAYOUT_MOTION_BLUR_IMAGE( DALI_IMAGE_DIR "icon-cluster-wobble.png" );
+const char * const LAYOUT_MOTION_BLUR_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-cluster-wobble-selected.png" );
 const char * const LAYOUT_CAROUSEL_IMAGE( DALI_IMAGE_DIR "icon-cluster-carousel.png" );
+const char * const LAYOUT_CAROUSEL_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-cluster-carousel-selected.png" );
 const char * const LAYOUT_SPHERE_IMAGE( DALI_IMAGE_DIR "icon-cluster-sphere.png" );
+const char * const LAYOUT_SPHERE_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-cluster-sphere-selected.png" );
 
 enum ClusterType
 {
@@ -151,7 +155,7 @@ const float SPHERE_EFFECT_VERTICAL_DOMAIN = 0.15f;          ///< In Sphere Effec
  */
 enum ExampleEffectType
 {
-  NO_EFFECT,
+  NO_EFFECT = 0,
   MOTION_BLUR_EFFECT,
   CAROUSEL_EFFECT,
   SPHERE_EFFECT,
@@ -380,9 +384,13 @@ public:
 
     // Create a effect toggle button. (right of toolbar)
     mLayoutButtonImages[ NO_EFFECT ] = ResourceImage::New( LAYOUT_NONE_IMAGE );
+    mLayoutSelectedImages[ NO_EFFECT ] = ResourceImage::New( LAYOUT_NONE_IMAGE_SELECTED );
     mLayoutButtonImages[ MOTION_BLUR_EFFECT ] = ResourceImage::New( LAYOUT_MOTION_BLUR_IMAGE );
+    mLayoutSelectedImages[ MOTION_BLUR_EFFECT ] = ResourceImage::New( LAYOUT_MOTION_BLUR_IMAGE_SELECTED );
     mLayoutButtonImages[ CAROUSEL_EFFECT ] = ResourceImage::New( LAYOUT_CAROUSEL_IMAGE );
+    mLayoutSelectedImages[ CAROUSEL_EFFECT ] = ResourceImage::New( LAYOUT_CAROUSEL_IMAGE_SELECTED );
     mLayoutButtonImages[ SPHERE_EFFECT ] = ResourceImage::New( LAYOUT_SPHERE_IMAGE );
+    mLayoutSelectedImages[ SPHERE_EFFECT ] = ResourceImage::New( LAYOUT_SPHERE_IMAGE_SELECTED );
 
     mLayoutButton = Toolkit::PushButton::New();
     mLayoutButton.ClickedSignal().Connect( this, &ClusterController::OnEffectTouched );
@@ -616,7 +624,8 @@ public:
     // Remove all shader-effects from mScrollView and it's children (the clusters)
     mScrollView.SetPosition(Vector3::ZERO);
 
-    mLayoutButton.SetBackgroundImage( mLayoutButtonImages[ type ] );
+    mLayoutButton.SetButtonImage( mLayoutButtonImages[ type ] );
+    mLayoutButton.SetSelectedImage( mLayoutSelectedImages[ type ] );
 
     for( std::vector<ClusterInfo>::iterator i = mClusterInfo.begin(); i != mClusterInfo.end(); ++i )
     {
@@ -769,6 +778,7 @@ private:
 
   Toolkit::PushButton        mLayoutButton;                      ///< The layout button
   Image                      mLayoutButtonImages[TOTAL_EFFECTS]; ///< Image when no layout
+  Image                      mLayoutSelectedImages[TOTAL_EFFECTS]; ///< Selected Image when no layout
 };
 
 void RunTest(Application& app)
