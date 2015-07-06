@@ -1,0 +1,88 @@
+static std::string glyphySdfShaderSource = MAKE_STRING(
+/*\n
+ * Copyright 2012 Google, Inc. All Rights Reserved.\n
+ *\n
+ * Licensed under the Apache License, Version 2.0 (the \"License\");\n
+ * you may not use this file except in compliance with the License.\n
+ * You may obtain a copy of the License at\n
+ *\n
+ *     http://www.apache.org/licenses/LICENSE-2.0\n
+ *\n
+ * Unless required by applicable law or agreed to in writing, software\n
+ * distributed under the License is distributed on an \"AS IS\" BASIS,\n
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+ * See the License for the specific language governing permissions and\n
+ * limitations under the License.\n
+ *\n
+ * Google Author(s): Behdad Esfahbod, Maysum Panju\n
+ */
+\n
+vec4 glyphy_texture1D_func (int offset, sampler2D _tex, ivec4 _atlas_info, ivec2 _atlas_pos)\n
+{\n
+  ivec2 item_geom = _atlas_info.zw;\n
+  vec2 pos = (vec2 (_atlas_pos.xy * item_geom +\n
+           ivec2 (mod (float (offset), float (item_geom.x)), offset / item_geom.x)) +\n
+          + vec2 (.5, .5)) / vec2(_atlas_info.xy);\n
+  return texture2D (_tex, pos);\n
+}\n
+\n
+glyphy_arc_list_t glyphy_arc_list (const ivec2 cell, const ivec2 nominal_size, sampler2D _tex, ivec4 _atlas_info, ivec2 _atlas_pos)\n
+{\n
+  int cell_offset = cell.y * nominal_size.x + cell.x;\n
+  vec4 arc_list_data = glyphy_texture1D_func (cell_offset, _tex, _atlas_info, _atlas_pos);\n
+  return glyphy_arc_list_decode (arc_list_data, nominal_size);\n
+}\n
+\n
+float glyphy_sdf (const vec2 p, const ivec2 nominal_size, sampler2D _tex, ivec4 _atlas_info, ivec2 _atlas_pos)\n
+{\n
+  ivec2 cell =  ivec2 (clamp (floor (p), vec2 (0.,0.), vec2(nominal_size - 1)));\n
+  glyphy_arc_list_t arc_list = glyphy_arc_list (cell, nominal_size , _tex, _atlas_info, _atlas_pos);\n
+\n
+  float side = float(arc_list.side);\n
+  vec2 cell_center = vec2(cell) + vec2(0.3+0.4*float(arc_list.pivot/2), 0.3+0.4*mod( float(arc_list.pivot),2.0 ));
+  /* Short-circuits: far-away cell */\n
+  //if (arc_list.num_endpoints == 0 || distance (p, cell_center) < GLYPHY_EPSILON) {\n
+  if (arc_list.num_endpoints == 0) {\n
+    return GLYPHY_INFINITY * (side > 0.5 ? -1.0 : 1.0);\n
+  }
+/*  if (arc_list.num_endpoints == -1) {\n
+    // single-line \n
+    float angle = arc_list.line_angle;\n
+    vec2 n = vec2 (cos (angle), sin (angle));\n
+    return dot (p - (vec2(nominal_size) * .5), n) - arc_list.line_distance;\n
+  }\n*/
+\n
+  float min_dist = GLYPHY_INFINITY;\n
+\n
+//  glyphy_arc_endpoint_t endpoint_prev, endpoint;\n
+  glyphy_arc_endpoint_t endpoint_prev;\n
+  glyphy_arc_endpoint_t endpoint;\n
+  endpoint_prev = glyphy_arc_endpoint_decode ( glyphy_texture1D_func (arc_list.offset, _tex, _atlas_info, _atlas_pos), nominal_size);\n
+  for (int i = 1; i < arc_list.num_endpoints; i++)\n
+  {\n
+    endpoint = glyphy_arc_endpoint_decode ( glyphy_texture1D_func (arc_list.offset + i, _tex, _atlas_info, _atlas_pos), nominal_size);\n
+    glyphy_arc_t a = glyphy_arc_t (endpoint_prev.p, endpoint.p, endpoint.d);\n
+    endpoint_prev = endpoint;\n
+    if (glyphy_isinf (a.d)) continue;\n
+\n
+    float udist;
+    if (glyphy_arc_wedge_contains (a, p))\n
+    {\n
+      float sdist = glyphy_arc_wedge_signed_dist (a, p);\n
+      udist = abs (sdist);\n
+    } else {\n
+      udist = min (distance (p, a.p0), distance (p, a.p1));\n
+    }\n
+    min_dist = min(udist, min_dist);
+    \n
+    if( distance (p, cell_center) > 0.001 )
+    {
+      if(glyphy_iszero(a.d))  side += float(winding_line( a.p0, a.p1, p, cell_center ));\n
+      else side += float(winding_arc(a, p, cell_center));\n
+   }
+  }\n
+\n
+  side = mod(side,2.0) > 0.5 ? -1.0 : 1.0;\n
+  return min_dist * side;\n
+}\n
+);
