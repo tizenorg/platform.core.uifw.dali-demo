@@ -28,10 +28,10 @@ class AtlasController;
 
 namespace
 {
-const char * const BACKGROUND_IMAGE( DALI_IMAGE_DIR "background-gradient.jpg" );
-const char * const TOOLBAR_IMAGE( DALI_IMAGE_DIR "top-bar.png" );
-const char * const LOSE_CONTEXT_IMAGE( DALI_IMAGE_DIR "icon-cluster-wobble.png" );
-const char * const LOSE_CONTEXT_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-cluster-wobble-selected.png" );
+const char * const BACKGROUND_IMAGE( DEMO_IMAGE_DIR "background-gradient.jpg" );
+const char * const TOOLBAR_IMAGE( DEMO_IMAGE_DIR "top-bar.png" );
+const char * const LOSE_CONTEXT_IMAGE( DEMO_IMAGE_DIR "icon-cluster-wobble.png" );
+const char * const LOSE_CONTEXT_IMAGE_SELECTED( DEMO_IMAGE_DIR "icon-cluster-wobble-selected.png" );
 
 Application gApplication;
 AtlasController* gAtlasController(NULL);
@@ -79,15 +79,15 @@ public:
 
     mAtlas = Atlas::New( 400,300, Pixel::RGBA8888);
     mAtlas.Clear(Vector4(0.f,0.5f,0.5f,0.5f));
-    mAtlas.Upload( DALI_IMAGE_DIR "icon-change.png", 50, 30 );
-    mAtlas.Upload( DALI_IMAGE_DIR "icon-cluster-carousel.png", 100, 30 );
-    mAtlas.Upload( DALI_IMAGE_DIR "icon-effects-on.png", 150, 30 );
-    mAtlas.Upload( DALI_IMAGE_DIR "icon-effect-cross.png", 100, 80 );
-    mAtlas.Upload( DALI_IMAGE_DIR "icon-effect-fold.png", 150, 80 );
-    mAtlas.Upload( DALI_IMAGE_DIR "icon-effect-wave.png", 200, 80 );
-    mAtlas.Upload( DALI_IMAGE_DIR "icon-item-view-layout-depth.png", 150, 130 );
-    mAtlas.Upload( DALI_IMAGE_DIR "icon-item-view-layout-grid.png", 200, 130 );
-    mAtlas.Upload( DALI_IMAGE_DIR "icon-item-view-layout-spiral.png", 250, 130 );
+    mAtlas.Upload( DEMO_IMAGE_DIR "icon-change.png", 50, 30 );
+    mAtlas.Upload( DEMO_IMAGE_DIR "icon-cluster-carousel.png", 100, 30 );
+    mAtlas.Upload( DEMO_IMAGE_DIR "icon-effects-on.png", 150, 30 );
+    mAtlas.Upload( DEMO_IMAGE_DIR "icon-effect-cross.png", 100, 80 );
+    mAtlas.Upload( DEMO_IMAGE_DIR "icon-effect-fold.png", 150, 80 );
+    mAtlas.Upload( DEMO_IMAGE_DIR "icon-effect-wave.png", 200, 80 );
+    mAtlas.Upload( DEMO_IMAGE_DIR "icon-item-view-layout-depth.png", 150, 130 );
+    mAtlas.Upload( DEMO_IMAGE_DIR "icon-item-view-layout-grid.png", 200, 130 );
+    mAtlas.Upload( DEMO_IMAGE_DIR "icon-item-view-layout-spiral.png", 250, 130 );
     UploadBufferImages();
 
     ImageActor imageActor1 = ImageActor::New( mAtlas );
@@ -97,16 +97,16 @@ public:
 
     Atlas atlas2 = Atlas::New( 400,400, Pixel::RGB888);
     atlas2.Clear( Color::RED );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-1.jpg", 4, 4 );
+    atlas2.Upload( DEMO_IMAGE_DIR "gallery-small-1.jpg", 4, 4 );
     atlas2.Clear( Color::BLUE );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-2.jpg", 136, 4 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-3.jpg", 268, 4 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-4.jpg", 4, 136 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-5.jpg", 136, 136 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-6.jpg", 268, 135 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-7.jpg", 4, 268 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-7.jpg", 136, 268 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-7.jpg", 268, 268 );
+    atlas2.Upload( DEMO_IMAGE_DIR "gallery-small-2.jpg", 136, 4 );
+    atlas2.Upload( DEMO_IMAGE_DIR "gallery-small-3.jpg", 268, 4 );
+    atlas2.Upload( DEMO_IMAGE_DIR "gallery-small-4.jpg", 4, 136 );
+    atlas2.Upload( DEMO_IMAGE_DIR "gallery-small-5.jpg", 136, 136 );
+    atlas2.Upload( DEMO_IMAGE_DIR "gallery-small-6.jpg", 268, 135 );
+    atlas2.Upload( DEMO_IMAGE_DIR "gallery-small-7.jpg", 4, 268 );
+    atlas2.Upload( DEMO_IMAGE_DIR "gallery-small-7.jpg", 136, 268 );
+    atlas2.Upload( DEMO_IMAGE_DIR "gallery-small-7.jpg", 268, 268 );
 
 
     ImageActor imageActor2 = ImageActor::New( atlas2 );

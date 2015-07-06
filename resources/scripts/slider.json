@@ -91,9 +91,9 @@
     "hit-region": [0, 48],
     "backing-region": [0, 10],
     "handle-region": [48, 48],
-    "backing-image-name": "{DALI_IMAGE_DIR}circle_point_32x32.png",
-    "handle-image-name": "{DALI_IMAGE_DIR}circle_point_shadow_32x32.png",
-    "progress-image-name": "{DALI_IMAGE_DIR}circle_point.png",
+    "backing-image-name": "{IMAGE_DIR}circle_point_32x32.png",
+    "handle-image-name": "{IMAGE_DIR}circle_point_shadow_32x32.png",
+    "progress-image-name": "{IMAGE_DIR}circle_point.png",
     "backing-scale9-border": [16, 0, 16, 0],
     "progress-scale9-border": [16, 0, 16, 0]
   }, {

@@ -25,7 +25,7 @@
       ],
       "sizeAspectRatio": false,
       "image": {
-        "filename": "{DALI_IMAGE_DIR}music-libray-main-screen.png",
+        "filename": "{IMAGE_DIR}music-libray-main-screen.png",
         "width": 545,
         "height": 860,
         "load-policy": "IMMEDIATE",
@@ -52,7 +52,7 @@
           ],
           "sizeAspectRatio": true,
           "image": {
-            "filename": "{DALI_IMAGE_DIR}music-libray-circle.png",
+            "filename": "{IMAGE_DIR}music-libray-circle.png",
             "width": 128,
             "height": 128,
             "load-policy": "IMMEDIATE",
@@ -76,7 +76,7 @@
           ],
           "sizeAspectRatio": true,
           "image": {
-            "filename": "{DALI_IMAGE_DIR}music-libray-triangle.png",
+            "filename": "{IMAGE_DIR}music-libray-triangle.png",
             "width": 185,
             "height": 198,
             "load-policy": "IMMEDIATE",
@@ -100,7 +100,7 @@
           ],
           "sizeAspectRatio": true,
           "image": {
-            "filename": "{DALI_IMAGE_DIR}music-libray-rectangle.png",
+            "filename": "{IMAGE_DIR}music-libray-rectangle.png",
             "width": 128,
             "height": 128,
             "load-policy": "IMMEDIATE",
@@ -195,7 +195,7 @@
       "color":[0,0,0,0],
       "sizeAspectRatio": false,
       "image": {
-        "filename": "{DALI_IMAGE_DIR}music-libray-foxtrot-oscar.png",
+        "filename": "{IMAGE_DIR}music-libray-foxtrot-oscar.png",
         "width": 545,
         "height": 95,
         "load-policy": "IMMEDIATE",
@@ -251,7 +251,7 @@
       ],
       "sizeAspectRatio": true,
       "image": {
-        "filename": "{DALI_IMAGE_DIR}music-libray-the-solars.png",
+        "filename": "{IMAGE_DIR}music-libray-the-solars.png",
         "width": 545,
         "height": 218,
         "load-policy": "IMMEDIATE",
@@ -317,7 +317,7 @@
       ],
       "sizeAspectRatio": false,
       "image": {
-        "filename": "{DALI_IMAGE_DIR}music-libray-record-cover.png",
+        "filename": "{IMAGE_DIR}music-libray-record-cover.png",
         "width": 545,
         "height": 502,
         "load-policy": "IMMEDIATE",
@@ -341,7 +341,7 @@
       ],
       "sizeAspectRatio": true,
       "image": {
-        "filename": "{DALI_IMAGE_DIR}music-libray-arrow.png",
+        "filename": "{IMAGE_DIR}music-libray-arrow.png",
         "width": 128,
         "height": 128,
         "load-policy": "IMMEDIATE",
@@ -365,7 +365,7 @@
       ],
       "sizeAspectRatio": false,
       "image": {
-        "filename": "{DALI_IMAGE_DIR}music-libray-star.png",
+        "filename": "{IMAGE_DIR}music-libray-star.png",
         "width": 121,
         "height": 128,
         "load-policy": "IMMEDIATE",
@@ -394,7 +394,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}music-libray-pause.png",
+        "filename": "{IMAGE_DIR}music-libray-pause.png",
         "width": 128,
         "height": 128,
         "load-policy": "IMMEDIATE",
@@ -418,7 +418,7 @@
       ],
       "sizeAspectRatio": true,
       "image": {
-        "filename": "{DALI_IMAGE_DIR}music-libray-menu.png",
+        "filename": "{IMAGE_DIR}music-libray-menu.png",
         "width": 32,
         "height": 32,
         "load-policy": "IMMEDIATE",

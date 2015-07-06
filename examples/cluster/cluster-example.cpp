@@ -37,17 +37,17 @@ using namespace DemoHelper;
 namespace // unnamed namespace
 {
 
-const char * const BACKGROUND_IMAGE( DALI_IMAGE_DIR "background-default.png" );
-const char * const TOOLBAR_IMAGE( DALI_IMAGE_DIR "top-bar.png" );
+const char * const BACKGROUND_IMAGE( DEMO_IMAGE_DIR "background-default.png" );
+const char * const TOOLBAR_IMAGE( DEMO_IMAGE_DIR "top-bar.png" );
 const char * const APPLICATION_TITLE( "Clusters" );
-const char * const LAYOUT_NONE_IMAGE( DALI_IMAGE_DIR "icon-cluster-none.png" );
-const char * const LAYOUT_NONE_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-cluster-none-selected.png" );
-const char * const LAYOUT_MOTION_BLUR_IMAGE( DALI_IMAGE_DIR "icon-cluster-wobble.png" );
-const char * const LAYOUT_MOTION_BLUR_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-cluster-wobble-selected.png" );
-const char * const LAYOUT_CAROUSEL_IMAGE( DALI_IMAGE_DIR "icon-cluster-carousel.png" );
-const char * const LAYOUT_CAROUSEL_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-cluster-carousel-selected.png" );
-const char * const LAYOUT_SPHERE_IMAGE( DALI_IMAGE_DIR "icon-cluster-sphere.png" );
-const char * const LAYOUT_SPHERE_IMAGE_SELECTED( DALI_IMAGE_DIR "icon-cluster-sphere-selected.png" );
+const char * const LAYOUT_NONE_IMAGE( DEMO_IMAGE_DIR "icon-cluster-none.png" );
+const char * const LAYOUT_NONE_IMAGE_SELECTED( DEMO_IMAGE_DIR "icon-cluster-none-selected.png" );
+const char * const LAYOUT_MOTION_BLUR_IMAGE( DEMO_IMAGE_DIR "icon-cluster-wobble.png" );
+const char * const LAYOUT_MOTION_BLUR_IMAGE_SELECTED( DEMO_IMAGE_DIR "icon-cluster-wobble-selected.png" );
+const char * const LAYOUT_CAROUSEL_IMAGE( DEMO_IMAGE_DIR "icon-cluster-carousel.png" );
+const char * const LAYOUT_CAROUSEL_IMAGE_SELECTED( DEMO_IMAGE_DIR "icon-cluster-carousel-selected.png" );
+const char * const LAYOUT_SPHERE_IMAGE( DEMO_IMAGE_DIR "icon-cluster-sphere.png" );
+const char * const LAYOUT_SPHERE_IMAGE_SELECTED( DEMO_IMAGE_DIR "icon-cluster-sphere-selected.png" );
 
 enum ClusterType
 {
@@ -61,54 +61,54 @@ enum ClusterType
   CLUSTER_COUNT
 };
 
-const char* PEOPLE_IMAGE_PATHS[] =   { DALI_IMAGE_DIR "people-medium-1.jpg",
-                                       DALI_IMAGE_DIR "people-medium-2.jpg",
-                                       DALI_IMAGE_DIR "people-medium-3.jpg",
-                                       DALI_IMAGE_DIR "people-medium-4.jpg",
-                                       DALI_IMAGE_DIR "people-medium-5.jpg",
-                                       DALI_IMAGE_DIR "people-medium-6.jpg",
-                                       DALI_IMAGE_DIR "people-medium-7.jpg",
-                                       DALI_IMAGE_DIR "people-medium-8.jpg",
+const char* PEOPLE_IMAGE_PATHS[] =   { DEMO_IMAGE_DIR "people-medium-1.jpg",
+                                       DEMO_IMAGE_DIR "people-medium-2.jpg",
+                                       DEMO_IMAGE_DIR "people-medium-3.jpg",
+                                       DEMO_IMAGE_DIR "people-medium-4.jpg",
+                                       DEMO_IMAGE_DIR "people-medium-5.jpg",
+                                       DEMO_IMAGE_DIR "people-medium-6.jpg",
+                                       DEMO_IMAGE_DIR "people-medium-7.jpg",
+                                       DEMO_IMAGE_DIR "people-medium-8.jpg",
                                        NULL };
 
-const char* TODAY_IMAGE_PATHS[] =    { DALI_IMAGE_DIR "gallery-medium-1.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-2.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-3.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-4.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-5.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-6.jpg",
+const char* TODAY_IMAGE_PATHS[] =    { DEMO_IMAGE_DIR "gallery-medium-1.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-2.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-3.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-4.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-5.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-6.jpg",
                                        NULL };
 
-const char* PHONE_IMAGE_PATHS[] =    { DALI_IMAGE_DIR "gallery-medium-7.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-8.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-9.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-10.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-11.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-12.jpg",
+const char* PHONE_IMAGE_PATHS[] =    { DEMO_IMAGE_DIR "gallery-medium-7.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-8.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-9.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-10.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-11.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-12.jpg",
                                        NULL };
 
-const char* PICTURES_IMAGE_PATHS[] = { DALI_IMAGE_DIR "gallery-medium-13.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-14.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-15.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-16.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-17.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-18.jpg",
+const char* PICTURES_IMAGE_PATHS[] = { DEMO_IMAGE_DIR "gallery-medium-13.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-14.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-15.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-16.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-17.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-18.jpg",
                                        NULL };
 
-const char* MUSIC_IMAGE_PATHS[] =    { DALI_IMAGE_DIR "gallery-medium-19.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-20.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-21.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-22.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-23.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-24.jpg",
+const char* MUSIC_IMAGE_PATHS[] =    { DEMO_IMAGE_DIR "gallery-medium-19.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-20.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-21.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-22.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-23.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-24.jpg",
                                        NULL };
 
-const char* MAGAZINE_IMAGE_PATHS[] = { DALI_IMAGE_DIR "gallery-medium-25.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-26.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-27.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-28.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-29.jpg",
-                                       DALI_IMAGE_DIR "gallery-medium-30.jpg",
+const char* MAGAZINE_IMAGE_PATHS[] = { DEMO_IMAGE_DIR "gallery-medium-25.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-26.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-27.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-28.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-29.jpg",
+                                       DEMO_IMAGE_DIR "gallery-medium-30.jpg",
                                        NULL };
 
 const char **IMAGE_GROUPS[] = {PEOPLE_IMAGE_PATHS,
@@ -122,9 +122,9 @@ const char **IMAGE_GROUPS[] = {PEOPLE_IMAGE_PATHS,
 const float CLUSTER_IMAGE_THUMBNAIL_WIDTH  = 256.0f;
 const float CLUSTER_IMAGE_THUMBNAIL_HEIGHT = 256.0f;
 
-const char* CLUSTER_SHADOW_IMAGE_PATH = DALI_IMAGE_DIR "cluster-image-shadow.png";
-const char* CLUSTER_BORDER_IMAGE_PATH = DALI_IMAGE_DIR "cluster-image-frame.png";
-const char* CLUSTER_BACKGROUND_IMAGE_PATH = DALI_IMAGE_DIR "cluster-background.png";
+const char* CLUSTER_SHADOW_IMAGE_PATH = DEMO_IMAGE_DIR "cluster-image-shadow.png";
+const char* CLUSTER_BORDER_IMAGE_PATH = DEMO_IMAGE_DIR "cluster-image-frame.png";
+const char* CLUSTER_BACKGROUND_IMAGE_PATH = DEMO_IMAGE_DIR "cluster-background.png";
 
 const float CLUSTER_IMAGE_BORDER_INDENT = 14.0f;            ///< Indent of border in pixels.
 const float CLUSTER_IMAGE_BORDER_WIDTH = 128;               ///< Width of border in pixels.

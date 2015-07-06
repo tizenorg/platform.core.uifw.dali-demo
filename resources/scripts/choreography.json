@@ -17,7 +17,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}circle.png"
+        "filename": "{IMAGE_DIR}circle.png"
       }
     },
     "rectangle-control":

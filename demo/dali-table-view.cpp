@@ -43,12 +43,12 @@ const std::string BUTTON_QUIT( "Quit" );
 const std::string BUTTON_OK( "Ok" );
 const std::string BUTTON_CANCEL( "Cancel" );
 
-const std::string DEFAULT_BACKGROUND_IMAGE_PATH( DALI_IMAGE_DIR "background-gradient.jpg" );
-const std::string LOGO_PATH( DALI_IMAGE_DIR "dali-logo.png" );
-const std::string DEFAULT_TOOLBAR_IMAGE_PATH( DALI_IMAGE_DIR "top-bar.png" );
-const std::string BUTTON_BACKGROUND(DALI_IMAGE_DIR "button-background.png");
-const std::string TILE_BACKGROUND(DALI_IMAGE_DIR "item-background.png");
-const std::string TILE_BACKGROUND_ALPHA(DALI_IMAGE_DIR "item-background-alpha.png");
+const std::string DEFAULT_BACKGROUND_IMAGE_PATH( DEMO_IMAGE_DIR "background-gradient.jpg" );
+const std::string LOGO_PATH( DEMO_IMAGE_DIR "dali-logo.png" );
+const std::string DEFAULT_TOOLBAR_IMAGE_PATH( DEMO_IMAGE_DIR "top-bar.png" );
+const std::string BUTTON_BACKGROUND(DEMO_IMAGE_DIR "button-background.png");
+const std::string TILE_BACKGROUND(DEMO_IMAGE_DIR "item-background.png");
+const std::string TILE_BACKGROUND_ALPHA(DEMO_IMAGE_DIR "item-background-alpha.png");
 
 const char * const DEFAULT_TOOLBAR_TEXT( "TOUCH TO LAUNCH EXAMPLE" );
 

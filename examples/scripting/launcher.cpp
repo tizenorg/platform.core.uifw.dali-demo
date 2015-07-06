@@ -78,10 +78,11 @@ void Launcher::Create( Dali::Application& application )
   {
     mBuilder = Toolkit::Builder::New();
 
+    // Setting application resource directories to be different from Toolkit
     Property::Map defaultDirs;
-    defaultDirs[ TOKEN_STRING(DALI_IMAGE_DIR) ]  = DALI_IMAGE_DIR;
-    defaultDirs[ TOKEN_STRING(DALI_MODEL_DIR) ]  = DALI_MODEL_DIR;
-    defaultDirs[ TOKEN_STRING(DALI_SCRIPT_DIR) ] = DALI_SCRIPT_DIR;
+    defaultDirs[ "IMAGE_DIR" ]  = DEMO_IMAGE_DIR;
+    defaultDirs[ "MODEL_DIR" ]  = DEMO_MODEL_DIR;
+    defaultDirs[ "SCRIPT_DIR" ] = DEMO_SCRIPT_DIR;
     mBuilder.AddConstants( defaultDirs );
 
     std::string json_data(GetFileContents( mJSONFileName ));

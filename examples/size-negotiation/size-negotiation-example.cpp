@@ -38,14 +38,14 @@ struct ButtonItem
 namespace
 {
 
-const char* const BACKGROUND_IMAGE = DALI_IMAGE_DIR "background-gradient.jpg";
-const char* const TOOLBAR_IMAGE = DALI_IMAGE_DIR "top-bar.png";
+const char* const BACKGROUND_IMAGE = DEMO_IMAGE_DIR "background-gradient.jpg";
+const char* const TOOLBAR_IMAGE = DEMO_IMAGE_DIR "top-bar.png";
 
 const char* const TOOLBAR_TITLE = "Negotiate Size";
 const int TOOLBAR_HEIGHT = 62;
 
-const char* MENU_ICON_IMAGE = DALI_IMAGE_DIR "icon-cluster-none.png";
-const char* MENU_ICON_IMAGE_SELECTED = DALI_IMAGE_DIR "icon-cluster-none-selected.png";
+const char* MENU_ICON_IMAGE = DEMO_IMAGE_DIR "icon-cluster-none.png";
+const char* MENU_ICON_IMAGE_SELECTED = DEMO_IMAGE_DIR "icon-cluster-none-selected.png";
 
 const char* const POPUPS_MENU_ID = "POPUPS_MENU";
 const char* const TABLEVIEW_MENU_ID = "TABLEVIEW_MENU";
@@ -80,10 +80,10 @@ const char* const OKAY_BUTTON_ID = "OKAY_BUTTON";
 const char* const CANCEL_BUTTON_ID = "CANCEL_BUTTON";
 
 const char* const CONTENT_TEXT = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-const char* const IMAGE1 = DALI_IMAGE_DIR "gallery-medium-5.jpg";
-const char* const IMAGE2 = DALI_IMAGE_DIR "background-magnifier.jpg";
-const char* const CHECKBOX_UNCHECKED_IMAGE = DALI_IMAGE_DIR "checkbox-unselected.png";
-const char* const CHECKBOX_CHECKED_IMAGE = DALI_IMAGE_DIR "checkbox-selected.png";
+const char* const IMAGE1 = DEMO_IMAGE_DIR "gallery-medium-5.jpg";
+const char* const IMAGE2 = DEMO_IMAGE_DIR "background-magnifier.jpg";
+const char* const CHECKBOX_UNCHECKED_IMAGE = DEMO_IMAGE_DIR "checkbox-unselected.png";
+const char* const CHECKBOX_CHECKED_IMAGE = DEMO_IMAGE_DIR "checkbox-selected.png";
 
 const ButtonItem MENU_ITEMS[] = {
     { POPUPS_MENU_ID,        "Popups" },

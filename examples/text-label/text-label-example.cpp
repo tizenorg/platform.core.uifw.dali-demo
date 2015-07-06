@@ -34,7 +34,7 @@ using namespace MultiLanguageStrings;
 
 namespace
 {
-  const char* const BACKGROUND_IMAGE = DALI_IMAGE_DIR "grab-handle.png";
+  const char* const BACKGROUND_IMAGE = DEMO_IMAGE_DIR "grab-handle.png";
 
   const unsigned int KEY_ZERO = 10;
   const unsigned int KEY_ONE = 11;

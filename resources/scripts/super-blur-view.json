@@ -54,7 +54,7 @@
       "position": [0, 10, 0],
       "size": [460, 600, 0],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}background-4.jpg"
+        "filename": "{IMAGE_DIR}background-4.jpg"
       }
     },
 
@@ -75,7 +75,7 @@
         "style": "STYLE_NINE_PATCH",
         "border": [26, 24, 26, 23],
         "image": {
-          "filename": "{DALI_IMAGE_DIR}button-background.png"
+          "filename": "{IMAGE_DIR}button-background.png"
         }
       },
       "selected-state-actor": {
@@ -83,7 +83,7 @@
         "style": "STYLE_NINE_PATCH",
         "border": [26, 24, 26, 23],
         "image": {
-          "filename": "{DALI_IMAGE_DIR}button-background.png"
+          "filename": "{IMAGE_DIR}button-background.png"
         }
       },
       "signals": [{

@@ -20,6 +20,10 @@ distributing this software or its derivatives.
 */
 
 {
+  "constants":
+  {
+    "IMAGE_DIR":"{DALI_IMAGE_DIR}", "MODEL_DIR":"{DALI_MODEL_DIR}", "SCRIPT_DIR":"{DALI_SCRIPT_DIR}"
+  },
   "styles":
   {
     "textlabel":
@@ -52,9 +56,9 @@ distributing this software or its derivatives.
       "primary-cursor-color":[0.75,0.96,1.0,1.0],
       "secondary-cursor-color":[1.0,0.71,0.9,1.0],
       "selection-highlight-color":[0.75,0.96,1.0,1.0],
-      "grab-handle-image":"{DALI_IMAGE_DIR}cursor_handler_center.png",
-      "selection-handle-image-left":"{DALI_IMAGE_DIR}selection_handle_left.png",
-      "selection-handle-image-right":"{DALI_IMAGE_DIR}selection_handle_right.png"
+      "grab-handle-image":"{IMAGE_DIR}cursor_handler_center.png",
+      "selection-handle-image-left":"{IMAGE_DIR}selection_handle_left.png",
+      "selection-handle-image-right":"{IMAGE_DIR}selection_handle_right.png"
     },
 
     "scrollview":

@@ -53,7 +53,7 @@
       "position": [ 0, 0, -1 ],
       "size": [ 450, 795, 1 ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}animation-list.png"
+        "filename": "{IMAGE_DIR}animation-list.png"
       }
     },
     {
@@ -120,35 +120,35 @@
       "type": "image-type",
       "name": "picture-1",
       "image": {
-        "filename": "{DALI_IMAGE_DIR}animation-picture-1.png"
+        "filename": "{IMAGE_DIR}animation-picture-1.png"
       }
     },
     {
       "type": "image-type",
       "name": "picture-2",
       "image": {
-        "filename": "{DALI_IMAGE_DIR}animation-picture-2.png"
+        "filename": "{IMAGE_DIR}animation-picture-2.png"
       }
     },
     {
       "type": "image-type",
       "name": "picture-3",
       "image": {
-        "filename": "{DALI_IMAGE_DIR}animation-picture-3.png"
+        "filename": "{IMAGE_DIR}animation-picture-3.png"
       }
     },
     {
       "type": "image-type",
       "name": "picture-4",
       "image": {
-        "filename": "{DALI_IMAGE_DIR}animation-picture-4.png"
+        "filename": "{IMAGE_DIR}animation-picture-4.png"
       }
     },
     {
       "type": "image-type",
       "name": "picture-5",
       "image": {
-        "filename": "{DALI_IMAGE_DIR}animation-picture-5.png"
+        "filename": "{IMAGE_DIR}animation-picture-5.png"
       }
     }
   ],

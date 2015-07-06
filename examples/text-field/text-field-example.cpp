@@ -37,7 +37,7 @@ using namespace MultiLanguageStrings;
 namespace
 {
 
-  const char* const FOLDER_ICON_IMAGE = DALI_IMAGE_DIR "folder_appicon_empty_bg.png";
+  const char* const FOLDER_ICON_IMAGE = DEMO_IMAGE_DIR "folder_appicon_empty_bg.png";
 
   const float BORDER_WIDTH = 4.0f;
 
