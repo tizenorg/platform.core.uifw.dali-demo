@@ -12,7 +12,7 @@
       "size": [200, 200, 0],
       "effect": "Ripple2D",
       "image": {
-        "filename": "{DALI_IMAGE_DIR}gallery-medium-25.jpg",
+        "filename": "{IMAGE_DIR}gallery-medium-25.jpg",
         "width": 200,
         "height": 80,
         "load-policy": "IMMEDIATE",

@@ -28,7 +28,7 @@ using namespace Dali::Toolkit;
 
 namespace
 {
-  const char* DESKTOP_IMAGE( DALI_IMAGE_DIR "woodEffect.jpg" );
+  const char* DESKTOP_IMAGE( DEMO_IMAGE_DIR "woodEffect.jpg" );
   const Vector2 DESKTOP_SIZE( Vector2( 1440, 1600 ) );
   const Vector2 PHOTOBOX_SIZE( Vector2(330.0f, 80.0f ) );
   const float MAX_OFFSCREEN_RENDERING_SIZE = 2048.f;

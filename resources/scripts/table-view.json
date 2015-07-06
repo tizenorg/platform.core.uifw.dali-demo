@@ -63,7 +63,7 @@
           "type":"ImageActor",
           "height-resize-policy":"FILL_TO_PARENT",
           "image": {
-            "filename": "{DALI_IMAGE_DIR}gallery-small-1.jpg"
+            "filename": "{IMAGE_DIR}gallery-small-1.jpg"
           },
           "custom-properties": { // properties registered dynamically
             "cell-index": [0,0], // property to specify the top-left cell this child occupies
@@ -75,7 +75,7 @@
           "type":"ImageActor",
           "height-resize-policy":"FILL_TO_PARENT",
           "image": {
-            "filename": "{DALI_IMAGE_DIR}gallery-small-2.jpg"
+            "filename": "{IMAGE_DIR}gallery-small-2.jpg"
           },
           "custom-properties": { // properties registered dynamically
             "cell-index": [0,1],
@@ -85,7 +85,7 @@
           "name":"gallery-3",
           "type":"ImageActor",
           "image": {
-            "filename": "{DALI_IMAGE_DIR}gallery-small-3.jpg"
+            "filename": "{IMAGE_DIR}gallery-small-3.jpg"
           },
           "custom-properties": {
             "cell-index":[1,1],
@@ -98,7 +98,7 @@
           "type":"ImageActor",
           "width-resize-policy":"FILL_TO_PARENT",
           "image": {
-            "filename": "{DALI_IMAGE_DIR}gallery-small-4.jpg"
+            "filename": "{IMAGE_DIR}gallery-small-4.jpg"
           },
           "custom-properties": {
             "cell-index":[2,2]
@@ -109,7 +109,7 @@
           "width-resize-policy":"FILL_TO_PARENT",
           "height-resize-policy":"FILL_TO_PARENT",
           "image": {
-            "filename": "{DALI_IMAGE_DIR}gallery-small-5.jpg"
+            "filename": "{IMAGE_DIR}gallery-small-5.jpg"
           },
           "custom-properties": {
             "cell-index":[3,2],

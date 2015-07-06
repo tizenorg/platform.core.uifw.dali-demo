@@ -22,7 +22,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}spot_button_on.png",
+        "filename": "{IMAGE_DIR}spot_button_on.png",
         "width": 144,
         "height": 144,
         "load-policy": "IMMEDIATE",
@@ -53,7 +53,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}spot_button_off.png",
+        "filename": "{IMAGE_DIR}spot_button_off.png",
         "width": 144,
         "height": 144,
         "load-policy": "IMMEDIATE",
@@ -85,7 +85,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}curve-right.png",
+        "filename": "{IMAGE_DIR}curve-right.png",
         "width": 85,
         "height": 161,
         "load-policy": "IMMEDIATE",
@@ -117,7 +117,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}curve-left.png",
+        "filename": "{IMAGE_DIR}curve-left.png",
         "width": 87,
         "height": 161,
         "load-policy": "IMMEDIATE",
@@ -153,7 +153,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}curve-middle.png",
+        "filename": "{IMAGE_DIR}curve-middle.png",
         "width": 13,
         "height": 161,
         "load-policy": "IMMEDIATE",
@@ -184,7 +184,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}spot_jelly_on.png",
+        "filename": "{IMAGE_DIR}spot_jelly_on.png",
         "width": 144,
         "height": 144,
         "load-policy": "IMMEDIATE",
@@ -273,7 +273,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}spot_jelly_off.png",
+        "filename": "{IMAGE_DIR}spot_jelly_off.png",
         "width": 144,
         "height": 144,
         "load-policy": "IMMEDIATE",
