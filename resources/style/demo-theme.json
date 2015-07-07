@@ -64,6 +64,38 @@ distributing this software or its derivatives.
     "buttonlabel":
     {
       "point-size":11
+    },
+
+    "pushbutton":
+    {
+      "normal-state-actor": {
+        "type": "ImageActor",
+        "image": {
+          "filename": "/home/SERILOCAL/adeel.kazmi/work/dali-env/opt/share/com.samsung.dali-demo/images/blocks-brick-1.png"
+        }
+      },
+      "selected-state-actor": {
+        "type": "ImageActor",
+        "image": {
+          "filename": "/home/SERILOCAL/adeel.kazmi/work/dali-env/opt/share/com.samsung.dali-demo/images/blocks-brick-2.png"
+        }
+      }
+    },
+
+    "custom-button":
+    {
+      "normal-state-actor": {
+        "type": "ImageActor",
+        "image": {
+          "filename": "/home/SERILOCAL/adeel.kazmi/work/dali-env/opt/share/com.samsung.dali-demo/images/blocks-brick-2.png"
+        }
+      },
+      "selected-state-actor": {
+        "type": "ImageActor",
+        "image": {
+          "filename": "/home/SERILOCAL/adeel.kazmi/work/dali-env/opt/share/com.samsung.dali-demo/images/blocks-brick-3.png"
+        }
+      }
     }
   }
 }
