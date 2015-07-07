@@ -18,7 +18,7 @@
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
-using Dali::Toolkit::TextLabel;
+using Dali::Toolkit::PushButton;
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -45,20 +45,18 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "hello-world-label" );
-    stage.Add( textLabel );
+    PushButton button = PushButton::New();
+    button.SetLabel( "Default In Given Theme" );
+    button.SetAnchorPoint( AnchorPoint::CENTER );
+    button.SetParentOrigin( ParentOrigin::CENTER );
+    stage.Add( button );
 
-    // Respond to a click anywhere on the stage
-    stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
-  }
-
-  bool OnTouch( Actor actor, const TouchEvent& touch )
-  {
-    // quit the application
-    mApplication.Quit();
-    return true;
+    PushButton styledButton = PushButton::New();
+    styledButton.SetLabel( "Style Name Specified" );
+    styledButton.SetAnchorPoint( AnchorPoint::BOTTOM_CENTER );
+    styledButton.SetParentOrigin( ParentOrigin::BOTTOM_CENTER );
+    styledButton.SetProperty( Toolkit::Control::Property::STYLE_NAME, "custom-button" );
+    stage.Add( styledButton );
   }
 
 private:
@@ -76,7 +74,7 @@ void RunTest( Application& application )
 //
 int main( int argc, char **argv )
 {
-  Application application = Application::New( &argc, &argv );
+  Application application = Application::New( &argc, &argv, DALI_DEMO_THEME_PATH );
 
   RunTest( application );
 
