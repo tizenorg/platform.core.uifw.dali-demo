@@ -78,7 +78,7 @@ public:
 
     // Create Desktop
     ResourceImage backgroundImage = ResourceImage::New( DESKTOP_IMAGE );
-    ImageActor desktop = ImageActor::New( backgroundImage );
+    ImageView desktop = ImageView::New( backgroundImage );
     desktop.SetName("desktopActor");
     desktop.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     desktop.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
@@ -87,13 +87,13 @@ public:
     rootActor.Add( desktop ); // Add desktop (content) to offscreen actor
 
     // Create Photo Box A
-    ImageActor photoBoxA = CreateSolidColorActor( Vector4(0,0,0,0), true, Color::WHITE, 1 );
+    ImageActor photoBoxA = CreateSolidColorActor( Vector4(1,0,0,1), true, Color::WHITE, 1 );
     photoBoxA.SetName("photoBoxA");
     photoBoxA.SetAnchorPoint( AnchorPoint::CENTER );
     photoBoxA.SetParentOrigin( ParentOrigin::CENTER );
     photoBoxA.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
     photoBoxA.SetSize( PHOTOBOX_SIZE );
-    photoBoxA.SetPosition( 0.0f, -500.0f, 1.0f );
+    photoBoxA.SetPosition( 0.0f, -500.0f );
     desktop.Add( photoBoxA );
 
     // Create TextField
