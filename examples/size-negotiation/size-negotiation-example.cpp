@@ -176,8 +176,8 @@ public:
 
     // Create menu button
     Toolkit::PushButton viewButton = Toolkit::PushButton::New();
-    viewButton.SetButtonImage( ResourceImage::New( MENU_ICON_IMAGE ) );
-    viewButton.SetSelectedImage( ResourceImage::New( MENU_ICON_IMAGE_SELECTED ) );
+    viewButton.SetButtonImage( MENU_ICON_IMAGE );
+    viewButton.SetSelectedImage( MENU_ICON_IMAGE_SELECTED );
     viewButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnMenu );
     mToolBar.AddControl( viewButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
 
@@ -260,8 +260,8 @@ public:
       Toolkit::PushButton menuButton = Toolkit::PushButton::New();
       menuButton.SetName( MENU_ITEMS[ i ].name );
       menuButton.SetLabel( MENU_ITEMS[ i ].text );
-      menuButton.SetButtonImage( Actor() );
-      menuButton.SetSelectedImage( Actor() );
+      menuButton.SetButtonImage( "" );
+      menuButton.SetSelectedImage( "" );
       menuButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnMenuSelect );
 
       tableView.Add( menuButton );
