@@ -50,8 +50,31 @@ public:
     textLabel.SetName( "hello-world-label" );
     stage.Add( textLabel );
 
+
+    Toolkit::PushButton testButton = Toolkit::PushButton::New();
+    testButton.SetLabel( "Select" );
+    testButton.SetName( "select-button" );
+    testButton.SetAnchorPoint( AnchorPoint::CENTER );
+    testButton.SetParentOrigin( ParentOrigin::CENTER );
+
+    testButton.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+    //testButton.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS ); testButton.SetSize( 300.0f, 150.0f );
+
+    //mUpdateButton.ClickedSignal().Connect( this, &ButtonsController::OnButtonClicked );
+
+    stage.Add( testButton );
+
+
+
+
+
+
+
+
+
+
     // Respond to a click anywhere on the stage
-    stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
+    //stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
   }
 
   bool OnTouch( Actor actor, const TouchEvent& touch )

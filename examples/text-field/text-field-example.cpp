@@ -38,6 +38,7 @@ namespace
 {
 
   const char* const FOLDER_ICON_IMAGE = DALI_IMAGE_DIR "folder_appicon_empty_bg.png";
+  const char* const FOLDER_OPEN_ICON_IMAGE = DALI_IMAGE_DIR "folder_appicon_empty_open_bg.png";
 
   const float BORDER_WIDTH = 4.0f;
 
@@ -82,14 +83,12 @@ public:
   PushButton CreateFolderButton()
   {
     PushButton button = PushButton::New();
-    ResourceImage image = ResourceImage::New( FOLDER_ICON_IMAGE );
-    ImageActor folderButton = ImageActor::New( image );
-    folderButton.SetColor( Color::WHITE );
-    button.SetButtonImage( folderButton );
-    button.SetSelectedImage( Actor() );
+    button.SetButtonImage( FOLDER_ICON_IMAGE );
+    button.SetSelectedImage( FOLDER_OPEN_ICON_IMAGE );
     button.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     button.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
-    button.SetSize( image.GetWidth(), image.GetHeight() );
+    ResourceImage imageClosed = ResourceImage::New( FOLDER_ICON_IMAGE );
+    button.SetSize( imageClosed.GetWidth(), imageClosed.GetHeight() );
 
     return button;
   }

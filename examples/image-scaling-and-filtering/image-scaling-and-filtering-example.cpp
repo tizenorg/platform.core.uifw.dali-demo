@@ -337,7 +337,6 @@ public:
       fittingModeGroup.Add( label );
 
       Toolkit::PushButton button = CreateButton( FITTING_BUTTON_ID, StringFromScalingMode( mFittingMode ) );
-      button.GetLabel().SetProperty( Toolkit::Control::Property::STYLE_NAME, STYLE_BUTTON_TEXT );
       fittingModeGroup.Add( button );
       mFittingModeButton = button;
 
@@ -359,7 +358,6 @@ public:
       samplingModeGroup.Add( label );
 
       Toolkit::PushButton button = CreateButton( SAMPLING_BUTTON_ID, StringFromFilterMode( mSamplingMode ) );
-      button.GetLabel().SetProperty( Toolkit::Control::Property::STYLE_NAME, STYLE_BUTTON_TEXT );
       samplingModeGroup.Add( button );
       mSamplingModeButton = button;
 
@@ -402,8 +400,6 @@ public:
     Toolkit::PushButton button = Toolkit::PushButton::New();
     button.SetName( id );
     button.SetLabel( id );
-    Toolkit::TextLabel textLabel = Toolkit::TextLabel::DownCast( button.GetLabel() );
-    textLabel.SetProperty( TextLabel::Property::POINT_SIZE, 12.0f );
 
     button.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     button.SetParentOrigin( ParentOrigin::BOTTOM_LEFT );
@@ -493,7 +489,6 @@ public:
     {
       mFittingMode = mode;
       mFittingModeButton.SetLabel( modeName );
-      mFittingModeButton.GetLabel().SetProperty( Toolkit::Control::Property::STYLE_NAME, STYLE_BUTTON_TEXT );
       ResizeImage();
       mPopup.Hide();
       mPopup.Reset();
@@ -509,7 +504,6 @@ public:
     {
       mSamplingMode = mode;
       mSamplingModeButton.SetLabel( modeName );
-      mSamplingModeButton.GetLabel().SetProperty( Toolkit::Control::Property::STYLE_NAME, STYLE_BUTTON_TEXT );
       ResizeImage();
       mPopup.Hide();
       mPopup.Reset();
@@ -658,14 +652,12 @@ public:
       {
         mSamplingMode = NextFilterMode( mSamplingMode );
         mSamplingModeButton.SetLabel( StringFromFilterMode( mSamplingMode ) );
-        mSamplingModeButton.GetLabel().SetProperty( Toolkit::Control::Property::STYLE_NAME, STYLE_BUTTON_TEXT );
       }
       // Cycle filter and scaling modes:
       else if ( event.keyPressedName == "s" )
       {
         mFittingMode = NextScalingMode( mFittingMode );
         mFittingModeButton.SetLabel( StringFromScalingMode( mFittingMode ) );
-        mFittingModeButton.GetLabel().SetProperty( Toolkit::Control::Property::STYLE_NAME, STYLE_BUTTON_TEXT );
       }
       else
       {
