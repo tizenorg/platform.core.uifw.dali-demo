@@ -464,9 +464,7 @@ class LoggingController: public ConnectionTracker
          << ", " << ((mLoggerStates[i].isTiming) ? "Started" : "Stopped")
          << ", " << ((mLoggerStates[i].isEnabled) ? "Enabled" : "Disabled");
 
-      Toolkit::TextLabel textLabel = Toolkit::TextLabel::New( ss.str() );
-
-      mLogRadioButtons[i].SetLabel( textLabel );
+      mLogRadioButtons[i].SetLabel( ss.str() );
     }
   }
 

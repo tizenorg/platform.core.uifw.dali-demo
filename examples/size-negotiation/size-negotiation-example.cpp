@@ -260,8 +260,8 @@ public:
       Toolkit::PushButton menuButton = Toolkit::PushButton::New();
       menuButton.SetName( MENU_ITEMS[ i ].name );
       menuButton.SetLabel( MENU_ITEMS[ i ].text );
-      menuButton.SetButtonImage( Actor() );
-      menuButton.SetSelectedImage( Actor() );
+      menuButton.SetButtonImage( Image() );
+      menuButton.SetSelectedImage( Image() );
       menuButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnMenuSelect );
 
       tableView.Add( menuButton );
