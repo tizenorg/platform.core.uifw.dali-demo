@@ -145,9 +145,9 @@ class ButtonsController: public ConnectionTracker
 
     // Radio 1
     {
-      ImageActor imageActor = ImageActor::New( ResourceImage::New( SMALL_IMAGE_1 ) );
-      imageActor.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
-      mRadioButtonImage1 = Dali::Toolkit::RadioButton::New( imageActor );
+      Toolkit::ImageView imageView = Toolkit::ImageView::New( SMALL_IMAGE_1 );
+      imageView.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
+      mRadioButtonImage1 = Dali::Toolkit::RadioButton::New( imageView );
       mRadioButtonImage1.SetParentOrigin( ParentOrigin::TOP_LEFT );
       mRadioButtonImage1.SetAnchorPoint( AnchorPoint::TOP_LEFT );
       mRadioButtonImage1.SetPosition( 0, DP(radioY) );
@@ -160,10 +160,10 @@ class ButtonsController: public ConnectionTracker
     {
       radioY += RADIO_LABEL_THUMBNAIL_SIZE + RADIO_IMAGE_SPACING;
 
-      ImageActor imageActor = ImageActor::New( ResourceImage::New( SMALL_IMAGE_2 ) );
-      imageActor.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
+      Toolkit::ImageView imageView = Toolkit::ImageView::New( SMALL_IMAGE_2 );
+      imageView.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
 
-      mRadioButtonImage2 = Dali::Toolkit::RadioButton::New( imageActor );
+      mRadioButtonImage2 = Dali::Toolkit::RadioButton::New( imageView );
       mRadioButtonImage2.SetParentOrigin( ParentOrigin::TOP_LEFT );
       mRadioButtonImage2.SetAnchorPoint( AnchorPoint::TOP_LEFT );
       mRadioButtonImage2.SetPosition( 0, DP(radioY) );
@@ -175,10 +175,10 @@ class ButtonsController: public ConnectionTracker
     {
       radioY += RADIO_LABEL_THUMBNAIL_SIZE + RADIO_IMAGE_SPACING;
 
-      ImageActor imageActor = ImageActor::New( ResourceImage::New( SMALL_IMAGE_3 ) );
-      imageActor.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
+      Toolkit::ImageView imageView = Toolkit::ImageView::New( SMALL_IMAGE_3 );
+      imageView.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
 
-      mRadioButtonImage3 = Dali::Toolkit::RadioButton::New( imageActor );
+      mRadioButtonImage3 = Dali::Toolkit::RadioButton::New( imageView );
       mRadioButtonImage3.SetParentOrigin( ParentOrigin::TOP_LEFT );
       mRadioButtonImage3.SetAnchorPoint( AnchorPoint::TOP_LEFT );
       mRadioButtonImage3.SetPosition( 0, DP(radioY) );
@@ -195,12 +195,12 @@ class ButtonsController: public ConnectionTracker
 
     radioGroup2Background.AddChild( mUpdateButton, Toolkit::TableView::CellPosition( 1, 0 ) );
 
-    // ImageActor to display selected image
+    // ImageView to display selected image
     mBigImage1 = ResourceImage::New( BIG_IMAGE_1 );
     mBigImage2 = ResourceImage::New( BIG_IMAGE_2 );
     mBigImage3 = ResourceImage::New( BIG_IMAGE_3 );
 
-    mImage = ImageActor::New( mBigImage1 );
+    mImage = Toolkit::ImageView::New( mBigImage1 );
     mImage.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
     mImage.SetSizeScalePolicy( SizeScalePolicy::FIT_WITH_ASPECT_RATIO );
     radioGroup2Background.AddChild( mImage, Toolkit::TableView::CellPosition( 0, 1, 2, 1 ) );
@@ -241,10 +241,10 @@ class ButtonsController: public ConnectionTracker
       textLabel.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
       tableView.AddChild( textLabel, Toolkit::TableView::CellPosition( 0, 0 ) );
 
-      ImageActor imageActor = ImageActor::New( ResourceImage::New( ENABLED_IMAGE ) );
-      imageActor.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
-      imageActor.SetPadding( Padding( DP(20.0f), 0.0f, 0.0f, 0.0f ) );
-      tableView.AddChild( imageActor, Toolkit::TableView::CellPosition( 0, 1 ) );
+      Toolkit::ImageView imageView = Toolkit::ImageView::New( ENABLED_IMAGE );
+      imageView.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
+      imageView.SetPadding( Padding( DP(20.0f), 0.0f, 0.0f, 0.0f ) );
+      tableView.AddChild( imageView, Toolkit::TableView::CellPosition( 0, 1 ) );
 
       Toolkit::RadioButton radioButton = Dali::Toolkit::RadioButton::New( tableView );
       radioButton.SetName( "radio-select-enable" );
@@ -511,7 +511,7 @@ class ButtonsController: public ConnectionTracker
   Image mBigImage1;
   Image mBigImage2;
   Image mBigImage3;
-  ImageActor mImage;
+  Toolkit::ImageView mImage;
 };
 
 void RunTest( Application& application )
