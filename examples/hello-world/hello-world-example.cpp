@@ -18,7 +18,7 @@
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
-using Dali::Toolkit::TextLabel;
+using namespace Toolkit;
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -44,11 +44,39 @@ public:
     // Get a handle to the stage
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
+    stage.GetRootLayer().SetBehavior(Layer::LAYER_3D);
+
+    item = Actor::New();
+    item.SetParentOrigin(ParentOrigin::CENTER);
+    item.SetAnchorPoint(AnchorPoint::CENTER);
+    item.SetSize(Vector2(300, 300));
+    stage.Add(item);
+
+    ImageActor bg = CreateSolidColorActor(Color::RED);
+    bg.SetParentOrigin(ParentOrigin::CENTER);
+    bg.SetAnchorPoint(AnchorPoint::CENTER);
+    bg.SetSize(Vector2(300, 300));
+    item.Add(bg);
+
+    ImageActor icon = CreateSolidColorActor(Color::GREEN);
+    icon.SetParentOrigin(ParentOrigin::TOP_RIGHT);
+    icon.SetAnchorPoint(AnchorPoint::TOP_RIGHT);
+    icon.SetSize(Vector2(50, 50));
+    icon.SetZ(0.1f);
+    bg.Add(icon);
 
     TextLabel textLabel = TextLabel::New( "Hello World" );
     textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     textLabel.SetName( "hello-world-label" );
-    stage.Add( textLabel );
+    textLabel.SetZ(0.1f);
+    bg.Add(textLabel);
+
+    CheckBoxButton btn = CheckBoxButton::New();
+    btn.SetParentOrigin(ParentOrigin::BOTTOM_RIGHT);
+    btn.SetAnchorPoint(AnchorPoint::BOTTOM_RIGHT);
+    btn.SetSize(Vector2(50,50));
+    btn.SetZ(0.1f);
+    bg.Add(btn);
 
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
@@ -56,12 +84,14 @@ public:
 
   bool OnTouch( Actor actor, const TouchEvent& touch )
   {
-    // quit the application
-    mApplication.Quit();
+    Animation animation = Animation::New(3.0f);
+    animation.AnimateTo(Property(item, Actor::Property::ORIENTATION), Quaternion(Radian(3.14), Vector3::XAXIS), AlphaFunction::BOUNCE);
+    animation.Play();
     return true;
   }
 
 private:
+  Actor item;
   Application&  mApplication;
 };
 
