@@ -25,6 +25,14 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include "shared/view.h"
 
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <unistd.h>
+
 using namespace Dali;
 using namespace Dali::Toolkit;
 using namespace DemoHelper;
@@ -829,6 +837,15 @@ private:
   int mBrickCount;                                      ///< Total bricks on screen.
 };
 
+void handler(int signal)
+{
+  void *symbolArray[10];
+  size_t size = backtrace( symbolArray, 10 );
+  fprintf( stderr, "Error: signal %d:\n", signal );
+  backtrace_symbols_fd( symbolArray, size, STDERR_FILENO );
+  exit(1);
+}
+
 void RunTest(Application& app)
 {
   ExampleController test(app);
@@ -838,6 +855,8 @@ void RunTest(Application& app)
 
 int main(int argc, char **argv)
 {
+  signal(SIGSEGV, handler);
+
   Application app = Application::New(&argc, &argv, DALI_DEMO_THEME_PATH);
 
   RunTest(app);
