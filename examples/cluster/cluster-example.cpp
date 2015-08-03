@@ -387,8 +387,6 @@ public:
                                             TOOLBAR_IMAGE,
                                             "" );
 
-    mContentLayer.SetProperty(Layer::Property::BEHAVIOR, "Dali::Layer::LAYER_3D");
-
     // Create a effect toggle button. (right of toolbar)
     mLayoutButtonImages[ NO_EFFECT ].mButtonImage = LAYOUT_NONE_IMAGE;
     mLayoutButtonImages[ NO_EFFECT ].mSelectedImage = LAYOUT_NONE_IMAGE_SELECTED;
