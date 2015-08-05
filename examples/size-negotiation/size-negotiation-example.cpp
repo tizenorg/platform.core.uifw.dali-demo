@@ -782,7 +782,7 @@ public: // From ItemFactory
   {
     Toolkit::PushButton popupButton = Toolkit::PushButton::New();
     popupButton.SetName( TABLEVIEW_BUTTON_ITEMS[ itemId ].name );
-    popupButton.SetLabelText( TABLEVIEW_BUTTON_ITEMS[ itemId ].text );
+    popupButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", TABLEVIEW_BUTTON_ITEMS[ itemId ].text ) );
     popupButton.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
 
     popupButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
