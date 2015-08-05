@@ -259,7 +259,7 @@ public:
     {
       Toolkit::PushButton menuButton = Toolkit::PushButton::New();
       menuButton.SetName( MENU_ITEMS[ i ].name );
-      menuButton.SetLabelText( MENU_ITEMS[ i ].text );
+      menuButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", MENU_ITEMS[ i ].text ) );
       menuButton.SetUnselectedImage( "" );
       menuButton.SetSelectedImage( "" );
       menuButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnMenuSelect );
@@ -354,7 +354,7 @@ public:
 
       Toolkit::PushButton okayButton = Toolkit::PushButton::New();
       okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabelText( "OK!" );
+      okayButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "OK!" ) );
 
       okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
 
@@ -368,7 +368,7 @@ public:
 
       Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
       cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabelText( "Cancel" );
+      cancelButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "Cancel" ) );
 
       cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
 
@@ -376,7 +376,7 @@ public:
 
       Toolkit::PushButton okayButton = Toolkit::PushButton::New();
       okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabelText( "OK!" );
+      okayButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "OK!" ) );
 
       okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
 
@@ -391,7 +391,7 @@ public:
 
       Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
       cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabelText( "Cancel" );
+      cancelButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "Cancel" ) );
 
       cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
 
@@ -399,7 +399,7 @@ public:
 
       Toolkit::PushButton okayButton = Toolkit::PushButton::New();
       okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabelText( "OK!" );
+      okayButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "OK!" ) );
 
       okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
 
@@ -513,7 +513,7 @@ public:
 
       Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
       cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabelText( "Cancel" );
+      cancelButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "Cancel" ) );
 
       cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
 
@@ -521,7 +521,7 @@ public:
 
       Toolkit::PushButton okayButton = Toolkit::PushButton::New();
       okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabelText( "OK!" );
+      okayButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "OK!" ) );
 
       okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
 
@@ -591,7 +591,7 @@ public:
       // Buttons
       Toolkit::PushButton cancelButton = Toolkit::PushButton::New();
       cancelButton.SetName( CANCEL_BUTTON_ID );
-      cancelButton.SetLabelText( "Cancel" );
+      cancelButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "Cancel" ) );
 
       cancelButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
 
@@ -599,7 +599,7 @@ public:
 
       Toolkit::PushButton okayButton = Toolkit::PushButton::New();
       okayButton.SetName( OKAY_BUTTON_ID );
-      okayButton.SetLabelText( "OK!" );
+      okayButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "OK!" ) );
 
       okayButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );
 
@@ -1226,7 +1226,7 @@ public: // From ItemFactory
     {
       Toolkit::PushButton popupButton = Toolkit::PushButton::New();
       popupButton.SetName( buttonDataArray[ itemId ].name );
-      popupButton.SetLabelText( buttonDataArray[ itemId ].text );
+      popupButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", buttonDataArray[ itemId ].text ) );
       popupButton.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
 
       popupButton.ClickedSignal().Connect( this, &SizeNegotiationController::OnButtonClicked );

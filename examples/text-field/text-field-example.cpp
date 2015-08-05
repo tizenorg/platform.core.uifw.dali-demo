@@ -148,7 +148,7 @@ public:
     {
       Property::Value text = mField.GetProperty( TextField::Property::TEXT );
       mButtonLabel = text.Get< std::string >();
-      mButton.SetLabelText( mButtonLabel );
+      mButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", mButtonLabel ) );
     }
 
     // Hide & discard the pop-up
@@ -174,7 +174,7 @@ public:
           {
             Property::Value text = mField.GetProperty( TextField::Property::TEXT );
             mButtonLabel = text.Get< std::string >();
-            mButton.SetLabelText( mButtonLabel );
+            mButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", mButtonLabel ) );
             mField.ClearKeyInputFocus();
           }
           break;

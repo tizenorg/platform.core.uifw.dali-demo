@@ -205,7 +205,7 @@ class ButtonsController: public ConnectionTracker
 
     // Create select button
     mUpdateButton = Toolkit::PushButton::New();
-    mUpdateButton.SetLabelText( "Select" );
+    mUpdateButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "Select" ) );
     mUpdateButton.SetName( "select-button" );
     mUpdateButton.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
 
@@ -309,7 +309,7 @@ class ButtonsController: public ConnectionTracker
     {
       mCheckboxButton1 = Toolkit::CheckBoxButton::New();
       mCheckboxButton1.SetName( "checkbox1" );
-      mCheckboxButton1.SetLabelText( "CheckBox1 is unselected" );
+      mCheckboxButton1.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "CheckBox1 is unselected" ) );
       mCheckboxButton1.StateChangedSignal().Connect( this, &ButtonsController::OnCheckBoxesSelected );
 
       checkBoxBackground.Add( mCheckboxButton1 );
@@ -318,7 +318,7 @@ class ButtonsController: public ConnectionTracker
     {
       mCheckboxButton2 = Toolkit::CheckBoxButton::New();
       mCheckboxButton2.SetName( "checkbox2" );
-      mCheckboxButton2.SetLabelText( "CheckBox2 is selected" );
+      mCheckboxButton2.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "CheckBox2 is selected" ) );
       mCheckboxButton2.SetSelected( true );
       mCheckboxButton2.StateChangedSignal().Connect( this, &ButtonsController::OnCheckBoxesSelected );
 
@@ -328,7 +328,7 @@ class ButtonsController: public ConnectionTracker
     {
       mCheckboxButton3 = Toolkit::CheckBoxButton::New();
       mCheckboxButton3.SetName( "checkbox3" );
-      mCheckboxButton3.SetLabelText( "CheckBox3 is unselected" );
+      mCheckboxButton3.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "CheckBox3 is unselected" ) );
       mCheckboxButton3.StateChangedSignal().Connect( this, &ButtonsController::OnCheckBoxesSelected );
 
       checkBoxBackground.Add( mCheckboxButton3 );
@@ -350,7 +350,7 @@ class ButtonsController: public ConnectionTracker
 
     mToggleButton = Toolkit::PushButton::New();
     mToggleButton.SetTogglableButton( true );
-    mToggleButton.SetLabelText( "Unselected" );
+    mToggleButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "Unselected" ) );
     mToggleButton.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
     mToggleButton.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::HEIGHT );
     mToggleButton.StateChangedSignal().Connect( this, &ButtonsController::OnButtonSelected );
@@ -377,11 +377,11 @@ class ButtonsController: public ConnectionTracker
     {
       if( button.IsSelected() )
       {
-        pushButton.SetLabelText( "Selected" );
+        pushButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "Selected" ) );
       }
       else
       {
-        pushButton.SetLabelText( "Unselected" );
+        pushButton.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "Unselected" ) );
       }
     }
 
@@ -445,11 +445,11 @@ class ButtonsController: public ConnectionTracker
     {
       if( button.IsSelected() )
       {
-        button.SetLabelText("CheckBox1 is selected");
+        button.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "CheckBox1 is selected" ) );
       }
       else
       {
-        button.SetLabelText("CheckBox1 is unselected");
+        button.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "CheckBox1 is unselected" ) );
       }
     }
 
@@ -457,11 +457,11 @@ class ButtonsController: public ConnectionTracker
     {
       if( button.IsSelected() )
       {
-        button.SetLabelText("CheckBox2 is selected");
+        button.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "CheckBox2 is selected" ) );
       }
       else
       {
-        button.SetLabelText("CheckBox2 is unselected");
+        button.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "CheckBox2 is unselected" ) );
       }
     }
 
@@ -469,11 +469,11 @@ class ButtonsController: public ConnectionTracker
     {
       if( button.IsSelected() )
       {
-        button.SetLabelText("CheckBox3 is selected");
+        button.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "CheckBox3 is selected" ) );
       }
       else
       {
-        button.SetLabelText("CheckBox3 is unselected");
+        button.SetProperty( Toolkit::Button::Property::LABEL_PROPERTIES, Property::Value( "text", "CheckBox3 is unselected" ) );
       }
     }
 
