@@ -198,7 +198,7 @@ public:
   : mApplication( application ),
     mMode( MODE_NORMAL ),
     mOrientation( 0 ),
-    mCurrentLayout( SPIRAL_LAYOUT ),
+    mCurrentLayout( GRID_LAYOUT ),
     mDurationSeconds( 0.25f )
   {
     // Connect to the Application's Init signal
@@ -212,6 +212,7 @@ public:
   {
     Stage stage = Dali::Stage::GetCurrent();
     stage.KeyEventSignal().Connect(this, &ItemViewExample::OnKeyEvent);
+    stage.GetRootLayer().SetBehavior(Layer::LAYER_3D);
 
     Vector2 stageSize = Stage::GetCurrent().GetSize();
 
@@ -295,6 +296,7 @@ public:
     mItemView = ItemView::New(*this);
     mItemView.SetParentOrigin(ParentOrigin::CENTER);
     mItemView.SetAnchorPoint(AnchorPoint::CENTER);
+    mItemView.SetOvershootEnabled(true);
 
     // Display item view on the stage
     stage.Add( mItemView );
@@ -865,10 +867,48 @@ public: // From ItemFactory
     actor.SetPosition( INITIAL_OFFSCREEN_POSITION );
 
     // Add a border image child actor
+    // Case 1.
     ImageActor borderActor = ImageActor::New(mBorderImage);
+    borderActor.SetPosition( 0.f, 0.f, 0.1f );
+
+    // Case 2.
+    // ImageActor borderActor = CreateSolidColorActor(Color::WHITE); 
+    // borderActor.SetPosition( 0.f, 0.f, -0.1f );
+
+    // Case 3.
+    // ImageActor borderActor = CreateSolidColorActor(Color::WHITE); 
+    // borderActor.SetPosition( 0.f, 0.f, -0.1f );
+    // borderActor.SetOpacity(0.9f);
+
+    // Case 4.
+    // ImageActor borderActor = CreateSolidColorActor(Color::WHITE); 
+    // borderActor.SetPosition( 0.f, 0.f, 0.1f );
+
+    // Case 5.
+    // ImageActor borderActor = CreateSolidColorActor(Color::WHITE); 
+    // borderActor.SetPosition( 0.f, 0.f, 0.1f );
+    // borderActor.SetOpacity(0.9f);
+
+    // Case 6.
+    // ImageActor borderActor = CreateSolidColorActor(Vector4(1.0f, 1.0f, 1.0f, 0.9f)); 
+    // borderActor.SetPosition( 0.f, 0.f, -0.1f );
+
+    // Case 7.
+    // ImageActor borderActor = CreateSolidColorActor(Vector4(1.0f, 1.0f, 1.0f, 0.9f)); 
+    // borderActor.SetPosition( 0.f, 0.f, 0.1f );
+
+    // Case 8.
+    // ImageActor borderActor = CreateSolidColorActor(Vector4(1.0f, 1.0f, 1.0f, 0.9f)); 
+    // borderActor.SetPosition( 0.f, 0.f, -0.1f );
+    // borderActor.SetOpacity(0.9f);
+
+    // Case 9.
+    // ImageActor borderActor = CreateSolidColorActor(Vector4(1.0f, 1.0f, 1.0f, 0.9f)); 
+    // borderActor.SetPosition( 0.f, 0.f, 0.1f );
+    // borderActor.SetOpacity(0.9f);
+    
     borderActor.SetParentOrigin( ParentOrigin::CENTER );
     borderActor.SetAnchorPoint( AnchorPoint::CENTER );
-    borderActor.SetPosition( 0.f, 0.f, 1.f );
     borderActor.SetStyle( ImageActor::STYLE_NINE_PATCH );
     borderActor.SetNinePatchBorder( Vector4( ITEM_IMAGE_BORDER_LEFT, ITEM_IMAGE_BORDER_TOP, ITEM_IMAGE_BORDER_RIGHT, ITEM_IMAGE_BORDER_BOTTOM ) );
     borderActor.SetColorMode( USE_OWN_MULTIPLY_PARENT_COLOR ); // darken with parent image-actor
