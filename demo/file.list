@@ -10,6 +10,7 @@ demo_src_files = \
 # Add files to install here
 
 demo_image_files = \
+    $(demo_src_dir)/images/*.spi \
     $(demo_src_dir)/images/*.png \
     $(demo_src_dir)/images/*.jpg \
     $(demo_src_dir)/images/*.gif \

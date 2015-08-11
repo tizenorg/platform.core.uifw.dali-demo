@@ -15,10 +15,12 @@
  *
  */
 
+#include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
-using Dali::Toolkit::TextLabel;
+
+const char* const SPI_IMAGE(DALI_IMAGE_DIR "8-4-1-10_Clock5011.spi");
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -45,10 +47,11 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "hello-world-label" );
-    stage.Add( textLabel );
+		Image image = ResourceImage::New(SPI_IMAGE);
+		ImageActor actor = ImageActor::New(image);
+		actor.SetParentOrigin(ParentOrigin::CENTER);
+		actor.SetAnchorPoint(AnchorPoint::CENTER);
+		stage.Add(actor);
 
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
