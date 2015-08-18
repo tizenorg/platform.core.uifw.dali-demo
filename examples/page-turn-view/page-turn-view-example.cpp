@@ -17,10 +17,6 @@
 
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
-#include <dali-toolkit/devel-api/controls/page-turn-view/page-factory.h>
-#include <dali-toolkit/devel-api/controls/page-turn-view/page-turn-landscape-view.h>
-#include <dali-toolkit/devel-api/controls/page-turn-view/page-turn-portrait-view.h>
-#include <dali-toolkit/devel-api/controls/page-turn-view/page-turn-view.h>
 
 #include <assert.h>
 #include <cstdlib>
@@ -35,6 +31,9 @@ using namespace Dali::Toolkit;
 // LOCAL STUFF
 namespace
 {
+const char*  const CHANGE_IMAGE_ICON(DALI_IMAGE_DIR "icon-change.png");
+const char * const CHANGE_IMAGE_ICON_SELECTED( DALI_IMAGE_DIR "icon-change-selected.png" );
+
 // The content amount of one page between portrait and landscape view are different
 // set a ratio to modify the current page number when the rotation is changed
 const float PAGE_NUMBER_CORRESPONDING_RATIO(1.25f);
@@ -76,7 +75,7 @@ class PortraitPageFactory : public PageFactory
    */
   virtual unsigned int GetNumberOfPages()
   {
-    return 5*NUMBER_OF_PORTRAIT_IMAGE + 1;
+    return 10*NUMBER_OF_PORTRAIT_IMAGE + 1;
   }
   /**
    * Create an image actor to represent a page.
@@ -108,7 +107,7 @@ class LandscapePageFactory : public PageFactory
    */
   virtual unsigned int GetNumberOfPages()
   {
-    return 5*NUMBER_OF_LANDSCAPE_IMAGE / 2 + 1;
+    return 10*NUMBER_OF_LANDSCAPE_IMAGE / 2 + 1;
   }
   /**
    * Create an image actor to represent a page.
@@ -160,6 +159,11 @@ private:
    * param [in] orientation The current screen orientation
    */
   void OnOrientationAnimationStarted( Orientation orientation );
+
+  /**
+   * This method gets called when the button is clicked, switch between portrait and landscape views
+   */
+  bool OnButtonClicked(Toolkit::Button button);
 
   /**
    * Main key event handler
@@ -244,25 +248,61 @@ void PageTurnController::OnInit( Application& app )
   winHandle.AddAvailableOrientation( Dali::Window::PORTRAIT_INVERSE  );
   winHandle.AddAvailableOrientation( Dali::Window::LANDSCAPE_INVERSE );
 
+  Toolkit::PushButton button = Toolkit::PushButton::New();
+  button.SetButtonImage( ResourceImage::New( CHANGE_IMAGE_ICON ) );
+  button.SetSelectedImage( ResourceImage::New( CHANGE_IMAGE_ICON_SELECTED ) );
+  button.SetAnchorPoint( AnchorPoint::TOP_RIGHT );
+  button.SetParentOrigin( ParentOrigin::TOP_RIGHT );
+  button.SetLeaveRequired( true );
+  button.SetSize(60.f, 60.f);
+  button.SetDrawMode(DrawMode::OVERLAY_2D);
+  button.ClickedSignal().Connect( this, &PageTurnController::OnButtonClicked );
+  stage.Add( button );
+
   // view will response to orientation change to display portrait or landscape views
   //app.GetWindow().GetOrientation().ChangedSignal().Connect( this, &PageTurnController::OnOrientationAnimationStarted );
 
-  mPageTurnPortraitView = PageTurnPortraitView::New( mPortraitPageFactory, stageSize );
+  mPageTurnPortraitView = PageTurnPortraitView::New( mPortraitPageFactory, stageSize*0.9 );
+  mPageTurnPortraitView.SetParentOrigin( ParentOrigin::CENTER_LEFT );
+  mPageTurnPortraitView.SetAnchorPoint( AnchorPoint::CENTER_LEFT );
   mPageTurnPortraitView.SetSpineShadowParameter( Vector2(70.f, 30.f) );
   mPageTurnPortraitView.PageTurnStartedSignal().Connect( this, &PageTurnController::OnPageStartedTurn );
   mPageTurnPortraitView.PageTurnFinishedSignal().Connect( this, &PageTurnController::OnPageFinishedTurn );
   mPageTurnPortraitView.PagePanStartedSignal().Connect( this, &PageTurnController::OnPageStartedPan );
   mPageTurnPortraitView.PagePanFinishedSignal().Connect( this, &PageTurnController::OnPageFinishedPan );
-  mPageTurnPortraitView.SetPositionInheritanceMode( USE_PARENT_POSITION );
 
-  mPageTurnLandscapeView = PageTurnLandscapeView::New( mLandscapePageFactory, Vector2(stageSize.y*0.5f, stageSize.x) );
+  mPageTurnLandscapeView = PageTurnLandscapeView::New( mLandscapePageFactory, Vector2(stageSize.y*0.45f, stageSize.x*0.9) );
+  mPageTurnLandscapeView.SetParentOrigin( ParentOrigin::CENTER );
+  mPageTurnLandscapeView.SetAnchorPoint( AnchorPoint::CENTER );
   mPageTurnLandscapeView.PageTurnStartedSignal().Connect( this, &PageTurnController::OnPageStartedTurn );
   mPageTurnLandscapeView.PageTurnFinishedSignal().Connect( this, &PageTurnController::OnPageFinishedTurn );
   mPageTurnLandscapeView.PagePanStartedSignal().Connect( this, &PageTurnController::OnPageStartedPan );
   mPageTurnLandscapeView.PagePanFinishedSignal().Connect( this, &PageTurnController::OnPageFinishedPan );
-  mPageTurnLandscapeView.SetPositionInheritanceMode( USE_PARENT_POSITION );
+  mPageTurnLandscapeView.SetOrientation(Degree(90.f), Vector3::ZAXIS);
 
   mView.Add(mPageTurnPortraitView);
+  mIsPortrait = true;
+}
+
+bool PageTurnController::OnButtonClicked(Toolkit::Button button)
+{
+  if( mIsPortrait )
+  {
+    mView.Remove( mPageTurnPortraitView );
+    mView.Add( mPageTurnLandscapeView );
+    int currentPage = ceil( static_cast<float>(mPageTurnPortraitView.GetCurrentPage()) / PAGE_NUMBER_CORRESPONDING_RATIO );
+    mPageTurnLandscapeView.GoToPage( currentPage );
+    mIsPortrait = false;
+  }
+  else
+  {
+    mView.Remove( mPageTurnLandscapeView );
+    mView.Add( mPageTurnPortraitView );
+    int currentPage = floor( static_cast<float>(mPageTurnLandscapeView.GetCurrentPage()) * PAGE_NUMBER_CORRESPONDING_RATIO );
+    mPageTurnPortraitView.GoToPage( currentPage );
+    mIsPortrait = true;
+  }
+  return true;
 }
 
 void PageTurnController::OnOrientationAnimationStarted( Orientation orientation )
