@@ -94,6 +94,7 @@ extern "C"
 #define DALI_DEMO_STR_TITLE_MESH_SORTING              "Mesh Sorting"
 #define DALI_DEMO_STR_TITLE_TEXTURED_MESH             "Mesh Texture"
 #define DALI_DEMO_STR_TITLE_LINE_MESH                 "Mesh Line"
+#define DALI_DEMO_STR_TITLE_SLIDER                    "Sliders"
 
 #endif
 
