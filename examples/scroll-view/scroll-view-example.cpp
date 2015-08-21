@@ -22,6 +22,8 @@
 #include "shared/view.h"
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali/devel-api/images/atlas.h>
+#include <stdio.h>
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -125,6 +127,145 @@ const float SPIN_DURATION = 1.0f;                                           ///<
 const float EFFECT_SNAP_DURATION(0.66f);                                    ///< Scroll Snap Duration for Effects
 const float EFFECT_FLICK_DURATION(0.5f);                                    ///< Scroll Flick Duration for Effects
 
+
+class AtlasGridManager
+{
+public:
+
+  AtlasGridManager()
+  :mFirstFreeCell(0),
+   mCellSize(Dali::Vector2::ZERO),
+   mRows(0),
+   mColumns(0),
+   mCellCount(0)
+  {}
+
+  AtlasGridManager( Dali::Vector2 cellSize, unsigned int rows, unsigned int columns, Pixel::Format format )
+  :mFirstFreeCell(0),
+   mCellSize(cellSize),
+   mRows(rows),
+   mColumns(columns),
+   mCellCount( rows * columns )
+  {
+     //Initialize free list
+     mCells.resize( mCellCount );
+     for( unsigned int i(0); i<mCellCount; ++i )
+     {
+        mCells[i] = i+1;
+     }
+
+     //Create the atlas
+     mAtlas = Atlas::New( (unsigned int)cellSize.x * columns, (unsigned int)cellSize.y * rows, format );
+  }
+
+  ~AtlasGridManager()
+  {}
+
+  /**
+   * @brief Add a new BufferImage to the atlas
+   *
+   * @param[in] image The image to be added
+   * @param[out] The region in the atlas where the image has been added
+   *
+   * @return true if image correctly added to the atlas, false otherwise
+   */
+  bool AddImage( BufferImage image, Dali::Rect<int>& region)
+  {
+    if( AllocateNewImage( region ) )
+    {
+      return mAtlas.Upload( image, region.x, region.y );
+    }
+    else
+    {
+      //Not enough space in the atlas
+      return false;
+    }
+  }
+
+  /**
+   * @brief Add a new ResourceImage to the atlas
+   *
+   * @param[in] imageUrl url of the image to be added
+   * @param[out] The region in the atlas where the image has been added
+   *
+   * @return true if image correctly added to the atlas, false otherwise
+   */
+  bool AddImage( const char* imageUrl, Dali::Rect<int>& region)
+  {
+    if( AllocateNewImage( region ) )
+    {
+      return mAtlas.Upload( imageUrl, region.x, region.y );
+    }
+    else
+    {
+      //Not enough room in the atlas
+      return false;
+    }
+  }
+
+  /**
+   * @brief Remove image at location specified by region
+   *
+   * @param[in] region The region in the atlas where the image resides
+   */
+  void RemoveImage( Dali::Rect<int> region )
+  {
+    //Get cell from region
+    unsigned int column = region.x / mCellSize.x;
+    unsigned int row = region.y / mCellSize.y;
+
+    unsigned int cell = row * mColumns + column;
+    mCells[cell] = mFirstFreeCell;
+    mFirstFreeCell = cell;
+  }
+
+  /**
+   * Get the Atlas
+   */
+  Dali::Atlas GetAtlas()
+  {
+     return mAtlas;
+  }
+
+private:
+
+  /**
+   * Helper function to allocate an image in the atlas
+   */
+  bool AllocateNewImage( Dali::Rect<int>& region )
+  {
+    if( mFirstFreeCell < mCellCount )
+    {
+      unsigned int allocatedCell = mFirstFreeCell;
+      unsigned int row = allocatedCell / mColumns;
+      unsigned int column = allocatedCell % mColumns;
+
+      //Upload the image to the atlas
+      region = Dali::Rect<int>(column * mCellSize.x,row * mCellSize.y,mCellSize.x, mCellSize.y);
+
+      //Update first free cell
+      mFirstFreeCell = mCells[allocatedCell];
+      return true;
+    }
+    else
+    {
+      //Atlas is full
+      return false;
+    }
+  }
+
+  Dali::Atlas mAtlas;
+
+  //Free list of cells
+  std::vector<unsigned int> mCells;
+  unsigned int mFirstFreeCell;
+
+  Dali::Vector2 mCellSize;
+  unsigned int mRows;
+  unsigned int mColumns;
+  unsigned int mCellCount;
+};
+
 } // unnamed namespace
 
 /**
@@ -142,7 +283,8 @@ public:
   : mApplication( application ),
     mView(),
     mScrolling(false),
-    mEffectMode(PageCarouselEffect)
+    mEffectMode(PageCarouselEffect),
+    mAtlasManager(0)
   {
     // Connect to the Application's Init and orientation changed signal
     mApplication.InitSignal().Connect(this, &ExampleController::OnInit);
@@ -150,7 +292,8 @@ public:
 
   ~ExampleController()
   {
-    // Nothing to do here; everything gets deleted automatically
+    if( mAtlasManager )
+      delete mAtlasManager;
   }
 
   /**
@@ -160,6 +303,10 @@ public:
   {
     Stage stage = Dali::Stage::GetCurrent();
     stage.KeyEventSignal().Connect(this, &ExampleController::OnKeyEvent);
+
+    Vector2 stageSize = stage.GetSize();
+    unsigned int columns = round(IMAGE_ROWS * (stageSize.x / stage.GetDpi().x) / (stageSize.y / stage.GetDpi().y)) * PAGE_COLUMNS;
+    mAtlasManager = new AtlasGridManager( Vector2(IMAGE_THUMBNAIL_WIDTH,IMAGE_THUMBNAIL_HEIGHT), IMAGE_ROWS, columns , Pixel::RGB888 );
 
     // Hide the indicator bar
     mApplication.GetWindow().ShowIndicator(Dali::Window::INVISIBLE);
@@ -194,6 +341,10 @@ public:
     Animation animation = Animation::New(1.0f);
     animation.AnimateTo(Property(mContentLayer, Actor::Property::POSITION), Vector3::ZERO );
     animation.Play();
+
+
+
+
   }
 
 private:
@@ -286,7 +437,7 @@ private:
     {
       for(int column = 0;column<imageColumns;column++)
       {
-        ImageView image = CreateImage( GetNextImagePath(), imageSize.x, imageSize.y );
+        ImageActor image = CreateImage( GetNextImagePath(), imageSize.x, imageSize.y );
 
         image.SetParentOrigin( ParentOrigin::CENTER );
         image.SetAnchorPoint( AnchorPoint::CENTER );
@@ -458,11 +609,12 @@ private:
    * @param[in] width the width of the image in texels
    * @param[in] height the height of the image in texels.
    */
-  ImageView CreateImage( const std::string& filename, unsigned int width = IMAGE_THUMBNAIL_WIDTH, unsigned int height = IMAGE_THUMBNAIL_HEIGHT )
+  ImageActor CreateImage( const std::string& filename, unsigned int width = IMAGE_THUMBNAIL_WIDTH, unsigned int height = IMAGE_THUMBNAIL_HEIGHT )
   {
-    Image img = ResourceImage::New(filename, ImageDimensions( width, height ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+    Dali::Rect<int> region;
+    mAtlasManager->AddImage( filename.c_str(), region );
 
-    ImageView actor = ImageView::New(img);
+    ImageActor actor = ImageActor::New(mAtlasManager->GetAtlas(), region );
     actor.SetName( filename );
     actor.SetParentOrigin(ParentOrigin::CENTER);
     actor.SetAnchorPoint(AnchorPoint::CENTER);
@@ -567,6 +719,8 @@ private:
   ScrollViewEffect mScrollViewEffect;                   ///< ScrollView Effect instance.
   std::vector< Actor > mPages;                          ///< Keeps track of all the pages for applying effects.
 
+
+
   /**
    * Enumeration of different effects this scrollview can operate under.
    */
@@ -585,6 +739,8 @@ private:
   std::string mEffectIcon[Total];                       ///< Icons for the effect button
   std::string mEffectIconSelected[Total];               ///< Icons for the effect button when its selected
   Toolkit::PushButton mEffectChangeButton;              ///< Effect Change Button
+
+  AtlasGridManager*  mAtlasManager;
 };
 
 int main(int argc, char **argv)
