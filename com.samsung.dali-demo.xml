@@ -115,4 +115,7 @@
 	<ui-application appid="gradients.example" exec="/usr/apps/com.samsung.dali-demo/bin/gradients.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Color Gradient</label>
 	</ui-application>
+	<ui-application appid="blending.example" exec="/usr/apps/com.samsung.dali-demo/bin/blending.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Blending</label>
+	</ui-application>
 </manifest>
