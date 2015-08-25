@@ -44,10 +44,10 @@ const char* EFFECT_MODE_NAME[] = {
 };
 
 const char * const IMAGE_PATHS[] = {
-    DALI_IMAGE_DIR "gallery-medium-1.jpg",
-    DALI_IMAGE_DIR "gallery-medium-2.jpg",
-    DALI_IMAGE_DIR "gallery-medium-3.jpg",
-    DALI_IMAGE_DIR "gallery-medium-4.jpg",
+    DALI_IMAGE_DIR "button-down.9.png",
+    DALI_IMAGE_DIR "button-down.9.png",
+    DALI_IMAGE_DIR "checkerbox.9.png",
+    DALI_IMAGE_DIR "circle.9.png",
     DALI_IMAGE_DIR "gallery-medium-5.jpg",
     DALI_IMAGE_DIR "gallery-medium-6.jpg",
     DALI_IMAGE_DIR "gallery-medium-7.jpg",
