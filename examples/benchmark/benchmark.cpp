@@ -31,6 +31,7 @@ namespace
 const char* IMAGE_PATH[] = {
                             DALI_IMAGE_DIR "gallery-medium-1.jpg",
                             DALI_IMAGE_DIR "gallery-medium-2.jpg",
+                            /*
                             DALI_IMAGE_DIR "gallery-medium-3.jpg",
                             DALI_IMAGE_DIR "gallery-medium-4.jpg",
                             DALI_IMAGE_DIR "gallery-medium-5.jpg",
@@ -82,6 +83,7 @@ const char* IMAGE_PATH[] = {
                             DALI_IMAGE_DIR "gallery-medium-51.jpg",
                             DALI_IMAGE_DIR "gallery-medium-52.jpg",
                             DALI_IMAGE_DIR "gallery-medium-53.jpg",
+                            */
 };
 
 const char* NINEPATCH_IMAGE_PATH[] = {
@@ -339,8 +341,7 @@ public:
 
     for( size_t i(0); i<actorCount; ++i )
     {
-      Image image = ResourceImage::New(ImagePath(i));
-      mImageView[i] = ImageView::New(image);
+      mImageView[i] = ImageView::New(ImagePath(i));
       mImageView[i].SetSize(Vector3(0.0f,0.0f,0.0f));
       mImageView[i].SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
       stage.Add(mImageView[i]);
