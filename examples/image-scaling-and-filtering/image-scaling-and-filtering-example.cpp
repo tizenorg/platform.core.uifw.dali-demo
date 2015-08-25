@@ -50,7 +50,8 @@ const char* IMAGE_PATHS[] =
 {
   // Worst case for aliasing in downscaling, 2k x 2k 1 bit per pixel dithered
   // black and white image:
-  DALI_IMAGE_DIR "gallery-large-14.wbmp",
+  DALI_IMAGE_DIR "heartsframe.9.png",
+  DALI_IMAGE_DIR "button-down.9.png",
   // Variety of sizes, shapes and formats:
   DALI_IMAGE_DIR "animation-list.png",
   DALI_IMAGE_DIR "layer1.png",
@@ -239,21 +240,20 @@ public:
     mPanGestureDetector.DetectedSignal().Connect( this, &ImageScalingAndFilteringController::OnPan );
 
     // Initialize the actor
-    mImageActor = ImageActor::New();
+    mImageView = Toolkit::ImageView::New();
 
     // Reposition the actor
-    mImageActor.SetParentOrigin( ParentOrigin::CENTER );
-    mImageActor.SetAnchorPoint( AnchorPoint::CENTER );
-    mImageActor.SetSortModifier(5.f);
+    mImageView.SetParentOrigin( ParentOrigin::CENTER );
+    mImageView.SetAnchorPoint( AnchorPoint::CENTER );
 
     // Display the actor on the stage
-    stage.Add( mImageActor );
+    stage.Add( mImageView );
 
-    mImageActor.SetSize( stage.GetSize() * mImageStageScale );
+    mImageView.SetSize( stage.GetSize() * mImageStageScale );
 
     // Setup the pinch detector for scaling the desired image load dimensions:
     mPinchDetector = PinchGestureDetector::New();
-    mPinchDetector.Attach( mImageActor );
+    mPinchDetector.Attach( mImageView );
     mPinchDetector.DetectedSignal().Connect( this, &ImageScalingAndFilteringController::OnPinch );
 
     // Tie-in input event handlers:
@@ -517,13 +517,6 @@ public:
     }
   }
 
-  void OnImageLoaded( ResourceImage image )
-  {
-      DALI_ASSERT_DEBUG( image == mNextImage );
-      mImageActor.SetImage( image );
-      mImageActor.SetSize( Size( image.GetWidth(), image.GetHeight() ) );
-  }
-
   bool OnControlTouched( Actor actor, const TouchEvent& event )
   {
     if(event.GetPointCount() > 0)
@@ -674,13 +667,13 @@ private:
     const ImageDimensions imageSizeInt = ImageDimensions::FromFloatArray( &imageSize.x );
 
     ResourceImage image = ResourceImage::New( path, imageSizeInt, mFittingMode, mSamplingMode );
-    image.LoadingFinishedSignal().Connect( this, &ImageScalingAndFilteringController::OnImageLoaded );
-
+    mImageView.SetImage( image );
+    mImageView.SetSize( imageSize );
     mNextImage = image;
 
-    mDesiredBox.SetSize( stage.GetSize() * mImageStageScale );
-    mHeightBox.SetSize( stage.GetSize().width,  (stage.GetSize() * mImageStageScale).height );
-    mWidthBox.SetSize( (stage.GetSize() * mImageStageScale).width, stage.GetSize().height );
+    mDesiredBox.SetSize( imageSize );
+    mHeightBox.SetSize( stage.GetSize().width,  imageSize.height );
+    mWidthBox.SetSize( imageSize.width, stage.GetSize().height );
   }
 
 private:
@@ -695,7 +688,7 @@ private:
   float mLastPinchScale;
   Toolkit::PushButton  mGrabCorner;
   PanGestureDetector mPanGestureDetector;
-  ImageActor mImageActor;
+  Toolkit::ImageView mImageView;
   ResourceImage mNextImage; //< Currently-loading image
   Vector2 mImageStageScale;
   int mCurrentPath;
