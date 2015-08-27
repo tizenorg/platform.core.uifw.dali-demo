@@ -107,7 +107,7 @@ public:
     mPopup.Add( mField );
     mPopup.OutsideTouchedSignal().Connect( this, &TextFieldExample::OnPopupOutsideTouched );
     stage.Add( mPopup );
-    mPopup.SetDisplayState( Popup::SHOWN );
+    mPopup.Show();
 
     return true;
   }
@@ -154,7 +154,7 @@ public:
     // Hide & discard the pop-up
     if( mPopup )
     {
-      mPopup.SetDisplayState( Popup::HIDDEN );
+      mPopup.Hide();
     }
     mField.Reset();
   }
