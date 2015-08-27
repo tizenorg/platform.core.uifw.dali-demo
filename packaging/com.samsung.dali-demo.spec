@@ -21,7 +21,9 @@ BuildRequires:  pkgconfig(capi-media-player)
 BuildRequires:  dali-toolkit-devel
 BuildRequires:  dali-adaptor-devel
 BuildRequires:  pkgconfig(dlog)
+BuildRequires:  pkgconfig(x11)
 BuildRequires:  gettext-tools
+BuildRequires:  libXi-devel
 
 %description
 The OpenGLES Canvas Core Demo is a collection of examples and demonstrations
@@ -51,6 +53,8 @@ LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -fPIC"
 %ifarch %{arm}
 CXXFLAGS+=" -D_ARCH_ARM_"
 %endif
+#CXXFLAGS+=" `pkg-config --cflags --libs x11`"
+
 
 cd %{_builddir}/%{name}-%{version}/build/tizen && cmake -DDALI_APP_DIR=%{dali_app_ro_dir} -DLOCALE_DIR=%{locale_dir} -DLOCAL_STYLE_DIR=%{local_style_dir} .
 
