@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,62 +15,333 @@
  *
  */
 
+#define X11_DIRECT
+
 // EXTERNAL INCLUDES
+#ifdef X11_DIRECT
+#include <X11/Xresource.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xos.h>
+#include <X11/extensions/XInput2.h>
+#include <X11/extensions/XI2.h>
+#include <X11/XF86keysym.h>
+#include <sys/time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <vector>
+#include <sys/utsname.h>
+#include <algorithm>
+#else
 #include <dali/dali.h>
-
-// INTERNAL INCLUDES
-#include "dali-table-view.h"
-#include "shared/dali-demo-strings.h"
-
+#include <dali-toolkit/dali-toolkit.h>
 using namespace Dali;
+using namespace Dali::Toolkit;
+#endif
 
-int main(int argc, char **argv)
+#include <iostream>
+
+using namespace std;
+
+#ifdef X11_DIRECT
+static unsigned int GetCurrentMilliSeconds( void )
 {
-  // Configure gettext for internalization
-  bindtextdomain(DALI_DEMO_DOMAIN_LOCAL, DALI_LOCALE_DIR);
-  textdomain(DALI_DEMO_DOMAIN_LOCAL);
-  setlocale(LC_ALL, DALI_LANG);
+  struct timeval tv;
+  struct timespec tp;
+  static clockid_t clockid;
+  if( !clockid )
+  {
+#ifdef CLOCK_MONOTONIC_COARSE
+    if( clock_getres(CLOCK_MONOTONIC_COARSE, &tp ) == 0 &&
+      ( tp.tv_nsec / 1000) <= 1000 && clock_gettime( CLOCK_MONOTONIC_COARSE, &tp ) == 0)
+    {
+      clockid = CLOCK_MONOTONIC_COARSE;
+    }
+    else
+#endif
+    if( clock_gettime( CLOCK_MONOTONIC, &tp ) == 0 )
+    {
+      clockid = CLOCK_MONOTONIC;
+    }
+    else
+    {
+      clockid = ~0L;
+    }
+  }
+  if( clockid != ~0L && clock_gettime( clockid, &tp ) == 0 )
+  {
+    return ( tp.tv_sec * 1000 ) + ( tp.tv_nsec / 1000000L );
+  }
+  gettimeofday(&tv, NULL);
+  return ( tv.tv_sec * 1000 ) + ( tv.tv_usec / 1000 );
+}
 
+void GetTouchDevices( Display* display, std::vector<int>& touchDevices )
+{
+  int numberOfDevices = 0;
+  XIDeviceInfo *info = XIQueryDevice( display, XIAllDevices, &numberOfDevices );
+  XIDeviceInfo *device = info;
+
+  for( int i = 0; i < numberOfDevices; ++i, ++device )
+  {
+    switch( device->use )
+    {
+      case XIMasterPointer:
+      {
+        std::cout << "xtest: Touch Input Device: Using XIMasterPointer Device: " << device->name << ", id: " << device->deviceid << std::endl;
+        touchDevices.push_back( device->deviceid );
+        break;
+      }
+      case XISlavePointer:
+      {
+        // Check to see whether we are already hooked up to this device through a master
+        // device that we may have added previously
+        std::vector<int>::iterator iterator = std::find( touchDevices.begin(), touchDevices.end(), device->attachment );
+        // Add if we have not
+        if( iterator == touchDevices.end() )
+        {
+          std::cout << "xtest: Touch Input Device: Using XISlavePointer Device: " << device->name << ", id: " << device->deviceid << std::endl;
+          touchDevices.push_back( device->deviceid );
+        }
+        break;
+      }
+      case XIFloatingSlave:
+      {
+        // Slaves can be any type, we are only interested in XIButtonClass types
+        if( ( *( device->classes ) )->type == XIButtonClass )
+        {
+          // Check to see whether we are already hooked up to this device through a master
+          // device that we may have added previously
+          std::vector<int>::iterator iterator = std::find( touchDevices.begin(), touchDevices.end(), device->attachment );
+          // Add if we have not
+          if( iterator == touchDevices.end() )
+          {
+            std::cout << "xtest: Touch Input Device: Using XIFloatingSlave Device: " << device->name << ", id: " << device->deviceid << std::endl;
+            touchDevices.push_back( device->deviceid );
+          }
+        }
+        break;
+      }
+      default:
+      {
+        // Do Nothing
+        break;
+      }
+    }
+  }
+
+  XIFreeDeviceInfo( info );
+}
+
+void ProcessEventX2Event( XGenericEventCookie* cookie )
+{
+  XIDeviceEvent* deviceEvent = static_cast< XIDeviceEvent* >( cookie->data );
+
+  bool requiresProcessing = true; //PreProcessEvent( deviceEvent );//TODO: for now, force
+  if( !requiresProcessing )
+  {
+    return;
+  }
+  Time time( deviceEvent->time ); // X is using uint32 for time field ( see XI2proto.h )
+
+  switch( cookie->evtype )
+  {
+    case XI_TouchUpdate:
+    case XI_Motion:
+    {
+      unsigned int msNow = GetCurrentMilliSeconds();
+      int msDiff = msNow - time;
+      std::cout << "xtest:ProcessEventX2: XI_Motion: " << deviceEvent->event_x << "," << deviceEvent->event_y << "," << time << "," << msDiff << std::endl;
+      break;
+    }
+    case XI_TouchBegin:
+    case XI_ButtonPress:
+    {
+      std::cout << "xtest:ProcessEventX2: XI_TouchBegin" << std::endl;
+      break;
+    }
+    case XI_TouchEnd:
+    case XI_ButtonRelease:
+    {
+      std::cout << "xtest:ProcessEventX2: XI_TouchEnd" << std::endl;
+      break;
+    }
+    case XI_FocusIn:
+    {
+      std::cout << "xtest:ProcessEventX2: XI_FocusIn" << std::endl;
+      break;
+    }
+    case XI_FocusOut:
+    {
+      std::cout << "xtest:ProcessEventX2: XI_FocusOut" << std::endl;
+      break;
+    }
+    case XI_KeyPress:
+    {
+      std::cout << "xtest:ProcessEventX2: XI_KeyPress" << std::endl;
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+}
+
+#else
+
+class HelloWorldController : public ConnectionTracker
+{
+public:
+  HelloWorldController( Application& application ): mApplication( application )
+  {
+    mApplication.InitSignal().Connect( this, &HelloWorldController::Create );
+  }
+
+  void Create( Application& application )
+  {
+    std::cout << "HelloWorldController::Create" << std::endl;
+    Stage::GetCurrent().GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
+    Stage::GetCurrent().KeyEventSignal().Connect(this, &HelloWorldController::OnKeyEvent);
+
+    // Get a handle to the stage
+    Stage stage = Stage::GetCurrent();
+    stage.SetBackgroundColor( Color::WHITE );
+
+    TextLabel textLabel = TextLabel::New( "Hello World" );
+    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    textLabel.SetName( "hello-world-label" );
+    stage.Add( textLabel );
+  }
+
+  void OnKeyEvent(const KeyEvent& event)
+  {
+    if(event.state == KeyEvent::Down)
+    {
+      if( IsKey( event, DALI_KEY_ESCAPE) || IsKey( event, DALI_KEY_BACK ) )
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+  bool OnTouch( Actor actor, const TouchEvent& touch )
+  {
+    return true;
+  }
+
+private:
+  Application&  mApplication;
+};
+#endif
+
+int main( int argc, char **argv )
+{
+#ifdef X11_DIRECT
+  Display* display = XOpenDisplay( NULL );
+  if( display == NULL )
+  {
+    fprintf( stderr, "Cannot open display\n" );
+    exit( 1 );
+  }
+
+  int screen = DefaultScreen( display );
+  XID window = XCreateSimpleWindow( display, RootWindow( display, screen ), 0, 0, 720, 1280, 0, BlackPixel( display, screen ), WhitePixel( display, screen ) );
+
+  // Select normal input.
+  XSelectInput( display, window, ExposureMask | KeyPressMask );
+
+  // We need XI (X2) to get touch events.
+  int extensionId = 0, extensionEvent = 0, extensionError = 0;
+  if( !XQueryExtension( display, "XInputExtension", &extensionId, &extensionEvent, &extensionError ) )
+  {
+    fprintf( stderr, "XInputExtension not supported\n" );
+  }
+
+  std::vector<int> touchDevices;
+  GetTouchDevices( display, touchDevices );
+
+  unsigned char mask[1] = { 0 };
+  XISetMask( mask, XI_ButtonPress );
+  XISetMask( mask, XI_ButtonRelease );
+  XISetMask( mask, XI_Motion );
+  int numberOfDevices = touchDevices.size();
+  XIEventMask *eventMasks = new XIEventMask[numberOfDevices];
+  XIEventMask *eventMasksPointer = eventMasks;
+  for( std::vector<int>::iterator iterator = touchDevices.begin(); iterator != touchDevices.end(); ++iterator, ++eventMasksPointer )
+  {
+    eventMasksPointer->deviceid = *iterator;
+    eventMasksPointer->mask_len = sizeof( mask );
+    eventMasksPointer->mask = mask;
+  }
+  XISelectEvents( display, window, eventMasks, numberOfDevices );
+  XFlush( display );
+
+  // Continue window setup.
+  XMapWindow( display, window );
+
+  Atom WM_DELETE_WINDOW = XInternAtom( display, "WM_DELETE_WINDOW", False );
+  XSetWMProtocols( display, window, &WM_DELETE_WINDOW, 1 );
+
+  std::cout << "xtest:Running  Press back-button to exit" << std::endl;
+
+  // Main loop.
+  bool running = true;
+  XEvent event;
+  while( running )
+  {
+    // Get an X event.
+    XNextEvent( display, &event );
+
+    // Handle generic X events.
+    if( event.type == KeyPress )
+    {
+      char buf[128] = { 0 };
+      KeySym keySym;
+      XLookupString( &event.xkey, buf, sizeof( buf ), &keySym, NULL );
+      std::cout << "xtest:KeyPress: " << keySym << std::endl;
+      // Exit on "Back" button.
+      if( keySym == XF86XK_Back )
+      {
+        running = false;
+      }
+    }
+    //else if( event.type == MotionNotify )
+    //{
+      //unsigned int curtime = GetCurrentMilliSeconds();
+      //XMotionEvent * evt = (XMotionEvent*)&event;
+      //cout << "x11 direct x:" << evt->x << " y:" << evt->y 
+        //<< " event-time:" << evt->time << " current-time:" << curtime
+        //<< " time-diff:" << curtime - evt->time << endl;
+    //}
+    else
+    {
+      // Handle XI2 events.
+      // Cookie data pointer is undefined until XGetEventData is called.
+      XGenericEventCookie* cookie = &event.xcookie;
+
+      if( XGetEventData( display, cookie ) )
+      {
+        if( cookie->extension == extensionId )
+        {
+          ProcessEventX2Event( cookie );
+        }
+        else
+        {
+          std::cout << "xtest:Not an XI2 event: " << event.type << std::endl;
+        }
+        XFreeEventData( display, cookie );
+      }
+    }
+  }
+
+  // Clean up.
+  XDestroyWindow( display, window );
+  XCloseDisplay( display );
+#else
   Application app = Application::New(&argc, &argv, DALI_DEMO_THEME_PATH);
-
-  // Create the demo launcher
-  DaliTableView demo(app);
-
-  demo.AddExample(Example("bubble-effect.example", DALI_DEMO_STR_TITLE_BUBBLES));
-  demo.AddExample(Example("blocks.example", DALI_DEMO_STR_TITLE_BLOCKS));
-  demo.AddExample(Example("cluster.example", DALI_DEMO_STR_TITLE_CLUSTER));
-  demo.AddExample(Example("cube-transition-effect.example", DALI_DEMO_STR_TITLE_CUBE_TRANSITION));
-  demo.AddExample(Example("dissolve-effect.example", DALI_DEMO_STR_TITLE_DISSOLVE_TRANSITION));
-  demo.AddExample(Example("item-view.example", DALI_DEMO_STR_TITLE_ITEM_VIEW));
-  demo.AddExample(Example("magnifier.example", DALI_DEMO_STR_TITLE_MAGNIFIER));
-  demo.AddExample(Example("model3d-view.example", DALI_DEMO_STR_TITLE_MODEL_3D_VIEWER));
-  demo.AddExample(Example("motion-blur.example", DALI_DEMO_STR_TITLE_MOTION_BLUR));
-  demo.AddExample(Example("motion-stretch.example", DALI_DEMO_STR_TITLE_MOTION_STRETCH));
-  demo.AddExample(Example("page-turn-view.example", DALI_DEMO_STR_TITLE_PAGE_TURN_VIEW));
-  demo.AddExample(Example("radial-menu.example", DALI_DEMO_STR_TITLE_RADIAL_MENU));
-  demo.AddExample(Example("refraction-effect.example", DALI_DEMO_STR_TITLE_REFRACTION));
-  demo.AddExample(Example("scroll-view.example", DALI_DEMO_STR_TITLE_SCROLL_VIEW));
-  demo.AddExample(Example("shadow-bone-lighting.example", DALI_DEMO_STR_TITLE_LIGHTS_AND_SHADOWS));
-  demo.AddExample(Example("builder.example", DALI_DEMO_STR_TITLE_SCRIPT_BASED_UI));
-  demo.AddExample(Example("image-scaling-and-filtering.example", DALI_DEMO_STR_TITLE_IMAGE_FITTING_SAMPLING));
-  demo.AddExample(Example("image-scaling-irregular-grid.example", DALI_DEMO_STR_TITLE_IMAGE_SCALING));
-  demo.AddExample(Example("text-field.example", DALI_DEMO_STR_TITLE_TEXT_FIELD));
-  demo.AddExample(Example("text-label.example", DALI_DEMO_STR_TITLE_TEXT_LABEL));
-  demo.AddExample(Example("text-label-multi-language.example", DALI_DEMO_STR_TITLE_TEXT_LABEL_MULTI_LANGUAGE));
-  demo.AddExample(Example("text-label-emojis.example", DALI_DEMO_STR_TITLE_EMOJI_TEXT));
-  demo.AddExample(Example("size-negotiation.example", DALI_DEMO_STR_TITLE_NEGOTIATE_SIZE));
-  demo.AddExample(Example("popup.example", DALI_DEMO_STR_TITLE_POPUP));
-  demo.AddExample(Example("buttons.example", DALI_DEMO_STR_TITLE_BUTTONS));
-  demo.AddExample(Example("logging.example", DALI_DEMO_STR_TITLE_LOGGING));
-  demo.AddExample(Example("mesh-morph.example", DALI_DEMO_STR_TITLE_MESH_MORPH));
-  demo.AddExample(Example("mesh-sorting.example", DALI_DEMO_STR_TITLE_MESH_SORTING));
-  demo.AddExample(Example("textured-mesh.example", DALI_DEMO_STR_TITLE_TEXTURED_MESH));
-  demo.AddExample(Example("line-mesh.example", DALI_DEMO_STR_TITLE_LINE_MESH));
-
-  demo.SortAlphabetically( true );
-
-  // Start the event loop
+  HelloWorldController test( app );
   app.MainLoop();
-
-  return 0;
+#endif
 }
