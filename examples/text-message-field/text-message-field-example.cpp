@@ -92,7 +92,7 @@ public:
     border.Insert( "renderer-type", "border-renderer" );
     border.Insert( "border-color", Color::WHITE );
     border.Insert( "border-size", 1.f );
-    photoBoxA.SetProperty( Control::Property::BACKGROUND, border );
+    // photoBoxA.SetProperty( Control::Property::BACKGROUND, border );
 
     photoBoxA.SetName("photoBoxA");
     photoBoxA.SetAnchorPoint( AnchorPoint::CENTER );
