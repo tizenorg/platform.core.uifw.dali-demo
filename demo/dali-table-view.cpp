@@ -698,11 +698,11 @@ void DaliTableView::OnKeyEvent( const KeyEvent& event )
     {
       // If there's a Popup, Hide it if it's contributing to the display in any way (EG. transitioning in or out).
       // Otherwise quit.
-      if ( mVersionPopup && ( mVersionPopup.GetDisplayState() != Toolkit::Popup::HIDDEN ) )
-      {
-        mVersionPopup.SetDisplayState( Popup::HIDDEN );
-      }
-      else
+      // if ( mVersionPopup && ( mVersionPopup.GetDisplayState() != Toolkit::Popup::HIDDEN ) )
+      // {
+      //   mVersionPopup.SetDisplayState( Popup::HIDDEN );
+      // }
+      // else
       {
         mApplication.Quit();
       }
@@ -978,48 +978,48 @@ bool DaliTableView::OnTileHovered( Actor actor, const HoverEvent& event )
 
 void DaliTableView::OnLogoTapped( Dali::Actor actor, const Dali::TapGesture& tap )
 {
-  // Only show if currently fully hidden. If transitioning-out, the transition will not be interrupted.
-  if ( !mVersionPopup || ( mVersionPopup.GetDisplayState() == Toolkit::Popup::HIDDEN ) )
-  {
-    if ( !mVersionPopup )
-    {
-      std::ostringstream stream;
-      stream << "DALi Core: "    << CORE_MAJOR_VERSION << "." << CORE_MINOR_VERSION << "." << CORE_MICRO_VERSION << std::endl << "(" << CORE_BUILD_DATE << ")\n";
-      stream << "DALi Adaptor: " << ADAPTOR_MAJOR_VERSION << "." << ADAPTOR_MINOR_VERSION << "." << ADAPTOR_MICRO_VERSION << std::endl << "(" << ADAPTOR_BUILD_DATE << ")\n";
-      stream << "DALi Toolkit: " << TOOLKIT_MAJOR_VERSION << "." << TOOLKIT_MINOR_VERSION << "." << TOOLKIT_MICRO_VERSION << std::endl << "(" << TOOLKIT_BUILD_DATE << ")\n";
+  // // Only show if currently fully hidden. If transitioning-out, the transition will not be interrupted.
+  // if ( !mVersionPopup || ( mVersionPopup.GetDisplayState() == Toolkit::Popup::HIDDEN ) )
+  // {
+  //   if ( !mVersionPopup )
+  //   {
+  //     std::ostringstream stream;
+  //     stream << "DALi Core: "    << CORE_MAJOR_VERSION << "." << CORE_MINOR_VERSION << "." << CORE_MICRO_VERSION << std::endl << "(" << CORE_BUILD_DATE << ")\n";
+  //     stream << "DALi Adaptor: " << ADAPTOR_MAJOR_VERSION << "." << ADAPTOR_MINOR_VERSION << "." << ADAPTOR_MICRO_VERSION << std::endl << "(" << ADAPTOR_BUILD_DATE << ")\n";
+  //     stream << "DALi Toolkit: " << TOOLKIT_MAJOR_VERSION << "." << TOOLKIT_MINOR_VERSION << "." << TOOLKIT_MICRO_VERSION << std::endl << "(" << TOOLKIT_BUILD_DATE << ")\n";
 
-      mVersionPopup = Dali::Toolkit::Popup::New();
+  //     mVersionPopup = Dali::Toolkit::Popup::New();
 
-      Toolkit::TextLabel titleActor = Toolkit::TextLabel::New( "Version information" );
-      titleActor.SetName( "title-actor" );
-      titleActor.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+  //     Toolkit::TextLabel titleActor = Toolkit::TextLabel::New( "Version information" );
+  //     titleActor.SetName( "title-actor" );
+  //     titleActor.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
 
-      Toolkit::TextLabel contentActor = Toolkit::TextLabel::New( stream.str() );
-      contentActor.SetName( "content-actor" );
-      contentActor.SetProperty( Toolkit::TextLabel::Property::MULTI_LINE, true );
-      contentActor.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
-      contentActor.SetPadding( Padding( 0.0f, 0.0f, 20.0f, 0.0f ) );
+  //     Toolkit::TextLabel contentActor = Toolkit::TextLabel::New( stream.str() );
+  //     contentActor.SetName( "content-actor" );
+  //     contentActor.SetProperty( Toolkit::TextLabel::Property::MULTI_LINE, true );
+  //     contentActor.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+  //     contentActor.SetPadding( Padding( 0.0f, 0.0f, 20.0f, 0.0f ) );
 
-      mVersionPopup.SetTitle( titleActor );
-      mVersionPopup.SetContent( contentActor );
+  //     mVersionPopup.SetTitle( titleActor );
+  //     mVersionPopup.SetContent( contentActor );
 
-      mVersionPopup.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::WIDTH );
-      mVersionPopup.SetSizeModeFactor( Vector3( 0.75f, 1.0f, 1.0f ) );
-      mVersionPopup.SetResizePolicy( ResizePolicy::FIT_TO_CHILDREN, Dimension::HEIGHT );
+  //     mVersionPopup.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::WIDTH );
+  //     mVersionPopup.SetSizeModeFactor( Vector3( 0.75f, 1.0f, 1.0f ) );
+  //     mVersionPopup.SetResizePolicy( ResizePolicy::FIT_TO_CHILDREN, Dimension::HEIGHT );
 
-      mVersionPopup.OutsideTouchedSignal().Connect( this, &DaliTableView::HideVersionPopup );
-      Stage::GetCurrent().Add( mVersionPopup );
-    }
+  //     mVersionPopup.OutsideTouchedSignal().Connect( this, &DaliTableView::HideVersionPopup );
+  //     Stage::GetCurrent().Add( mVersionPopup );
+  //   }
 
-    mVersionPopup.SetDisplayState( Popup::SHOWN );
-  }
+  //   mVersionPopup.SetDisplayState( Popup::SHOWN );
+  // }
 }
 
 void DaliTableView::HideVersionPopup()
 {
-  // Only hide if currently fully shown. If transitioning-in, the transition will not be interrupted.
-  if ( mVersionPopup && ( mVersionPopup.GetDisplayState() == Toolkit::Popup::SHOWN ) )
-  {
-    mVersionPopup.SetDisplayState( Popup::HIDDEN );
-  }
+  // // Only hide if currently fully shown. If transitioning-in, the transition will not be interrupted.
+  // if ( mVersionPopup && ( mVersionPopup.GetDisplayState() == Toolkit::Popup::SHOWN ) )
+  // {
+  //   mVersionPopup.SetDisplayState( Popup::HIDDEN );
+  // }
 }
