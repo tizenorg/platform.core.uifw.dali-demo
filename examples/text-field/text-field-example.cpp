@@ -22,7 +22,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali-toolkit/dali-toolkit.h>
-#include <dali-toolkit/devel-api/controls/popup/popup.h>
 #include <iostream>
 #include <dali/public-api/events/touch-point.h>
 
@@ -41,8 +40,6 @@ namespace
   const char* const FOLDER_OPEN_ICON_IMAGE = DALI_IMAGE_DIR "folder_appicon_empty_open_bg.png";
 
   const float BORDER_WIDTH = 4.0f;
-
-  const Vector3 POPUP_SIZE_FACTOR_TO_PARENT = Vector3( 0.0, 0.25, 0.0 );
 
 } // unnamed namespace
 
@@ -98,17 +95,10 @@ public:
     Stage stage = Stage::GetCurrent();
     Vector2 stageSize = stage.GetSize();
 
-    // Remove previously hidden pop-up
-    UnparentAndReset(mPopup);
-
-    // Launch a pop-up containing TextField
+    // Launch a TextField
     mField = CreateTextField( stageSize, mButtonLabel );
-    mPopup = CreatePopup( stageSize.width * 0.8f );
-    mPopup.Add( mField );
-    mPopup.OutsideTouchedSignal().Connect( this, &TextFieldExample::OnPopupOutsideTouched );
-    stage.Add( mPopup );
-    mPopup.SetDisplayState( Popup::SHOWN );
-
+    stage.Add( mField );
+ 
     return true;
   }
 
@@ -126,67 +116,6 @@ public:
     field.SetProperty( TextField::Property::DECORATION_BOUNDING_BOX, Rect<int>( BORDER_WIDTH, BORDER_WIDTH, stageSize.width - BORDER_WIDTH*2, stageSize.height - BORDER_WIDTH*2 ) );
 
     return field;
-  }
-
-  Popup CreatePopup( float width )
-  {
-    Popup popup = Popup::New();
-    popup.SetParentOrigin( ParentOrigin::CENTER );
-    popup.SetAnchorPoint( AnchorPoint::CENTER );
-    popup.SetSize( width, 0.0f );
-    popup.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::HEIGHT );
-    popup.SetSizeModeFactor( POPUP_SIZE_FACTOR_TO_PARENT );
-    popup.TouchedSignal().Connect( this, &TextFieldExample::OnPopupTouched );
-
-    return popup;
-  }
-
-  void OnPopupOutsideTouched()
-  {
-    // Update the folder text
-    if( mButton && mField )
-    {
-      Property::Value text = mField.GetProperty( TextField::Property::TEXT );
-      mButtonLabel = text.Get< std::string >();
-      mButton.SetLabelText( mButtonLabel );
-    }
-
-    // Hide & discard the pop-up
-    if( mPopup )
-    {
-      mPopup.SetDisplayState( Popup::HIDDEN );
-    }
-    mField.Reset();
-  }
-
-  bool OnPopupTouched( Actor actor, const TouchEvent& event )
-  {
-    // End edit mode for TextField if parent Popup touched.
-    if(event.GetPointCount() > 0)
-    {
-      const TouchPoint& point = event.GetPoint(0);
-      switch(point.state)
-      {
-        case TouchPoint::Down:
-        {
-          // Update the folder text and lose focus for Key events
-          if( mButton && mField )
-          {
-            Property::Value text = mField.GetProperty( TextField::Property::TEXT );
-            mButtonLabel = text.Get< std::string >();
-            mButton.SetLabelText( mButtonLabel );
-            mField.ClearKeyInputFocus();
-          }
-          break;
-        }
-        default:
-        {
-          break;
-        }
-      } // end switch
-    }
-
-    return true;
   }
 
   /**
@@ -207,13 +136,12 @@ private:
 
   Application& mApplication;
 
-  // This button launches a pop-up containing TextField
+  // This button launches a TextField
   PushButton mButton;
   std::string mButtonLabel;
 
-  // Pop-up contents
+  // contents
   TextField mField;
-  Popup mPopup;
 };
 
 void RunTest( Application& application )
