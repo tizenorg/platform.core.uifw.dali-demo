@@ -457,7 +457,12 @@ public:
     // filter mode:
     Image bg = ResourceImage::New( CLUSTER_BACKGROUND_IMAGE_PATH, Dali::ImageDimensions( stageSize.x * 0.5f, stageSize.y * 0.5f ), Dali::FittingMode::SHRINK_TO_FIT, Dali::SamplingMode::BOX );
     Control clusterControl = Control::DownCast( clusterActor );
-    clusterControl.SetBackgroundImage( bg );
+    ImageActor bgActor = ImageActor::New( bg );
+    bgActor.SetPositionInheritanceMode( USE_PARENT_POSITION_PLUS_LOCAL_POSITION );
+    bgActor.SetColorMode( USE_OWN_MULTIPLY_PARENT_COLOR );
+    bgActor.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+    bgActor.SetSortModifier( -10000 );
+    clusterControl.Add(bgActor);
 
     // Add actors (pictures) as the children of the cluster
     for (unsigned int i = 0; (i < style.GetMaximumNumberOfChildren()) && (*paths); i++, paths++)
