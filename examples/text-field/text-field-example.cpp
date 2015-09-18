@@ -39,6 +39,7 @@ namespace
 
   const char* const FOLDER_ICON_IMAGE = DALI_IMAGE_DIR "folder_appicon_empty_bg.png";
   const char* const FOLDER_OPEN_ICON_IMAGE = DALI_IMAGE_DIR "folder_appicon_empty_open_bg.png";
+  const std::string TEXT_SELECTION_POPUP_BUTTON_STYLE_NAME( "textselectionpopupbutton" );
 
   const float BORDER_WIDTH = 4.0f;
 
@@ -75,17 +76,23 @@ public:
     stage.SetBackgroundColor( Vector4( 0.04f, 0.345f, 0.392f, 1.0f ) );
     stage.KeyEventSignal().Connect(this, &TextFieldExample::OnKeyEvent);
 
-    mButton = CreateFolderButton();
+    mButton = CreateFolderButton( AnchorPoint::TOP_LEFT );
     mButton.ClickedSignal().Connect( this, &TextFieldExample::OnButtonClicked );
+
+    mButton2 = CreateFolderButton(  AnchorPoint::TOP_RIGHT );
+    mButton2.SetParentOrigin( ParentOrigin::TOP_RIGHT );
+    mButton2.ClickedSignal().Connect( this, &TextFieldExample::OnButton2Clicked );
+
     stage.Add( mButton );
+    stage.Add( mButton2 );
   }
 
-  PushButton CreateFolderButton()
+  PushButton CreateFolderButton( Vector3 anchorPoint )
   {
     PushButton button = PushButton::New();
     button.SetUnselectedImage( FOLDER_ICON_IMAGE );
     button.SetSelectedImage( FOLDER_OPEN_ICON_IMAGE );
-    button.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    button.SetAnchorPoint(  anchorPoint );
     button.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
     ResourceImage imageClosed = ResourceImage::New( FOLDER_ICON_IMAGE );
     button.SetSize( imageClosed.GetWidth(), imageClosed.GetHeight() );
@@ -93,102 +100,61 @@ public:
     return button;
   }
 
+  PushButton CreateButton()
+  {
+    // 1. Create a option.
+    Toolkit::PushButton option = Toolkit::PushButton::New();
+    option.SetName( "the-push-me-button" );
+    option.SetAnimationTime( 0.0f );
+    option.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+    option.SetParentOrigin( ParentOrigin::TOP_CENTER );
+    option.SetAnchorPoint( AnchorPoint:: TOP_CENTER );
+    option.SetProperty( Toolkit::Control::Property::STYLE_NAME, TEXT_SELECTION_POPUP_BUTTON_STYLE_NAME );
+    // Label properties.
+    Property::Map buttonLabelProperties;
+    buttonLabelProperties.Insert( "text", "push me" );
+    option.SetProperty( Toolkit::Button::Property::LABEL, buttonLabelProperties );
+    return option;
+  }
+
   bool OnButtonClicked( Toolkit::Button button )
   {
     Stage stage = Stage::GetCurrent();
-    Vector2 stageSize = stage.GetSize();
 
-    // Remove previously hidden pop-up
-    UnparentAndReset(mPopup);
+    mLabelledButton = CreateButton();
 
-    // Launch a pop-up containing TextField
-    mField = CreateTextField( stageSize, mButtonLabel );
-    mPopup = CreatePopup( stageSize.width * 0.8f );
-    mPopup.Add( mField );
-    mPopup.OutsideTouchedSignal().Connect( this, &TextFieldExample::OnPopupOutsideTouched );
-    stage.Add( mPopup );
-    mPopup.SetDisplayState( Popup::SHOWN );
+    stage.Add( mLabelledButton );
 
     return true;
   }
 
-  TextField CreateTextField( const Vector2& stageSize, const std::string& text )
+  bool OnButton2Clicked( Toolkit::Button button )
+  {
+    Stage stage = Stage::GetCurrent();
+    Vector2 stageSize = stage.GetSize();
+    // Launch a pop-up containing TextField
+    mField = CreateTextField( stageSize );
+    stage.Add( mField );
+
+    return true;
+  }
+
+  TextField CreateTextField( const Vector2& stageSize )
   {
     TextField field = TextField::New();
     field.SetName("text-field");
-    field.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    field.SetAnchorPoint( AnchorPoint::CENTER );
+    field.SetParentOrigin( ParentOrigin::CENTER );
     field.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
     field.SetResizePolicy( ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT );
-    field.SetProperty( TextField::Property::TEXT, text );
     field.SetProperty( TextField::Property::TEXT_COLOR, Vector4( 0.0f, 1.0f, 1.0f, 1.0f ) ); // CYAN
     field.SetProperty( TextField::Property::PLACEHOLDER_TEXT, "Unnamed folder" );
     field.SetProperty( TextField::Property::PLACEHOLDER_TEXT_FOCUSED, "Enter folder name." );
     field.SetProperty( TextField::Property::DECORATION_BOUNDING_BOX, Rect<int>( BORDER_WIDTH, BORDER_WIDTH, stageSize.width - BORDER_WIDTH*2, stageSize.height - BORDER_WIDTH*2 ) );
+    field.SetProperty( TextField::Property::FONT_FAMILY, "choco cooky" );
 
     return field;
   }
-
-  Popup CreatePopup( float width )
-  {
-    Popup popup = Popup::New();
-    popup.SetParentOrigin( ParentOrigin::CENTER );
-    popup.SetAnchorPoint( AnchorPoint::CENTER );
-    popup.SetSize( width, 0.0f );
-    popup.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::HEIGHT );
-    popup.SetSizeModeFactor( POPUP_SIZE_FACTOR_TO_PARENT );
-    popup.TouchedSignal().Connect( this, &TextFieldExample::OnPopupTouched );
-
-    return popup;
-  }
-
-  void OnPopupOutsideTouched()
-  {
-    // Update the folder text
-    if( mButton && mField )
-    {
-      Property::Value text = mField.GetProperty( TextField::Property::TEXT );
-      mButtonLabel = text.Get< std::string >();
-      mButton.SetLabelText( mButtonLabel );
-    }
-
-    // Hide & discard the pop-up
-    if( mPopup )
-    {
-      mPopup.SetDisplayState( Popup::HIDDEN );
-    }
-    mField.Reset();
-  }
-
-  bool OnPopupTouched( Actor actor, const TouchEvent& event )
-  {
-    // End edit mode for TextField if parent Popup touched.
-    if(event.GetPointCount() > 0)
-    {
-      const TouchPoint& point = event.GetPoint(0);
-      switch(point.state)
-      {
-        case TouchPoint::Down:
-        {
-          // Update the folder text and lose focus for Key events
-          if( mButton && mField )
-          {
-            Property::Value text = mField.GetProperty( TextField::Property::TEXT );
-            mButtonLabel = text.Get< std::string >();
-            mButton.SetLabelText( mButtonLabel );
-            mField.ClearKeyInputFocus();
-          }
-          break;
-        }
-        default:
-        {
-          break;
-        }
-      } // end switch
-    }
-
-    return true;
-  }
-
   /**
    * Main key event handler
    */
@@ -209,11 +175,13 @@ private:
 
   // This button launches a pop-up containing TextField
   PushButton mButton;
+  PushButton mButton2;
+
+  PushButton mLabelledButton;
   std::string mButtonLabel;
 
-  // Pop-up contents
   TextField mField;
-  Popup mPopup;
+
 };
 
 void RunTest( Application& application )
