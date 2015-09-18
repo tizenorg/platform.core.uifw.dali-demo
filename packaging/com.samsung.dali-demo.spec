@@ -45,7 +45,7 @@ of the capability of the toolkit.
 ##############################
 %build
 PREFIX="/usr"
-CXXFLAGS+=" -Wall -g -O2"
+CXXFLAGS+=" -Wall -g -O2 -DDEBUG_ENABLED"
 LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -fPIC"
 
 %ifarch %{arm}
