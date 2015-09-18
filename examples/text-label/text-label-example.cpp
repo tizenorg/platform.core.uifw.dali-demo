@@ -92,6 +92,56 @@ public:
     // Nothing to do here.
   }
 
+  void CreateTextLabelA()
+  {
+    mLabel = TextLabel::New("2015년 SCI 진단에 참여 바랍니다. (9.15-22)");
+    mLabel.SetName( "TextLabelMixed" );
+    mLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
+    mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT );
+    mLabel.SetProperty( TextLabel::Property::MULTI_LINE, true );
+    mLabel.SetProperty( TextLabel::Property::TEXT_COLOR, Color::BLUE );
+    mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2( 1.0f, 1.0f ) );
+    mLabel.SetProperty( TextLabel::Property::SHADOW_COLOR, Color::BLACK );
+    mLabel.SetBackgroundColor( Color::WHITE );
+
+    mLabel.SetProperty(TextLabel::Property::FONT_FAMILY, "SamsungOneUI");
+    //mLabel.SetProperty(TextLabel::Property::FONT_FAMILY, "BreezeSansKorean");
+
+    mContainer.Add( mLabel );
+  }
+
+  void CreateTextLabelB()
+  {
+    mLabel = TextLabel::New("년 진단에 참여 바랍니다");
+    mLabel.SetName( "TextLabelKorean" );
+    mLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
+    mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT );
+    mLabel.SetProperty( TextLabel::Property::MULTI_LINE, true );
+    mLabel.SetProperty( TextLabel::Property::TEXT_COLOR, Color::BLUE );
+    mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2( 1.0f, 1.0f ) );
+    mLabel.SetProperty( TextLabel::Property::SHADOW_COLOR, Color::BLACK );
+    mLabel.SetBackgroundColor( Color::WHITE );
+
+    mLabel.SetProperty(TextLabel::Property::FONT_FAMILY, "SamsungOneUI");
+    //mLabel.SetProperty(TextLabel::Property::FONT_FAMILY, "BreezeSansKorean");
+
+    mContainer.Add( mLabel );
+  }
+
+  bool OnButtonAClicked( Toolkit::Button button )
+  {
+    CreateTextLabelA();
+    return true;
+  }
+
+  bool OnButtonBClicked( Toolkit::Button button )
+  {
+    CreateTextLabelB();
+    return true;
+  }
+
   /**
    * One-time setup in response to Application InitSignal.
    */
@@ -123,20 +173,20 @@ public:
     mPanGestureDetector.Attach( mGrabCorner );
     mPanGestureDetector.DetectedSignal().Connect( this, &TextLabelExample::OnPan );
 
-    mLabel = TextLabel::New( "A Quick Brown Fox Jumps Over The Lazy Dog" );
-    mLabel.SetName( "TextLabel" );
-    mLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
-    mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT );
-    mLabel.SetProperty( TextLabel::Property::MULTI_LINE, true );
-    mLabel.SetProperty( TextLabel::Property::TEXT_COLOR, Color::BLUE );
-    mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2( 1.0f, 1.0f ) );
-    mLabel.SetProperty( TextLabel::Property::SHADOW_COLOR, Color::BLACK );
-    mLabel.SetBackgroundColor( Color::WHITE );
-    mContainer.Add( mLabel );
+    PushButton buttonA = PushButton::New();
+    buttonA.ClickedSignal().Connect( this, &TextLabelExample::OnButtonAClicked );
+    buttonA.SetParentOrigin( ParentOrigin::TOP_CENTER );
+    buttonA.SetAnchorPoint( AnchorPoint::TOP_RIGHT );
+    buttonA.SetSize(100.0, 70.0 );
+    stage.Add( buttonA );
 
-    Property::Value labelText = mLabel.GetProperty( TextLabel::Property::TEXT );
-    std::cout << "Displaying text: \"" << labelText.Get< std::string >() << "\"" << std::endl;
+    PushButton buttonB = PushButton::New();
+    buttonB.ClickedSignal().Connect( this, &TextLabelExample::OnButtonBClicked );
+    buttonB.SetSize(100.0, 70.0 );
+    buttonB.SetParentOrigin( ParentOrigin::TOP_CENTER );
+    buttonB.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    stage.Add( buttonB );
+
   }
 
   // Resize the text-label with pan gesture
