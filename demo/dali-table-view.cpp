@@ -43,7 +43,6 @@ const std::string BUTTON_QUIT( "Quit" );
 const std::string BUTTON_OK( "Ok" );
 const std::string BUTTON_CANCEL( "Cancel" );
 
-const std::string DEFAULT_BACKGROUND_IMAGE_PATH( DALI_IMAGE_DIR "background-gradient.jpg" );
 const std::string LOGO_PATH( DALI_IMAGE_DIR "dali-logo.png" );
 const std::string DEFAULT_TOOLBAR_IMAGE_PATH( DALI_IMAGE_DIR "top-bar.png" );
 const std::string BUTTON_BACKGROUND(DALI_IMAGE_DIR "button-background.png");
@@ -88,14 +87,14 @@ const float BUBBLE_MAX_Z = 0.0f;
 /**
  * Creates the background image
  */
-ImageView CreateBackground( std::string imagePath )
+Control CreateBackground( std::string stylename )
 {
-  Image image = ResourceImage::New( imagePath );
-  ImageView background = ImageView::New( image );
+  Control background = Control::New();
+  Stage::GetCurrent().Add( background );
+  background.SetProperty( Control::Property::STYLE_NAME,stylename);
   background.SetName( "BACKGROUND" );
   background.SetAnchorPoint( AnchorPoint::CENTER );
   background.SetParentOrigin( ParentOrigin::CENTER );
-  background.SetZ( -1.0f );
   background.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
 
   return background;
@@ -171,7 +170,6 @@ DaliTableView::DaliTableView( Application& application )
   mBackgroundAnimations(),
   mExampleList(),
   mExampleMap(),
-  mBackgroundImagePath( DEFAULT_BACKGROUND_IMAGE_PATH ),
   mTotalPages(),
   mScrolling( false ),
   mSortAlphabetically( false ),
@@ -190,11 +188,6 @@ void DaliTableView::AddExample( Example example )
   mExampleMap[ example.name ] = example;
 }
 
-void DaliTableView::SetBackgroundPath( std::string imagePath )
-{
-  mBackgroundImagePath = imagePath;
-}
-
 void DaliTableView::SortAlphabetically( bool sortAlphabetically )
 {
   mSortAlphabetically = sortAlphabetically;
@@ -207,7 +200,7 @@ void DaliTableView::Initialize( Application& application )
   const Vector2 stageSize = Stage::GetCurrent().GetSize();
 
   // Background
-  ImageView background = CreateBackground( mBackgroundImagePath );
+  Control background = CreateBackground( "launcherbackground" );
   Stage::GetCurrent().Add( background );
 
   // Render entire content as overlays, as is all on same 2D plane.
