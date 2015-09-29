@@ -29,7 +29,8 @@ const char* BACKGROUND_IMAGE( DALI_IMAGE_DIR "background-gradient.jpg" );
 const char* TOOLBAR_IMAGE( DALI_IMAGE_DIR "top-bar.png" );
 const char* APPLICATION_TITLE( "Blending" );
 
-const char* MATERIAL_SAMPLE( DALI_IMAGE_DIR "heartsframe.9.png" );
+//const char* MATERIAL_SAMPLE( DALI_IMAGE_DIR "heartsframe.9.png" );
+const char* MATERIAL_SAMPLE( DALI_IMAGE_DIR "blocks-brick-33.png" );
 
 }  // namespace
 
