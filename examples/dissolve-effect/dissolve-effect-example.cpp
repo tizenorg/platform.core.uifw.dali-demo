@@ -77,7 +77,7 @@ const int VIEWINGTIME = 2000; // 2 seconds
 
 const float TRANSITION_DURATION = 2.5f; //2.5 second
 
-const float INITIAL_DEPTH = 10.0f;
+const float INITIAL_DEPTH = -10.0f;
 
 /**
  * @brief Load an image, scaled-down to no more than the stage dimensions.
@@ -163,13 +163,12 @@ private:
   Toolkit::TextLabel              mTitleActor;
   Actor                           mParent;
 
-  Toolkit::ImageView              mCurrentImage;
-  Toolkit::ImageView              mNextImage;
+  ImageActor                      mCurrentImage;
+  ImageActor                      mNextImage;
   unsigned int                    mIndex;
 
-  Property::Map                   mDissolveEffect;
-  Property::Map                   mEmptyEffect;
-
+  ShaderEffect                    mCurrentImageEffect;
+  ShaderEffect                    mNextImageEffect;
   bool                            mUseHighPrecision;
   Animation                       mAnimation;
 
@@ -181,16 +180,8 @@ private:
   bool                            mTimerReady;
   unsigned int                    mCentralLineIndex;
 
-  Image                           mIconPlay;
-  Image                           mIconPlaySelected;
-  Image                           mIconStop;
-  Image                           mIconStopSelected;
   Toolkit::PushButton             mPlayStopButton;
 
-  Image                           mIconHighP;
-  Image                           mIconHighPSelected;
-  Image                           mIconMediumP;
-  Image                           mIconMediumPSelected;
   Toolkit::PushButton             mEffectChangeButton;
 };
 
@@ -219,13 +210,9 @@ void DissolveEffectApp::OnInit( Application& application )
   mContent = DemoHelper::CreateView( application, mView,mToolBar, "", TOOLBAR_IMAGE, "" );
 
   // Add an effect-changing button on the right of the tool bar.
-  mIconHighP = ResourceImage::New( EFFECT_HIGHP_IMAGE );
-  mIconHighPSelected = ResourceImage::New( EFFECT_HIGHP_IMAGE_SELECTED );
-  mIconMediumP = ResourceImage::New( EFFECT_MEDIUMP_IMAGE );
-  mIconMediumPSelected = ResourceImage::New( EFFECT_MEDIUMP_IMAGE_SELECTED );
   mEffectChangeButton = Toolkit::PushButton::New();
-  mEffectChangeButton.SetButtonImage( mIconHighP );
-  mEffectChangeButton.SetSelectedImage( mIconHighPSelected );
+  mEffectChangeButton.SetUnselectedImage( EFFECT_HIGHP_IMAGE );
+  mEffectChangeButton.SetSelectedImage( EFFECT_HIGHP_IMAGE_SELECTED );
   mEffectChangeButton.ClickedSignal().Connect( this, &DissolveEffectApp::OnEffectButtonClicked );
   mToolBar.AddControl( mEffectChangeButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING );
 
@@ -234,19 +221,19 @@ void DissolveEffectApp::OnInit( Application& application )
   mToolBar.AddControl( mTitleActor, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarTitlePercentage, Toolkit::Alignment::HorizontalCenter );
 
   // Add an slide-show button on the right of the title
-  mIconPlay = ResourceImage::New( PLAY_ICON );
-  mIconPlaySelected = ResourceImage::New( PLAY_ICON_SELECTED );
-  mIconStop = ResourceImage::New( STOP_ICON );
-  mIconStopSelected = ResourceImage::New( STOP_ICON_SELECTED );
   mPlayStopButton = Toolkit::PushButton::New();
-  mPlayStopButton.SetButtonImage( mIconPlay );
-  mPlayStopButton.SetSelectedImage( mIconPlaySelected );
+  mPlayStopButton.SetUnselectedImage( PLAY_ICON );
+  mPlayStopButton.SetSelectedImage( PLAY_ICON_SELECTED );
   mPlayStopButton.ClickedSignal().Connect( this, &DissolveEffectApp::OnSildeshowButtonClicked );
   mToolBar.AddControl( mPlayStopButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalCenter, DemoHelper::DEFAULT_PLAY_PADDING );
 
   // use pan gesture to detect the cursor or finger movement
   mPanGestureDetector = PanGestureDetector::New();
   mPanGestureDetector.DetectedSignal().Connect( this, &DissolveEffectApp::OnPanGesture );
+
+  // create the dissolve effect object
+  mCurrentImageEffect = Toolkit::CreateDissolveEffect(mUseHighPrecision);
+  mNextImageEffect = Toolkit::CreateDissolveEffect(mUseHighPrecision);
 
   mViewTimer = Timer::New( VIEWINGTIME );
   mViewTimer.TickSignal().Connect( this, &DissolveEffectApp::OnTimerTick );
@@ -259,16 +246,13 @@ void DissolveEffectApp::OnInit( Application& application )
   mContent.Add( mParent );
 
   // show the first image
-  mCurrentImage = Toolkit::ImageView::New( LoadStageFillingImage( IMAGES[mIndex] ) );
+  mCurrentImage = ImageActor::New( LoadStageFillingImage( IMAGES[mIndex] ) );
   mCurrentImage.SetPositionInheritanceMode(USE_PARENT_POSITION_PLUS_LOCAL_POSITION);
   mCurrentImage.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
   mCurrentImage.SetSizeScalePolicy( SizeScalePolicy::FIT_WITH_ASPECT_RATIO );
   mParent.Add( mCurrentImage );
 
   mPanGestureDetector.Attach( mCurrentImage );
-
-  mDissolveEffect = Dali::Toolkit::CreateDissolveEffect( mUseHighPrecision );
-  mEmptyEffect.Insert( "shader", Property::Value() );
 }
 
 // signal handler, called when the pan gesture is detected
@@ -292,7 +276,7 @@ void DissolveEffectApp::OnPanGesture( Actor actor, const PanGesture& gesture )
     }
 
     Image image = LoadStageFillingImage( IMAGES[ mIndex ] );
-    mNextImage = Toolkit::ImageView::New( image );
+    mNextImage = ImageActor::New( image );
     mNextImage.SetPositionInheritanceMode(USE_PARENT_POSITION_PLUS_LOCAL_POSITION);
     mNextImage.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
     mNextImage.SetSizeScalePolicy( SizeScalePolicy::FIT_WITH_ASPECT_RATIO );
@@ -307,18 +291,20 @@ void DissolveEffectApp::StartTransition(Vector2 position, Vector2 displacement)
 {
   mAnimation = Animation::New(TRANSITION_DURATION);
 
-  Dali::Toolkit::DissolveEffectSetCentralLine( mCurrentImage, position, displacement, 0.0f );
-  mCurrentImage.SetProperty( Toolkit::ImageView::Property::IMAGE, mDissolveEffect );
-  mAnimation.AnimateTo( Property( mCurrentImage, "uPercentage" ), 1.0f, AlphaFunction::LINEAR );
+  Dali::Toolkit::DissolveEffectSetCentralLine( mCurrentImageEffect, position, displacement );
+  mCurrentImageEffect.SetUniform("uPercentage", 0.0f);
+  mCurrentImage.SetShaderEffect(mCurrentImageEffect);
+  mAnimation.AnimateTo( Property(mCurrentImageEffect, "uPercentage"), 1.0f, AlphaFunction::LINEAR );
 
   mNextImage.SetOpacity(0.0f);
   mAnimation.AnimateTo( Property( mNextImage, Actor::Property::COLOR_ALPHA ), 1.0f, AlphaFunction::LINEAR );
 
   if(mUseHighPrecision)
   {
-    Dali::Toolkit::DissolveEffectSetCentralLine( mNextImage, position, displacement, 1.0f );
-    mNextImage.SetProperty( Toolkit::ImageView::Property::IMAGE, mDissolveEffect );
-    mAnimation.AnimateTo( Property( mNextImage, "uPercentage" ), 0.0f, AlphaFunction::LINEAR );
+    Dali::Toolkit::DissolveEffectSetCentralLine( mNextImageEffect, position, displacement );
+    mNextImageEffect.SetUniform("uPercentage", 1.0f);
+    mNextImage.SetShaderEffect(mNextImageEffect);
+    mAnimation.AnimateTo( Property(mNextImageEffect, "uPercentage"), 0.0f, AlphaFunction::LINEAR );
   }
   else
   {
@@ -344,18 +330,18 @@ void DissolveEffectApp::OnKeyEvent(const KeyEvent& event)
 bool DissolveEffectApp::OnEffectButtonClicked( Toolkit::Button button )
 {
   mUseHighPrecision = !mUseHighPrecision;
-  mDissolveEffect = Dali::Toolkit::CreateDissolveEffect(mUseHighPrecision);
+  mCurrentImageEffect = Dali::Toolkit::CreateDissolveEffect(mUseHighPrecision);
   if(mUseHighPrecision)
   {
     mTitleActor.SetProperty( TextLabel::Property::TEXT, std::string(APPLICATION_TITLE_HIGHP) );
-    mEffectChangeButton.SetButtonImage( mIconHighP );
-    mEffectChangeButton.SetSelectedImage( mIconHighPSelected );
+    mEffectChangeButton.SetUnselectedImage( EFFECT_HIGHP_IMAGE );
+    mEffectChangeButton.SetSelectedImage( EFFECT_HIGHP_IMAGE_SELECTED );
   }
   else
   {
     mTitleActor.SetProperty( TextLabel::Property::TEXT, std::string(APPLICATION_TITLE_MEDIUMP) );
-    mEffectChangeButton.SetButtonImage( mIconMediumP );
-    mEffectChangeButton.SetSelectedImage( mIconMediumPSelected );
+    mEffectChangeButton.SetUnselectedImage( EFFECT_MEDIUMP_IMAGE );
+    mEffectChangeButton.SetSelectedImage( EFFECT_MEDIUMP_IMAGE_SELECTED );
   }
 
   return true;
@@ -366,16 +352,16 @@ bool DissolveEffectApp::OnSildeshowButtonClicked( Toolkit::Button button )
   mSlideshow = !mSlideshow;
   if( mSlideshow )
   {
-    mPlayStopButton.SetButtonImage( mIconStop );
-    mPlayStopButton.SetSelectedImage( mIconStopSelected );
+    mPlayStopButton.SetUnselectedImage( STOP_ICON );
+    mPlayStopButton.SetSelectedImage( STOP_ICON_SELECTED );
     mPanGestureDetector.Detach( mParent );
     mViewTimer.Start();
     mTimerReady = false;
   }
   else
   {
-    mPlayStopButton.SetButtonImage( mIconPlay );
-    mPlayStopButton.SetSelectedImage( mIconPlaySelected );
+    mPlayStopButton.SetUnselectedImage( PLAY_ICON );
+    mPlayStopButton.SetSelectedImage( PLAY_ICON_SELECTED );
     mTimerReady = true;
     mPanGestureDetector.Attach( mParent );
   }
@@ -384,7 +370,8 @@ bool DissolveEffectApp::OnSildeshowButtonClicked( Toolkit::Button button )
 
 void DissolveEffectApp::OnTransitionCompleted( Animation& source )
 {
-  mNextImage.SetProperty( Toolkit::ImageView::Property::IMAGE, mEmptyEffect );
+  mCurrentImage.RemoveShaderEffect();
+  mNextImage.RemoveShaderEffect();
   mParent.Remove( mCurrentImage );
   mPanGestureDetector.Detach( mCurrentImage );
   mCurrentImage = mNextImage;
@@ -405,7 +392,7 @@ bool DissolveEffectApp::OnTimerTick()
   {
     mIndex = (mIndex + 1)%NUM_IMAGES;
     Image image = LoadStageFillingImage( IMAGES[ mIndex ] );
-    mNextImage = Toolkit::ImageView::New( image );
+    mNextImage = ImageActor::New( image );
     mNextImage.SetPositionInheritanceMode(USE_PARENT_POSITION_PLUS_LOCAL_POSITION);
     mNextImage.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
     mNextImage.SetSizeScalePolicy( SizeScalePolicy::FIT_WITH_ASPECT_RATIO );
