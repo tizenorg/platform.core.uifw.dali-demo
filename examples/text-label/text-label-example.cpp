@@ -123,6 +123,12 @@ public:
     mPanGestureDetector.Attach( mGrabCorner );
     mPanGestureDetector.DetectedSignal().Connect( this, &TextLabelExample::OnPan );
 
+    mLabelParent = Actor::New();
+    mLabelParent.SetParentOrigin( ParentOrigin::CENTER );
+    mLabelParent.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+    mLabelParent.SetColor( Color::TRANSPARENT );
+    mContainer.Add( mLabelParent );
+
     mLabel = TextLabel::New( "A Quick Brown Fox Jumps Over The Lazy Dog" );
     mLabel.SetName( "TextLabel" );
     mLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
@@ -133,7 +139,7 @@ public:
     mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2( 1.0f, 1.0f ) );
     mLabel.SetProperty( TextLabel::Property::SHADOW_COLOR, Color::BLACK );
     mLabel.SetBackgroundColor( Color::WHITE );
-    mContainer.Add( mLabel );
+    mLabelParent.Add( mLabel );
 
     Property::Value labelText = mLabel.GetProperty( TextLabel::Property::TEXT );
     std::cout << "Displaying text: \"" << labelText.Get< std::string >() << "\"" << std::endl;
@@ -165,7 +171,8 @@ public:
     {
       if( IsKey( event, DALI_KEY_ESCAPE) || IsKey( event, DALI_KEY_BACK ) )
       {
-        mApplication.Quit();
+//        mApplication.Quit();
+        mLabelParent.SetColor( Color::BLACK );
       }
       else if( event.IsCtrlModifier() )
       {
@@ -261,6 +268,7 @@ private:
   Application& mApplication;
 
   TextLabel mLabel;
+  Actor mLabelParent;
 
   Control mContainer;
   Control mGrabCorner;
