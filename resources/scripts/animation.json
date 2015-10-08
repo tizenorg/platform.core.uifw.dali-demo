@@ -16,12 +16,18 @@
  */
 {
   // library of styles
+  "constants": {
+    "ALPHA": "EASE_IN_OUT",
+    "LOOP": false,
+    "ENDACTION":"BAKE"
+  },
   "styles": {
     "red-theme": {
       "color": [1, 0, 0, 1]
     },
     "basic-text": {
-      "parent-origin": "CENTER"
+      "parent-origin": "CENTER",
+      "color": [1,1,1,1]
     }
   },
   "paths":
@@ -40,7 +46,7 @@
         "actor": "greeting", // referenced actors must exist on stage
         "property": "position",
         "value": [300, 300, -1000],
-        "alpha-function": "EASE_IN_OUT",
+        "alpha-function": "{ALPHA}",
         "time-period": {
           "delay": 0,
           "duration": 3
@@ -56,12 +62,14 @@
       }]
     },
     "rotate": {
-      "duration": 10.0,
+      "duration": 3.0,
+      "loop": "{LOOP}",
+      "end-action": "{ENDACTION}",
       "properties": [{
         "actor": "image", // referenced actors must exist on stage
         "property": "orientation",
         "value": [0, 0, -45],
-        "alpha-function": "EASE_IN_OUT",
+        "alpha-function": "{ALPHA}",
         "time-period": {
           "delay": 0,
           "duration": 3
@@ -117,19 +125,97 @@
     "size": [200, 200, 1],
     "text": "or the image.."
   }, {
+    "name": "animage",
+    "type": "ImageActor",
+    "image": {
+      "filename": "{DALI_IMAGE_DIR}gallery-medium-14.jpg"
+    },
+    "relayout-enabled": false,
+    "position": [-200, -200, 0],
+    "size": [100, 100, -1],
+    "signals": [{
+      "name": "touched",
+      "action": "play",
+      "animation": "path-animation",
+      "substitute": "self"
+    }],
+    "position-inheritance": "DONT_INHERIT_POSITION"
+  }, {
     "name": "image",
     "type": "ImageActor",
     "image": {
       "filename": "{DALI_IMAGE_DIR}gallery-large-21.jpg"
     },
     "relayout-enabled": false,
-    "position": [0, 200, 0],
+    "position": [0, 100, 0],
     "size": [200, 200, 1],
     "signals": [{
       "name": "touched",
       "action": "play",
-      "animation": "rotate"
+      "animation": "rotate",
+      "constants":
+      {
+        "LOOP": true,
+        "ENDACTION":"DISCARD"
+      }
     }],
     "position-inheritance": "DONT_INHERIT_POSITION"
+  },{
+    "name": "image-with-siblings",
+    "type": "ImageActor",
+    "image": {
+      "filename": "{DALI_IMAGE_DIR}icon-reset-selected.png"
+    },
+    "relayout-enabled": false,
+    "position": [-250, 300, 0],
+    "size": [50, 50, 1],
+    "signals": [{
+      "name": "touched",
+      "action": "play",
+      "animation": "rotate",
+      "substitute": "siblings",
+      "constants": {
+        "ALPHA": "BOUNCE"
+      }
+    }],
+    "position-inheritance": "DONT_INHERIT_POSITION",
+    "actors":[
+      {
+        "name": "image-with-siblings",
+        "position": [100, 0, 0],
+        "size": [50, 50, 1],
+        "type": "ImageActor",
+        "image": {
+          "filename": "{DALI_IMAGE_DIR}gallery-large-15.jpg"
+        }
+      },
+      {
+        "name": "image-with-siblings",
+        "position": [200, 0, 0],
+        "size": [50, 50, 1],
+        "type": "ImageActor",
+        "image": {
+          "filename": "{DALI_IMAGE_DIR}gallery-large-15.jpg"
+        }
+      },
+      {
+        "name": "image-with-siblings",
+        "position": [300, 0, 0],
+        "size": [50, 50, 1],
+        "type": "ImageActor",
+        "image": {
+          "filename": "{DALI_IMAGE_DIR}gallery-large-15.jpg"
+        }
+      },
+      {
+        "name": "image-with-siblings",
+        "position": [400, 0, 0],
+        "size": [50, 50, 1],
+        "type": "ImageActor",
+        "image": {
+          "filename": "{DALI_IMAGE_DIR}gallery-large-15.jpg"
+        }
+      }
+    ]
   }]
 }
