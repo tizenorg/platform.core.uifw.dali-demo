@@ -165,15 +165,11 @@ DaliTableView::DaliTableView( Application& application )
   mScrollViewEffect(),
   mScrollRulerX(),
   mScrollRulerY(),
-  mButtons(),
   mPressedActor(),
   mAnimationTimer(),
   mLogoTapDetector(),
   mVersionPopup(),
-  mButtonsPageRelativeSize(),
   mPages(),
-  mTableViewImages(),
-  mBackgroundActors(),
   mBackgroundAnimations(),
   mExampleList(),
   mExampleMap(),
@@ -372,8 +368,8 @@ void DaliTableView::Populate()
 
     for( int t = 0; t < mTotalPages; t++ )
     {
-      // Create Table. (contains up to 9 Examples)
-      TableView page = TableView::New( 3, 3 );
+      // Create Table
+      TableView page = TableView::New( ROWS_PER_PAGE, EXAMPLES_PER_ROW );
       page.SetAnchorPoint( AnchorPoint::CENTER );
       page.SetParentOrigin( ParentOrigin::CENTER );
       page.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );

@@ -384,16 +384,12 @@ private:
   Dali::Toolkit::ScrollViewEffect mScrollViewEffect;         ///< Effect to be applied to the scroll view
   Dali::Toolkit::RulerPtr         mScrollRulerX;             ///< ScrollView X (horizontal) ruler
   Dali::Toolkit::RulerPtr         mScrollRulerY;             ///< ScrollView Y (vertical) ruler
-  Dali::Toolkit::TableView        mButtons;                  ///< Navigation buttons
   Dali::Actor                     mPressedActor;             ///< The currently pressed actor.
   Dali::Timer                     mAnimationTimer;           ///< Timer used to turn off animation after a specific time period
   Dali::TapGestureDetector        mLogoTapDetector;          ///< To detect taps on the logo
   Dali::Toolkit::Popup            mVersionPopup;             ///< Displays DALi library version information
-  Dali::Vector3                   mButtonsPageRelativeSize;  ///< Size of a buttons page relative to the stage size
 
   std::vector< Dali::Actor >      mPages;                    ///< List of pages.
-  std::vector< Dali::Actor >      mTableViewImages;          ///< Offscreen render of tableview
-  std::vector< Dali::Actor >      mBackgroundActors;         ///< List of background actors used in the effect
   AnimationList                   mBackgroundAnimations;     ///< List of background bubble animations
   ExampleList                     mExampleList;              ///< List of examples.
   ExampleMap                      mExampleMap;               ///< Map LUT for examples.
