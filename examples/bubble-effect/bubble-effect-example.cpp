@@ -18,6 +18,9 @@
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/controls/bubble-effect/bubble-emitter.h>
+#include <dali/devel-api/adaptor-framework/file-loader.h>
+#include <dali/devel-api/adaptor-framework/image-decoder.h>
+#include <dali/integration-api/bitmap.h>
 #include "shared/view.h"
 
 using namespace Dali;
@@ -61,10 +64,20 @@ const unsigned int DEFAULT_NUMBER_OF_BUBBLES( 1000 );
  * and filter mode BOX_THEN_LINEAR to sample the image with
  * maximum quality.
  */
-ResourceImage LoadStageFillingImage( const char * const imagePath )
+BufferImage LoadStageFillingImage( const char * const imagePath )
 {
   Size stageSize = Stage::GetCurrent().GetSize();
-  return ResourceImage::New( imagePath, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+  Dali::Vector<char> fileContent;
+  if( FileLoader::ReadFile(imagePath, fileContent) == 1)
+  {
+    Integration::BitmapPtr bitmap = ImageDecoder::DecodeBuffer(fileContent, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+    if(bitmap)
+    {
+      return BufferImage::New( bitmap->GetBuffer(), bitmap->GetImageWidth(), bitmap->GetImageHeight(), bitmap->GetPixelFormat() );
+    }
+  }
+
+  return BufferImage();
 }
 
 }// end LOCAL_STUFF
