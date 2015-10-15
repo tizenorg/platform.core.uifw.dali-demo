@@ -209,7 +209,7 @@ public:
     mMotionBlurActorSize = Size( std::min( mMotionBlurActorSize.x, mMotionBlurActorSize.y ), std::min( mMotionBlurActorSize.x, mMotionBlurActorSize.y ) );
 
     Image image = LoadImageFittedInBox( MOTION_BLUR_ACTOR_IMAGE1, mMotionBlurActorSize.x, mMotionBlurActorSize.y );
-    mMotionBlurImageActor = ImageActor::New(image);
+    mMotionBlurImageActor = ImageView::New(image);
     mMotionBlurImageActor.SetParentOrigin( ParentOrigin::CENTER );
     mMotionBlurImageActor.SetSize(mMotionBlurActorSize.x, mMotionBlurActorSize.y);
 
@@ -217,11 +217,8 @@ public:
 
     // Create shader used for doing motion blur
     mMotionBlurEffect = Toolkit::CreateMotionBlurEffect();
-    Dali::Property::Index uModelProperty = mMotionBlurEffect.GetPropertyIndex( "uModelLastFrame" );
-    Constraint constraint = Constraint::New<Matrix>( mMotionBlurEffect, uModelProperty, EqualToConstraint() );
-    constraint.AddSource( Source( mMotionBlurImageActor , Actor::Property::WORLD_MATRIX ) );
-    constraint.Apply();
-    mMotionBlurImageActor.SetShaderEffect( mMotionBlurEffect );
+    Toolkit::SetMotionBlurProperties( mMotionBlurImageActor );
+    mMotionBlurImageActor.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionBlurEffect );
 
 
 #ifdef MULTIPLE_MOTION_BLURRED_ACTORS
@@ -522,8 +519,8 @@ private:
   PushButton                 mActorEffectsButton;     ///< The actor effects toggling Button.
 
   // Motion blur
-  ShaderEffect mMotionBlurEffect;
-  ImageActor mMotionBlurImageActor;
+  Property::Map mMotionBlurEffect;
+  ImageView mMotionBlurImageActor;
   Size mMotionBlurActorSize;
 
 #ifdef MULTIPLE_MOTION_BLURRED_ACTORS
