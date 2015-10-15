@@ -177,21 +177,17 @@ public:
     // Motion stretched actor
     //
 
-    Image image = ResourceImage::New( MOTION_STRETCH_ACTOR_IMAGE1 );
-    mMotionStretchImageActor = ImageActor::New(image);
+    mMotionStretchImageActor = ImageView::New( MOTION_STRETCH_ACTOR_IMAGE1 );
     mMotionStretchImageActor.SetParentOrigin( ParentOrigin::CENTER );
     mMotionStretchImageActor.SetAnchorPoint( AnchorPoint::CENTER );
-    mMotionStretchImageActor.SetSize(MOTION_STRETCH_ACTOR_WIDTH, MOTION_STRETCH_ACTOR_HEIGHT);
+    mMotionStretchImageActor.SetSize( MOTION_STRETCH_ACTOR_WIDTH, MOTION_STRETCH_ACTOR_HEIGHT );
 
     mContentLayer.Add( mMotionStretchImageActor );
 
     // Create shader used for doing motion stretch
     mMotionStretchEffect = Toolkit::CreateMotionStretchEffect();
-    Dali::Property::Index uModelProperty = mMotionStretchEffect.GetPropertyIndex( "uModelLastFrame" );
-    Constraint constraint = Constraint::New<Matrix>( mMotionStretchEffect, uModelProperty, EqualToConstraint() );
-    constraint.AddSource( Source( mMotionStretchImageActor , Actor::Property::WORLD_MATRIX ) );
-    constraint.Apply();
-    mMotionStretchImageActor.SetShaderEffect( mMotionStretchEffect );
+    Toolkit::SetMotionStretchProperties( mMotionStretchImageActor );
+    mMotionStretchImageActor.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionStretchEffect );
   }
 
   //////////////////////////////////////////////////////////////
@@ -415,8 +411,8 @@ private:
   PushButton                 mActorEffectsButton;     ///< The actor effects toggling Button.
 
   // Motion stretch
-  ShaderEffect mMotionStretchEffect;
-  ImageActor mMotionStretchImageActor;
+  Property::Map mMotionStretchEffect;
+  ImageView mMotionStretchImageActor;
 
   // animate actor to position where user taps screen
   Animation mActorTapMovementAnimation;
