@@ -209,19 +209,18 @@ public:
     mMotionBlurActorSize = Size( std::min( mMotionBlurActorSize.x, mMotionBlurActorSize.y ), std::min( mMotionBlurActorSize.x, mMotionBlurActorSize.y ) );
 
     Image image = LoadImageFittedInBox( MOTION_BLUR_ACTOR_IMAGE1, mMotionBlurActorSize.x, mMotionBlurActorSize.y );
-    mMotionBlurImageActor = ImageActor::New(image);
+    mMotionBlurImageActor = ImageView::New(image);
     mMotionBlurImageActor.SetParentOrigin( ParentOrigin::CENTER );
     mMotionBlurImageActor.SetSize(mMotionBlurActorSize.x, mMotionBlurActorSize.y);
 
     mContentLayer.Add( mMotionBlurImageActor );
 
     // Create shader used for doing motion blur
-    mMotionBlurEffect = Toolkit::CreateMotionBlurEffect();
-    Dali::Property::Index uModelProperty = mMotionBlurEffect.GetPropertyIndex( "uModelLastFrame" );
-    Constraint constraint = Constraint::New<Matrix>( mMotionBlurEffect, uModelProperty, EqualToConstraint() );
-    constraint.AddSource( Source( mMotionBlurImageActor , Actor::Property::WORLD_MATRIX ) );
-    constraint.Apply();
-    mMotionBlurImageActor.SetShaderEffect( mMotionBlurEffect );
+    mMotionBlurEffect = CreateMotionBlurEffect();
+
+    // set actor shader to the blur one
+    Toolkit::SetMotionBlurProperties( mMotionBlurImageActor, MOTION_BLUR_NUM_SAMPLES );
+    mMotionBlurImageActor.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionBlurEffect );
 
 
 #ifdef MULTIPLE_MOTION_BLURRED_ACTORS
@@ -231,17 +230,15 @@ public:
     // Motion blurred actor 2
     //
 
-    mMotionBlurImageActor2 = ImageActor::New(image);
+    mMotionBlurImageActor2 = ImageView::New(image);
     mMotionBlurImageActor2.SetParentOrigin( ParentOrigin::CENTER );
     mMotionBlurImageActor2.SetSize(mMotionBlurActorSize.x, mMotionBlurActorSize.y);
     mMotionBlurImageActor2.SetPosition(mMotionBlurActorSize.x * 1.1f, 0.0f);
     mMotionBlurImageActor.Add( mMotionBlurImageActor2 );
 
-    // Create shader used for doing motion blur
-    mMotionBlurEffect2 = CreateMotionBlurEffect(MOTION_BLUR_NUM_SAMPLES);
-
     // set actor shader to the blur one
-    mMotionBlurImageActor2.SetShaderEffect( mMotionBlurEffect2 );
+    Toolkit::SetMotionBlurProperties( mMotionBlurImageActor2, MOTION_BLUR_NUM_SAMPLES );
+    mMotionBlurImageActor2.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionBlurEffect );
 
 
     ///////////////////////////////////////////////////////
@@ -249,17 +246,15 @@ public:
     // Motion blurred actor 3
     //
 
-    mMotionBlurImageActor3 = ImageActor::New(image);
+    mMotionBlurImageActor3 = ImageView::New(image);
     mMotionBlurImageActor3.SetParentOrigin( ParentOrigin::CENTER );
     mMotionBlurImageActor3.SetSize(mMotionBlurActorSize.x, mMotionBlurActorSize.y);
     mMotionBlurImageActor3.SetPosition(-mMotionBlurActorSize.x * 1.1f, 0.0f);
     mMotionBlurImageActor.Add( mMotionBlurImageActor3 );
 
-    // Create shader used for doing motion blur
-    mMotionBlurEffect3 = CreateMotionBlurEffect(MOTION_BLUR_NUM_SAMPLES);
-
     // set actor shader to the blur one
-    mMotionBlurImageActor3.SetShaderEffect( mMotionBlurEffect3 );
+    Toolkit::SetMotionBlurProperties( mMotionBlurImageActor3, MOTION_BLUR_NUM_SAMPLES );
+    mMotionBlurImageActor3.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionBlurEffect );
 
 
     ///////////////////////////////////////////////////////
@@ -267,35 +262,30 @@ public:
     // Motion blurred actor 4
     //
 
-    mMotionBlurImageActor4 = ImageActor::New(image);
+    mMotionBlurImageActor4 = ImageView::New(image);
     mMotionBlurImageActor4.SetParentOrigin( ParentOrigin::CENTER );
     mMotionBlurImageActor4.SetSize(mMotionBlurActorSize.x, mMotionBlurActorSize.y);
     mMotionBlurImageActor4.SetPosition(0.0f, mMotionBlurActorSize.y * 1.1f);
     mMotionBlurImageActor.Add( mMotionBlurImageActor4 );
 
-    // Create shader used for doing motion blur
-    mMotionBlurEffect4 = CreateMotionBlurEffect(MOTION_BLUR_NUM_SAMPLES);
-
     // set actor shader to the blur one
-    mMotionBlurImageActor4.SetShaderEffect( mMotionBlurEffect4 );
-
+    Toolkit::SetMotionBlurProperties( mMotionBlurImageActor4, MOTION_BLUR_NUM_SAMPLES );
+    mMotionBlurImageActor4.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionBlurEffect );
 
     ///////////////////////////////////////////////////////
     //
     // Motion blurred actor 5
     //
 
-    mMotionBlurImageActor5 = ImageActor::New(image);
+    mMotionBlurImageActor5 = ImageView::New(image);
     mMotionBlurImageActor5.SetParentOrigin( ParentOrigin::CENTER );
     mMotionBlurImageActor5.SetSize(mMotionBlurActorSize.x, mMotionBlurActorSize.y);
     mMotionBlurImageActor5.SetPosition(0.0f, -mMotionBlurActorSize.y * 1.1f);
     mMotionBlurImageActor.Add( mMotionBlurImageActor5 );
 
-    // Create shader used for doing motion blur
-    mMotionBlurEffect5 = CreateMotionBlurEffect(MOTION_BLUR_NUM_SAMPLES);
-
     // set actor shader to the blur one
-    mMotionBlurImageActor5.SetShaderEffect( mMotionBlurEffect5 );
+    Toolkit::SetMotionBlurProperties( mMotionBlurImageActor5, MOTION_BLUR_NUM_SAMPLES );
+    mMotionBlurImageActor5.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionBlurEffect );
 #endif //#ifdef MULTIPLE_MOTION_BLURRED_ACTORS
   }
 
@@ -508,7 +498,14 @@ public:
     }
 
     Image blurImage = LoadImageFittedInBox( MOTION_BLUR_ACTOR_IMAGES[mCurrentImage], mMotionBlurActorSize.x, mMotionBlurActorSize.y );
+
     mMotionBlurImageActor.SetImage(blurImage);
+#ifdef MULTIPLE_MOTION_BLURRED_ACTORS
+    mMotionBlurImageActor2.SetImage(blurImage);
+    mMotionBlurImageActor3.SetImage(blurImage);
+    mMotionBlurImageActor4.SetImage(blurImage);
+    mMotionBlurImageActor5.SetImage(blurImage);
+#endif
   }
 
 
@@ -522,20 +519,15 @@ private:
   PushButton                 mActorEffectsButton;     ///< The actor effects toggling Button.
 
   // Motion blur
-  ShaderEffect mMotionBlurEffect;
-  ImageActor mMotionBlurImageActor;
+  Property::Map mMotionBlurEffect;
+  ImageView mMotionBlurImageActor;
   Size mMotionBlurActorSize;
 
 #ifdef MULTIPLE_MOTION_BLURRED_ACTORS
-  ShaderEffect mMotionBlurEffect2;
-  ShaderEffect mMotionBlurEffect3;
-  ShaderEffect mMotionBlurEffect4;
-  ShaderEffect mMotionBlurEffect5;
-
-  ImageActor mMotionBlurImageActor2;
-  ImageActor mMotionBlurImageActor3;
-  ImageActor mMotionBlurImageActor4;
-  ImageActor mMotionBlurImageActor5;
+  ImageView mMotionBlurImageActor2;
+  ImageView mMotionBlurImageActor3;
+  ImageView mMotionBlurImageActor4;
+  ImageView mMotionBlurImageActor5;
 #endif //#ifdef MULTIPLE_MOTION_BLURRED_ACTORS
 
   // animate actor to position where user taps screen
