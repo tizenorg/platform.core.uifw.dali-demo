@@ -170,9 +170,16 @@ public:
     Stage stage = Stage::GetCurrent();
 
     // Background image:
-    ResourceImage backgroundImage = ResourceImage::New( BACKGROUND_IMAGE, ImageDimensions( stage.GetSize().width, stage.GetSize().height ), FittingMode::SCALE_TO_FILL, SamplingMode::BOX_THEN_LINEAR );
-    Toolkit::ImageView background = Toolkit::ImageView::New( backgroundImage );
-    background.SetZ( -2.0f );
+    Dali::Property::Map backgroundImage;
+    backgroundImage.Insert( "renderer-type", "image-renderer" );
+    backgroundImage.Insert( "image-url", BACKGROUND_IMAGE );
+    backgroundImage.Insert( "image-desired-width", stage.GetSize().width );
+    backgroundImage.Insert( "image-desired-height", stage.GetSize().height );
+    backgroundImage.Insert( "image-fitting-mode", "scale-to-fill" );
+    backgroundImage.Insert( "image-sampling-mode", "box-then-nearest" );
+
+    Toolkit::ImageView background = Toolkit::ImageView::New();
+    background.SetProperty( Toolkit::ImageView::Property::IMAGE, backgroundImage );
     background.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     background.SetSize( stage.GetSize() );
     stage.Add( background );
@@ -206,17 +213,31 @@ public:
     mDesiredBox.SetSize( stage.GetSize() * mImageStageScale );
     mDesiredBox.SetParentOrigin( ParentOrigin::CENTER );
     mDesiredBox.SetAnchorPoint( AnchorPoint::CENTER );
-    mDesiredBox.SetPosition( 0, 0, -1 );
 
     mHeightBox.SetSize( stage.GetSize().width,  (stage.GetSize() * mImageStageScale).height );
     mHeightBox.SetParentOrigin( ParentOrigin::CENTER );
     mHeightBox.SetAnchorPoint( AnchorPoint::CENTER );
-    mHeightBox.SetPosition( 0, 0, -1 );
 
     mWidthBox.SetSize( (stage.GetSize() * mImageStageScale).width, stage.GetSize().height );
     mWidthBox.SetParentOrigin( ParentOrigin::CENTER );
     mWidthBox.SetAnchorPoint( AnchorPoint::CENTER );
-    mWidthBox.SetPosition( 0, 0, -1 );
+
+    // Initialize the actor
+    mImageActor = Toolkit::ImageView::New();
+
+    // Reposition the actor
+    mImageActor.SetParentOrigin( ParentOrigin::CENTER );
+    mImageActor.SetAnchorPoint( AnchorPoint::CENTER );
+
+    // Display the actor on the stage
+    mDesiredBox.Add( mImageActor );
+
+    mImageActor.SetSize( stage.GetSize() * mImageStageScale );
+
+    // Setup the pinch detector for scaling the desired image load dimensions:
+    mPinchDetector = PinchGestureDetector::New();
+    mPinchDetector.Attach( mImageActor );
+    mPinchDetector.DetectedSignal().Connect( this, &ImageScalingAndFilteringController::OnPinch );
 
     // Make a grab-handle for resizing the image:
     mGrabCorner = Toolkit::PushButton::New();
@@ -233,28 +254,11 @@ public:
     grabCornerLayer.SetParentOrigin( ParentOrigin::BOTTOM_RIGHT );
 
     grabCornerLayer.Add( mGrabCorner );
-    mDesiredBox.Add( grabCornerLayer );
+    mImageActor.Add( grabCornerLayer );
     mPanGestureDetector = PanGestureDetector::New();
     mPanGestureDetector.Attach( mGrabCorner );
     mPanGestureDetector.DetectedSignal().Connect( this, &ImageScalingAndFilteringController::OnPan );
 
-    // Initialize the actor
-    mImageActor = ImageActor::New();
-
-    // Reposition the actor
-    mImageActor.SetParentOrigin( ParentOrigin::CENTER );
-    mImageActor.SetAnchorPoint( AnchorPoint::CENTER );
-    mImageActor.SetSortModifier(5.f);
-
-    // Display the actor on the stage
-    background.Add( mImageActor );
-
-    mImageActor.SetSize( stage.GetSize() * mImageStageScale );
-
-    // Setup the pinch detector for scaling the desired image load dimensions:
-    mPinchDetector = PinchGestureDetector::New();
-    mPinchDetector.Attach( mImageActor );
-    mPinchDetector.DetectedSignal().Connect( this, &ImageScalingAndFilteringController::OnPinch );
 
     // Tie-in input event handlers:
     stage.KeyEventSignal().Connect( this, &ImageScalingAndFilteringController::OnKeyEvent );
@@ -517,13 +521,6 @@ public:
     }
   }
 
-  void OnImageLoaded( ResourceImage image )
-  {
-      DALI_ASSERT_DEBUG( image == mNextImage );
-      mImageActor.SetImage( image );
-      mImageActor.SetSize( Size( image.GetWidth(), image.GetHeight() ) );
-  }
-
   bool OnControlTouched( Actor actor, const TouchEvent& event )
   {
     if(event.GetPointCount() > 0)
@@ -674,7 +671,8 @@ private:
     const ImageDimensions imageSizeInt = ImageDimensions::FromFloatArray( &imageSize.x );
 
     ResourceImage image = ResourceImage::New( path, imageSizeInt, mFittingMode, mSamplingMode );
-    image.LoadingFinishedSignal().Connect( this, &ImageScalingAndFilteringController::OnImageLoaded );
+    mImageActor.SetImage( image );
+    mImageActor.SetSize( Size( image.GetWidth(), image.GetHeight() ) );
 
     mNextImage = image;
 
@@ -695,7 +693,7 @@ private:
   float mLastPinchScale;
   Toolkit::PushButton  mGrabCorner;
   PanGestureDetector mPanGestureDetector;
-  ImageActor mImageActor;
+  Toolkit::ImageView mImageActor;
   ResourceImage mNextImage; //< Currently-loading image
   Vector2 mImageStageScale;
   int mCurrentPath;
