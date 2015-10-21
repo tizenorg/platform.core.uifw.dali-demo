@@ -286,7 +286,7 @@ private:
     {
       for(int column = 0;column<imageColumns;column++)
       {
-        ImageView image = CreateImage( GetNextImagePath(), imageSize.x, imageSize.y );
+        ImageView image = CreateImage( GetNextImagePath() );
 
         image.SetParentOrigin( ParentOrigin::CENTER );
         image.SetAnchorPoint( AnchorPoint::CENTER );
@@ -458,11 +458,9 @@ private:
    * @param[in] width the width of the image in texels
    * @param[in] height the height of the image in texels.
    */
-  ImageView CreateImage( const std::string& filename, unsigned int width = IMAGE_THUMBNAIL_WIDTH, unsigned int height = IMAGE_THUMBNAIL_HEIGHT )
+  ImageView CreateImage( const std::string& filename )
   {
-    Image img = ResourceImage::New(filename, ImageDimensions( width, height ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
-
-    ImageView actor = ImageView::New(img);
+    ImageView actor = ImageView::New(filename, ImageDimensions( IMAGE_THUMBNAIL_WIDTH, IMAGE_THUMBNAIL_HEIGHT ));
     actor.SetName( filename );
     actor.SetParentOrigin(ParentOrigin::CENTER);
     actor.SetAnchorPoint(AnchorPoint::CENTER);

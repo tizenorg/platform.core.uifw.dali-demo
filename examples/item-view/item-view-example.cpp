@@ -47,7 +47,7 @@ const char* IMAGE_PATHS[] = {
     DALI_IMAGE_DIR "gallery-medium-8.jpg",
     DALI_IMAGE_DIR "gallery-medium-9.jpg",
     DALI_IMAGE_DIR "gallery-medium-10.jpg",
-    DALI_IMAGE_DIR "gallery-medium-11.jpg",
+    DALI_IMAGE_DIR "gallery-medium-110000.jpg", //  wrong path, to test whether the broken image is loaded
     DALI_IMAGE_DIR "gallery-medium-12.jpg",
     DALI_IMAGE_DIR "gallery-medium-13.jpg",
     DALI_IMAGE_DIR "gallery-medium-14.jpg",
@@ -94,6 +94,8 @@ const char* IMAGE_PATHS[] = {
 
 const unsigned int NUM_IMAGES = sizeof(IMAGE_PATHS) / sizeof(char*);
 
+const unsigned int IMAGE_WIDTH = 256;
+const unsigned int IMAGE_HEIGHT = 256;
 const char* BACKGROUND_IMAGE( "" );
 const char* TOOLBAR_IMAGE( DALI_IMAGE_DIR "top-bar.png" );
 const char* EDIT_IMAGE( DALI_IMAGE_DIR "icon-edit.png" );
@@ -850,7 +852,7 @@ public: // From ItemFactory
   virtual Actor NewItem(unsigned int itemId)
   {
     // Create an image view for this item
-    ImageView actor = ImageView::New( IMAGE_PATHS[ itemId % NUM_IMAGES ] );
+    ImageView actor = ImageView::New( IMAGE_PATHS[ itemId % NUM_IMAGES ] , ImageDimensions( IMAGE_WIDTH, IMAGE_HEIGHT ));
     actor.SetZ( 0.0f );
     actor.SetPosition( INITIAL_OFFSCREEN_POSITION );
 
