@@ -54,7 +54,7 @@ const char* IMAGE_PATHS[] = {
     DALI_IMAGE_DIR "gallery-medium-8.jpg",
     DALI_IMAGE_DIR "gallery-medium-9.jpg",
     DALI_IMAGE_DIR "gallery-medium-10.jpg",
-    DALI_IMAGE_DIR "gallery-medium-11.jpg",
+    DALI_IMAGE_DIR "gallery-medium-110000.jpg", //  wrong path, to test whether the broken image is loaded
     DALI_IMAGE_DIR "gallery-medium-12.jpg",
     DALI_IMAGE_DIR "gallery-medium-13.jpg",
     DALI_IMAGE_DIR "gallery-medium-14.jpg",
@@ -296,7 +296,6 @@ public:
     mWhiteImage = BufferImage::WHITE();
 
     // Create the item view actor
-    mImageAtlas = CreateImageAtlas();
     mItemView = ItemView::New(*this);
     mItemView.SetParentOrigin(ParentOrigin::CENTER);
     mItemView.SetAnchorPoint(AnchorPoint::CENTER);
@@ -859,11 +858,7 @@ public: // From ItemFactory
   {
     // Create an image actor for this item
     unsigned int imageId = itemId % NUM_IMAGES;
-    ImageActor::PixelArea pixelArea( (imageId%NUM_IMAGE_PER_ROW_IN_ATLAS)*IMAGE_WIDTH,
-                                     (imageId/NUM_IMAGE_PER_ROW_IN_ATLAS)*IMAGE_HEIGHT,
-                                      IMAGE_WIDTH,
-                                      IMAGE_HEIGHT );
-    Actor actor = ImageActor::New(mImageAtlas, pixelArea);
+    Actor actor = ImageView::New( IMAGE_PATHS[imageId], ImageDimensions( IMAGE_WIDTH, IMAGE_HEIGHT ));
     actor.SetPosition( INITIAL_OFFSCREEN_POSITION );
 
     // Add a border image child actor
@@ -926,23 +921,6 @@ public: // From ItemFactory
 private:
 
   /**
-   * Create an Atlas to tile the images inside.
-   */
-  Atlas CreateImageAtlas()
-  {
-    const unsigned int atlas_width = IMAGE_WIDTH*NUM_IMAGE_PER_ROW_IN_ATLAS;
-    const unsigned int atlas_height = IMAGE_HEIGHT*ceil( static_cast<float>(NUM_IMAGES)/ static_cast<float>(NUM_IMAGE_PER_ROW_IN_ATLAS));
-    Atlas atlas = Atlas::New(atlas_width, atlas_height, Pixel::RGB888);
-
-    for( unsigned int i = 0; i < NUM_IMAGES; i++ )
-    {
-      atlas.Upload( IMAGE_PATHS[i], (i%NUM_IMAGE_PER_ROW_IN_ATLAS)*IMAGE_WIDTH, (i/NUM_IMAGE_PER_ROW_IN_ATLAS)*IMAGE_HEIGHT );
-    }
-
-    return atlas;
-  }
-
-  /**
    * Sets/Updates the title of the View
    * @param[in] title The new title for the view.
    */
@@ -985,7 +963,6 @@ private:
 
   ItemView mItemView;
   Image mBorderImage;
-  Atlas mImageAtlas;
   unsigned int mCurrentLayout;
   float mDurationSeconds;
 

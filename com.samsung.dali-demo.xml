@@ -117,5 +117,8 @@
 	</ui-application>
 	<ui-application appid="image-view.example" exec="/usr/apps/com.samsung.dali-demo/bin/image-view.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Image View</label>
+        </ui-application>
+        <ui-application appid="image-atlas.example" exec="/usr/apps/com.samsung.dali-demo/bin/image-atlas.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Image Atlas</label>
 	</ui-application>
 </manifest>
