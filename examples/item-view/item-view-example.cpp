@@ -28,6 +28,9 @@
 #include <dali/devel-api/images/atlas.h>
 #include <dali/devel-api/rendering/cull-face.h>
 
+#include <dali-toolkit/devel-api/controls/renderer-factory/control-renderer.h>
+#include <dali-toolkit/devel-api/controls/renderer-factory/renderer-factory.h>
+
 using namespace Dali;
 using namespace Dali::Toolkit;
 
@@ -128,7 +131,6 @@ const char* SPIRAL_LABEL("Spiral");
 const char* GRID_LABEL("Grid");
 const char* DEPTH_LABEL("Depth");
 
-const char* ITEM_BORDER_IMAGE_PATH( DALI_IMAGE_DIR "frame-128x128.png" );
 const Vector3 ITEM_BORDER_MARGIN_SIZE(24, 24, 0);
 
 // These values depend on the border image
@@ -166,6 +168,27 @@ static Vector3 DepthLayoutItemSizeFunctionLandscape( float layoutWidth )
   // 1x1 aspect ratio
   return Vector3(width, width, width);
 }
+
+const char* VERTEX_SHADER = DALI_COMPOSE_SHADER(
+  attribute mediump vec2 aPosition;\n
+  varying mediump vec2 vTexCoord;\n
+  uniform mediump mat4 uMvpMatrix;\n
+  uniform mediump vec3 uSize;\n
+  uniform mediump vec4 uTextureRect;\n
+  \n
+  void main()\n
+  {\n
+    mediump vec4 vertexPosition = vec4(aPosition, 0.0, 1.0);\n
+    vertexPosition.xyz *= uSize;\n
+    vertexPosition = uMvpMatrix * vertexPosition;\n
+    \n
+    vTexCoord = aPosition + vec2(0.5);\n
+    vTexCoord.x = mix(uTextureRect.x, uTextureRect.z, vTexCoord.x);\n
+    vTexCoord.y = mix(uTextureRect.y, uTextureRect.w, vTexCoord.y);\n
+
+    gl_Position = vertexPosition;\n
+  }\n
+);
 
 } // unnamed namespace
 
@@ -218,7 +241,12 @@ public:
     Vector2 stageSize = Stage::GetCurrent().GetSize();
 
     // Create a border image shared by all the item actors
-    mBorderImage = ResourceImage::New(ITEM_BORDER_IMAGE_PATH);
+    mBorderRenderer = RendererFactory::Get().GetControlRenderer( 5.0f, Color::WHITE );
+
+    Property::Map customShader;
+
+    customShader[ "vertex-shader" ] = VERTEX_SHADER;
+    mCustomShader[ "shader" ] = customShader;
 
     // Creates a default view with a default tool bar.
     // The view is added to the stage.
@@ -850,6 +878,16 @@ public: // From ItemFactory
     return NUM_IMAGES * 10;
   }
 
+  void ItemOnStage( Actor actor )
+  {
+    mBorderRenderer.SetOnStage( actor );
+  }
+
+  void ItemOffStage( Actor actor )
+  {
+    mBorderRenderer.SetOffStage( actor );
+  }
+
   /**
    * Create an Actor to represent a visible item.
    * @param itemId
@@ -859,24 +897,38 @@ public: // From ItemFactory
   {
     // Create an image actor for this item
     unsigned int imageId = itemId % NUM_IMAGES;
+    /*
     ImageActor::PixelArea pixelArea( (imageId%NUM_IMAGE_PER_ROW_IN_ATLAS)*IMAGE_WIDTH,
                                      (imageId/NUM_IMAGE_PER_ROW_IN_ATLAS)*IMAGE_HEIGHT,
                                       IMAGE_WIDTH,
                                       IMAGE_HEIGHT );
-    Actor actor = ImageActor::New(mImageAtlas, pixelArea);
+                                      */
+
+    Vector4 textureRect( (imageId%NUM_IMAGE_PER_ROW_IN_ATLAS)/(float)NUM_IMAGE_PER_ROW_IN_ATLAS,
+                         (imageId%NUM_IMAGE_PER_ROW_IN_ATLAS)/(float)NUM_IMAGE_PER_ROW_IN_ATLAS,
+                         (1+(imageId%NUM_IMAGE_PER_ROW_IN_ATLAS))/(float)NUM_IMAGE_PER_ROW_IN_ATLAS,
+                         (1+(imageId%NUM_IMAGE_PER_ROW_IN_ATLAS))/(float)NUM_IMAGE_PER_ROW_IN_ATLAS);
+
+    ImageView actor = ImageView::New(mImageAtlas);
     actor.SetPosition( INITIAL_OFFSCREEN_POSITION );
+    actor.SetProperty( ImageView::Property::IMAGE, mCustomShader );
+    actor.RegisterProperty( "uTextureRect", textureRect );
+    //actor.OnStageSignal().Connect( this, &ItemViewExample::ItemOnStage );
+    //actor.OffStageSignal().Connect( this, &ItemViewExample::ItemOffStage );
 
     // Add a border image child actor
-    ImageActor borderActor = ImageActor::New(mBorderImage);
+    /*
+    ImageView borderActor = ImageView::New(mBorderImage);
     borderActor.SetParentOrigin( ParentOrigin::CENTER );
     borderActor.SetAnchorPoint( AnchorPoint::CENTER );
     borderActor.SetPosition( 0.f, 0.f, 1.f );
-    borderActor.SetStyle( ImageActor::STYLE_NINE_PATCH );
+    borderActor.SetStyle( ImageView::STYLE_NINE_PATCH );
     borderActor.SetNinePatchBorder( Vector4( ITEM_IMAGE_BORDER_LEFT, ITEM_IMAGE_BORDER_TOP, ITEM_IMAGE_BORDER_RIGHT, ITEM_IMAGE_BORDER_BOTTOM ) );
     borderActor.SetColorMode( USE_OWN_MULTIPLY_PARENT_COLOR ); // darken with parent image-actor
     borderActor.SetResizePolicy( ResizePolicy::SIZE_FIXED_OFFSET_FROM_PARENT, Dimension::ALL_DIMENSIONS );
     borderActor.SetSizeModeFactor( ITEM_BORDER_MARGIN_SIZE );
     actor.Add(borderActor);
+    */
     actor.SetKeyboardFocusable( true );
 
     Vector3 spiralItemSize;
@@ -884,7 +936,7 @@ public: // From ItemFactory
 
     // Add a checkbox child actor; invisible until edit-mode is enabled
 
-    ImageActor checkbox = ImageActor::New( mWhiteImage );
+    ImageView checkbox = ImageView::New( mWhiteImage );
     checkbox.SetName( "CheckBox" );
     checkbox.SetColor( Vector4(0.0f,0.0f,0.0f,0.6f) );
     checkbox.SetParentOrigin( ParentOrigin::TOP_RIGHT );
@@ -892,8 +944,8 @@ public: // From ItemFactory
     checkbox.SetSize( spiralItemSize.width * 0.2f, spiralItemSize.width * 0.2f );
     checkbox.SetPosition( -SELECTION_BORDER_WIDTH, SELECTION_BORDER_WIDTH );
     checkbox.SetZ( 1.0f );
-    SetCullFace(checkbox, Dali::CullBack);
-    checkbox.SetSortModifier( 150.0f );
+    //SetCullFace(checkbox, Dali::CullBack);
+    //checkbox.SetSortModifier( 150.0f );
     if( MODE_REMOVE_MANY  != mMode &&
         MODE_INSERT_MANY  != mMode &&
         MODE_REPLACE_MANY != mMode )
@@ -902,16 +954,16 @@ public: // From ItemFactory
     }
     actor.Add( checkbox );
 
-    ImageActor tick = ImageActor::New( ResourceImage::New(SELECTED_IMAGE) );
+    ImageView tick = ImageView::New( ResourceImage::New(SELECTED_IMAGE) );
     tick.SetColorMode( USE_OWN_COLOR );
     tick.SetName( "Tick" );
     tick.SetParentOrigin( ParentOrigin::TOP_RIGHT );
     tick.SetAnchorPoint( AnchorPoint::TOP_RIGHT );
     tick.SetSize( spiralItemSize.width * 0.2f, spiralItemSize.width * 0.2f );
     tick.SetZ( 1.0f );
-    tick.SetSortModifier( 150.0f );
+    //tick.SetSortModifier( 150.0f );
     tick.SetVisible( false );
-    SetCullFace(tick, Dali::CullBack);
+    //SetCullFace(tick, Dali::CullBack);
     checkbox.Add( tick );
 
     // Connect new items for various editing modes
@@ -984,7 +1036,8 @@ private:
   TextLabel mTitleActor;             ///< The Toolbar's Title.
 
   ItemView mItemView;
-  Image mBorderImage;
+  Toolkit::ControlRenderer mBorderRenderer;
+  Property::Map mCustomShader;
   Atlas mImageAtlas;
   unsigned int mCurrentLayout;
   float mDurationSeconds;
