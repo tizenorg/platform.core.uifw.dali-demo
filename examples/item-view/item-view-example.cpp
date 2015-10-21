@@ -47,7 +47,7 @@ const char* IMAGE_PATHS[] = {
     DALI_IMAGE_DIR "gallery-medium-8.jpg",
     DALI_IMAGE_DIR "gallery-medium-9.jpg",
     DALI_IMAGE_DIR "gallery-medium-10.jpg",
-    DALI_IMAGE_DIR "gallery-medium-11.jpg",
+    DALI_IMAGE_DIR "gallery-medium-110000.jpg", //  wrong path, to test whether the broken image is loaded
     DALI_IMAGE_DIR "gallery-medium-12.jpg",
     DALI_IMAGE_DIR "gallery-medium-13.jpg",
     DALI_IMAGE_DIR "gallery-medium-14.jpg",
@@ -849,9 +849,15 @@ public: // From ItemFactory
    */
   virtual Actor NewItem(unsigned int itemId)
   {
+<<<<<<< HEAD
     // Create an image view for this item
     ImageView actor = ImageView::New( IMAGE_PATHS[ itemId % NUM_IMAGES ] );
     actor.SetZ( 0.0f );
+=======
+    // Create an image actor for this item
+    unsigned int imageId = itemId % NUM_IMAGES;
+    Actor actor = ImageView::New( IMAGE_PATHS[imageId], ImageDimensions( IMAGE_WIDTH, IMAGE_HEIGHT ));
+>>>>>>> Image atlasing example
     actor.SetPosition( INITIAL_OFFSCREEN_POSITION );
 
     // Add a border image child actor
@@ -961,6 +967,10 @@ private:
   TextLabel mTitleActor;             ///< The Toolbar's Title.
 
   ItemView mItemView;
+<<<<<<< HEAD
+=======
+  Image mBorderImage;
+>>>>>>> Image atlasing example
   unsigned int mCurrentLayout;
   float mDurationSeconds;
 

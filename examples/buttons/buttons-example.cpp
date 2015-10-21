@@ -158,7 +158,7 @@ class ButtonsController: public ConnectionTracker
 
     // Radio 1
     {
-      Toolkit::ImageView image = Toolkit::ImageView::New( ResourceImage::New( SMALL_IMAGE_1 ) );
+      Toolkit::ImageView image = Toolkit::ImageView::New( SMALL_IMAGE_1 );
       image.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
 
       mRadioButtonImage1 = Dali::Toolkit::RadioButton::New( "1" );
@@ -175,7 +175,7 @@ class ButtonsController: public ConnectionTracker
     {
       radioY += RADIO_LABEL_THUMBNAIL_SIZE + RADIO_IMAGE_SPACING;
 
-      Toolkit::ImageView image = Toolkit::ImageView::New( ResourceImage::New( SMALL_IMAGE_2 ) );
+      Toolkit::ImageView image = Toolkit::ImageView::New( SMALL_IMAGE_2  );
       image.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
 
       mRadioButtonImage2 = Dali::Toolkit::RadioButton::New( "2" );
@@ -191,7 +191,7 @@ class ButtonsController: public ConnectionTracker
     {
       radioY += RADIO_LABEL_THUMBNAIL_SIZE + RADIO_IMAGE_SPACING;
 
-      Toolkit::ImageView image = Toolkit::ImageView::New( ResourceImage::New( SMALL_IMAGE_3 ) );
+      Toolkit::ImageView image = Toolkit::ImageView::New( SMALL_IMAGE_3 );
       image.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
 
       mRadioButtonImage3 = Dali::Toolkit::RadioButton::New( "3" );
@@ -214,11 +214,7 @@ class ButtonsController: public ConnectionTracker
     radioGroup2Background.AddChild( mUpdateButton, Toolkit::TableView::CellPosition( 1, 0 ) );
 
     // ImageView to display selected image
-    mBigImage1 = ResourceImage::New( BIG_IMAGE_1 );
-    mBigImage2 = ResourceImage::New( BIG_IMAGE_2 );
-    mBigImage3 = ResourceImage::New( BIG_IMAGE_3 );
-
-    mImage = Toolkit::ImageView::New( mBigImage1 );
+    mImage = Toolkit::ImageView::New( BIG_IMAGE_1 );
     mImage.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
     mImage.SetSizeScalePolicy( SizeScalePolicy::FIT_WITH_ASPECT_RATIO );
     radioGroup2Background.AddChild( mImage, Toolkit::TableView::CellPosition( 0, 1, 2, 1 ) );
@@ -258,7 +254,7 @@ class ButtonsController: public ConnectionTracker
     textLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT );
     textLabel.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "CENTER" );
 
-    Toolkit::ImageView image = Toolkit::ImageView::New( ResourceImage::New( ENABLED_IMAGE ) );
+    Toolkit::ImageView image = Toolkit::ImageView::New( ENABLED_IMAGE );
     image.SetSize( DP(RADIO_LABEL_THUMBNAIL_SIZE), DP(RADIO_LABEL_THUMBNAIL_SIZE) );
     image.SetPadding( Padding( DP(20.0f), 0.0f, 0.0f, 0.0f ) );
     tableView.AddChild( image, Toolkit::TableView::CellPosition( 0, 1 ) );
@@ -426,15 +422,15 @@ class ButtonsController: public ConnectionTracker
   {
     if( mRadioButtonImage1.IsSelected() )
     {
-      mImage.SetImage( mBigImage1 );
+      mImage.SetImage( BIG_IMAGE_1 );
     }
     else if( mRadioButtonImage2.IsSelected() )
     {
-      mImage.SetImage( mBigImage2 );
+      mImage.SetImage( BIG_IMAGE_2 );
     }
     else if( mRadioButtonImage3.IsSelected() )
     {
-      mImage.SetImage( mBigImage3 );
+      mImage.SetImage( BIG_IMAGE_3 );
     }
     return true;
   }
@@ -529,9 +525,6 @@ class ButtonsController: public ConnectionTracker
   Animation      mAnimation;
   float          mLastPoint;
 
-  Image mBigImage1;
-  Image mBigImage2;
-  Image mBigImage3;
   Toolkit::ImageView mImage;
 };
 

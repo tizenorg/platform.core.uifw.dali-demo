@@ -522,8 +522,7 @@ private:
     Vector2 stageSize(Stage::GetCurrent().GetSize());
     const Vector2 brickSize(BRICK_SIZE * Vector2(stageSize.x, stageSize.x));
 
-    Image img = ResourceImage::New( BRICK_IMAGE_PATH[type], Dali::ImageDimensions( 128, 64 ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
-    ImageView brick = ImageView::New(img);
+    ImageView brick = ImageView::New(BRICK_IMAGE_PATH[type], Dali::ImageDimensions( 128, 64 ));
     brick.SetParentOrigin(ParentOrigin::TOP_LEFT);
     brick.SetAnchorPoint(AnchorPoint::CENTER);
     brick.SetSize( brickSize );
