@@ -653,9 +653,9 @@ void DaliTableView::OnKeyEvent( const KeyEvent& event )
     {
       // If there's a Popup, Hide it if it's contributing to the display in any way (EG. transitioning in or out).
       // Otherwise quit.
-      if ( mVersionPopup && ( mVersionPopup.GetDisplayState() != Toolkit::Popup::HIDDEN ) )
+      if ( mVersionPopup && ( mVersionPopup.GetState() != Toolkit::Popup::POPUP_HIDE ) )
       {
-        mVersionPopup.SetDisplayState( Popup::HIDDEN );
+        mVersionPopup.Hide();
       }
       else
       {
@@ -721,8 +721,8 @@ void DaliTableView::AddBackgroundActors( Actor layer, int count, BufferImage dis
     dfActor.SetSize( Vector2( randSize, randSize ) );
     dfActor.SetParentOrigin( ParentOrigin::CENTER );
 
-    Dali::Property::Map effect = Toolkit::CreateDistanceFieldEffect();
-    dfActor.SetProperty( Toolkit::ImageView::Property::IMAGE, effect );
+    //Dali::Property::Map effect = Toolkit::CreateDistanceFieldEffect();
+    //dfActor.SetProperty( Toolkit::ImageView::Property::RESOURCE_URL, effect );
     dfActor.SetColor( BUBBLE_COLOR[ i%NUMBER_OF_BUBBLE_COLOR ] );
     layer.Add( dfActor );
   }
@@ -926,7 +926,7 @@ bool DaliTableView::OnTileHovered( Actor actor, const HoverEvent& event )
 void DaliTableView::OnLogoTapped( Dali::Actor actor, const Dali::TapGesture& tap )
 {
   // Only show if currently fully hidden. If transitioning-out, the transition will not be interrupted.
-  if ( !mVersionPopup || ( mVersionPopup.GetDisplayState() == Toolkit::Popup::HIDDEN ) )
+  if ( !mVersionPopup || ( mVersionPopup.GetState() == Toolkit::Popup::POPUP_HIDE ) )
   {
     if ( !mVersionPopup )
     {
@@ -937,9 +937,9 @@ void DaliTableView::OnLogoTapped( Dali::Actor actor, const Dali::TapGesture& tap
 
       mVersionPopup = Dali::Toolkit::Popup::New();
 
-      Toolkit::TextLabel titleActor = Toolkit::TextLabel::New( "Version information" );
-      titleActor.SetName( "title-actor" );
-      titleActor.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+      //Toolkit::TextLabel titleActor = Toolkit::TextLabel::New( "Version information" );
+      //titleActor.SetName( "title-actor" );
+      //titleActor.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
 
       Toolkit::TextLabel contentActor = Toolkit::TextLabel::New( stream.str() );
       contentActor.SetName( "content-actor" );
@@ -947,8 +947,8 @@ void DaliTableView::OnLogoTapped( Dali::Actor actor, const Dali::TapGesture& tap
       contentActor.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
       contentActor.SetPadding( Padding( 0.0f, 0.0f, 20.0f, 0.0f ) );
 
-      mVersionPopup.SetTitle( titleActor );
-      mVersionPopup.SetContent( contentActor );
+      mVersionPopup.SetTitle( "Version information" );
+      mVersionPopup.Add( contentActor );
 
       mVersionPopup.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::WIDTH );
       mVersionPopup.SetSizeModeFactor( Vector3( 0.75f, 1.0f, 1.0f ) );
@@ -958,15 +958,15 @@ void DaliTableView::OnLogoTapped( Dali::Actor actor, const Dali::TapGesture& tap
       Stage::GetCurrent().Add( mVersionPopup );
     }
 
-    mVersionPopup.SetDisplayState( Popup::SHOWN );
+    mVersionPopup.Show();
   }
 }
 
 void DaliTableView::HideVersionPopup()
 {
   // Only hide if currently fully shown. If transitioning-in, the transition will not be interrupted.
-  if ( mVersionPopup && ( mVersionPopup.GetDisplayState() == Toolkit::Popup::SHOWN ) )
+  if ( mVersionPopup && ( mVersionPopup.GetState() == Toolkit::Popup::POPUP_SHOW ) )
   {
-    mVersionPopup.SetDisplayState( Popup::HIDDEN );
+    mVersionPopup.Hide();
   }
 }
