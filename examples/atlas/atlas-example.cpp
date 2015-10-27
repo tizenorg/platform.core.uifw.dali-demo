@@ -109,7 +109,7 @@ public:
     atlas2.Upload( DALI_IMAGE_DIR "gallery-small-7.jpg", 268, 268 );
 
 
-    Toolkit::ImageView imageView = Toolkit::ImageView::New( DALI_IMAGE_DIR "gallery-small-1.jpg" );
+    Toolkit::ImageView imageView = Toolkit::ImageView::New( atlas2 );
 
     imageView.SetY(200.f);
     imageView.SetZ(-1.f);
