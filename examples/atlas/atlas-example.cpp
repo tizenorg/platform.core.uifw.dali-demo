@@ -77,7 +77,7 @@ public:
     mLoseContextButton.ClickedSignal().Connect( this, &AtlasController::OnLoseContextButtonClicked );
     mToolBar.AddControl( mLoseContextButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING );
 
-    mAtlas = Atlas::New( 400,300, Pixel::RGBA8888);
+    mAtlas = Atlas::New( 400,700, Pixel::RGBA8888);
     mAtlas.Clear(Vector4(0.f,0.5f,0.5f,0.5f));
     mAtlas.Upload( DALI_IMAGE_DIR "icon-change.png", 50, 30 );
     mAtlas.Upload( DALI_IMAGE_DIR "icon-cluster-carousel.png", 100, 30 );
@@ -88,37 +88,27 @@ public:
     mAtlas.Upload( DALI_IMAGE_DIR "icon-item-view-layout-depth.png", 150, 130 );
     mAtlas.Upload( DALI_IMAGE_DIR "icon-item-view-layout-grid.png", 200, 130 );
     mAtlas.Upload( DALI_IMAGE_DIR "icon-item-view-layout-spiral.png", 250, 130 );
+
     UploadBufferImages();
 
-    Toolkit::ImageView imageActor1 = Toolkit::ImageView::New( mAtlas );
-    imageActor1.SetY(-170.f);
-    imageActor1.SetParentOrigin(ParentOrigin::CENTER);
-    mContentLayer.Add( imageActor1 );
-
-    Atlas atlas2 = Atlas::New( 400,400, Pixel::RGB888);
-    atlas2.Clear( Color::RED );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-1.jpg", 4, 4 );
-    atlas2.Clear( Color::BLUE );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-2.jpg", 136, 4 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-3.jpg", 268, 4 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-4.jpg", 4, 136 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-5.jpg", 136, 136 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-6.jpg", 268, 135 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-7.jpg", 4, 268 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-7.jpg", 136, 268 );
-    atlas2.Upload( DALI_IMAGE_DIR "gallery-small-7.jpg", 268, 268 );
+    mAtlas.Upload( DALI_IMAGE_DIR "gallery-small-1.jpg", 4, 304 );
+    mAtlas.Upload( DALI_IMAGE_DIR "gallery-small-2.jpg", 136, 304 );
+    mAtlas.Upload( DALI_IMAGE_DIR "gallery-small-3.jpg", 268, 304 );
+    mAtlas.Upload( DALI_IMAGE_DIR "gallery-small-4.jpg", 4, 436 );
+    mAtlas.Upload( DALI_IMAGE_DIR "gallery-small-5.jpg", 136, 436 );
+    mAtlas.Upload( DALI_IMAGE_DIR "gallery-small-6.jpg", 268, 436 );
+    mAtlas.Upload( DALI_IMAGE_DIR "gallery-small-7.jpg", 4, 568 );
+    mAtlas.Upload( DALI_IMAGE_DIR "gallery-small-7.jpg", 136, 568 );
+    mAtlas.Upload( DALI_IMAGE_DIR "gallery-small-7.jpg", 268, 568 );
 
 
-    Toolkit::ImageView imageView = Toolkit::ImageView::New( DALI_IMAGE_DIR "gallery-small-1.jpg" );
+    Toolkit::ImageView imageView = Toolkit::ImageView::New( mAtlas );
 
-    imageView.SetY(200.f);
-    imageView.SetZ(-1.f);
     imageView.SetParentOrigin(ParentOrigin::CENTER);
     mContentLayer.Add( imageView );
 
     mPanGestureDetector = PanGestureDetector::New();
     mPanGestureDetector.DetectedSignal().Connect( this, &AtlasController::OnPanGesture );
-    mPanGestureDetector.Attach( imageActor1 );
     mPanGestureDetector.Attach( imageView );
 
     stage.ContextLostSignal().Connect( this, &AtlasController::OnContextLost );
