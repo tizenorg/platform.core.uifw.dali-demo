@@ -82,17 +82,17 @@ class PortraitPageFactory : public PageFactory
    * @param[in] pageId The ID of the page to create.
    * @return An image actor, or an uninitialized pointer if the ID is out of range.
    */
-  virtual Actor NewPage( unsigned int pageId )
+  virtual Toolkit::ImageView NewPage( unsigned int pageId )
   {
-    ImageActor page;
+    ImageView page;
 
     if( pageId == 0 )
     {
-      page = ImageActor::New( ResourceImage::New( BOOK_COVER_PORTRAIT ) );
+      page = ImageView::New( BOOK_COVER_PORTRAIT );
     }
     else
     {
-      page = ImageActor::New( ResourceImage::New( PAGE_IMAGES_PORTRAIT[ (pageId-1) % NUMBER_OF_PORTRAIT_IMAGE ] ) );
+      page = ImageView::New( PAGE_IMAGES_PORTRAIT[ (pageId-1) % NUMBER_OF_PORTRAIT_IMAGE ] );
     }
 
     return page;
@@ -114,20 +114,20 @@ class LandscapePageFactory : public PageFactory
    * @param[in] pageId The ID of the page to create.
    * @return An image actor, or an uninitialized pointer if the ID is out of range.
    */
-  virtual Actor NewPage( unsigned int pageId )
+  virtual Toolkit::ImageView NewPage( unsigned int pageId )
   {
-    ImageActor pageFront;
-    ImageActor pageBack;
+    ImageView pageFront;
+    ImageView pageBack;
     if( pageId == 0 )
     {
-       pageFront = ImageActor::New( ResourceImage::New( BOOK_COVER_LANDSCAPE ) );
-       pageBack = ImageActor::New( ResourceImage::New( BOOK_COVER_BACK_LANDSCAPE ) );
+       pageFront = ImageView::New( BOOK_COVER_LANDSCAPE );
+       pageBack = ImageView::New( BOOK_COVER_BACK_LANDSCAPE );
     }
     else
     {
       unsigned int imageId = (pageId-1)*2;
-      pageFront = ImageActor::New( ResourceImage::New( PAGE_IMAGES_LANDSCAPE[ imageId % NUMBER_OF_LANDSCAPE_IMAGE ] ) );
-      pageBack = ImageActor::New( ResourceImage::New( PAGE_IMAGES_LANDSCAPE[ (imageId+1) % NUMBER_OF_LANDSCAPE_IMAGE ] ) );
+      pageFront = ImageView::New( PAGE_IMAGES_LANDSCAPE[ imageId % NUMBER_OF_LANDSCAPE_IMAGE ] );
+      pageBack = ImageView::New( PAGE_IMAGES_LANDSCAPE[ (imageId+1) % NUMBER_OF_LANDSCAPE_IMAGE ] );
     }
     pageFront.Add(pageBack);
 
