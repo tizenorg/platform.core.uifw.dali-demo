@@ -117,5 +117,7 @@
 	</ui-application>
 	<ui-application appid="image-view.example" exec="/usr/apps/com.samsung.dali-demo/bin/image-view.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Image View</label>
+	<ui-application appid="fridge.example" exec="/usr/apps/com.samsung.dali-demo/bin/fridge.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Fridge Demo</label>
 	</ui-application>
 </manifest>
