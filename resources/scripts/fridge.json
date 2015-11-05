@@ -1,0 +1,81 @@
+{
+  "includes":
+  [
+  ],
+  "constants":
+  {
+    "MENU_ITEM_SIZE_X":100,
+    "MENU_ITEM_SIZE_Y":100,
+    "MENU_ITEM_ICON":"icon0.png",
+    "MENU_ITEM_TITLE":"Title",
+    "MENU_ITEM_TITLE_FONT_SIZE":20,
+    "MENU_ITEM_TITLE_POSITION":[0.0,-30.0,0.0]
+  },
+  "templates":
+  {
+    "template-menu-item":
+    {
+      "name":"menu-item",
+      "type":"Actor",
+      "position":[0,0,0],
+      "anchorPoint":"TOP_LEFT",
+      "parentOrigin":"TOP_LEFT",
+      "actors":
+       [
+        {
+          "name":"icon",
+          "type":"ImageView",
+          "image":
+          {
+            "url": "{IMAGE_PATH}{MENU_ITEM_ICON}"
+          },
+          "position":[0,0,0],
+          "color":[1.0,1.0,1.0,1.0],
+          "anchorPoint":"CENTER",
+          "parentOrigin":"CENTER","actors":
+          [
+            {
+              "name":"title",
+              "anchorPoint":"TOP_CENTER",
+              "parentOrigin":"BOTTOM_CENTER",
+              "type":"TextLabel",
+              "position": [0.0,75.0,0.0],
+              "pointSize":"{MENU_ITEM_TITLE_FONT_SIZE}",
+              "fontFamily":"HelveticaNeue",
+              "fontStyle":"Bold",
+              "horizontalAlignment":"CENTER",
+              "text":"{MENU_ITEM_TITLE}"
+            }
+          ]
+        },
+        {
+          "name":"line",
+          "type":"ImageView",
+          "image":
+          {
+            "url": "{IMAGE_PATH}white-pixel.png"
+          },
+          "color":[0.4,0.4,0.4,1.0],
+          "anchorPoint":"CENTER_LEFT",
+          "parentOrigin":"CENTER_LEFT"
+        }
+       ]
+     },
+     "template-focus-actor":
+     {
+       "name":"FocusActor",
+       "type":"ImageView",
+       "image":
+       {
+         "url": "{IMAGE_PATH}keyboard_focus.png"
+       },
+       "style":"STYLE_NINE_PATCH",
+       "border": [10, 10, 10, 10],
+       "drawMode":"OVERLAY",
+       "anchorPoint":"TOP_LEFT",
+       "parentOrigin":"TOP_LEFT",
+       "position":[0,0,0.0]
+     }
+  }
+}
+
