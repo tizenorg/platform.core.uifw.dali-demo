@@ -56,7 +56,7 @@ public:
     stage.Add( mTextLabel );
 
     // Respond to a click anywhere on the stage
-    stage.GetRootLayer().TouchedSignal().Connect( this, &TiltController::OnTouch );
+    stage.GetRootLayer().TouchSignal().Connect( this, &TiltController::OnTouch );
 
     CreateSensor();
   }
@@ -71,7 +71,7 @@ public:
     }
   }
 
-  bool OnTouch( Actor actor, const TouchEvent& touch )
+  bool OnTouch( Actor actor, const TouchData& touch )
   {
     // quit the application
     mApplication.Quit();
@@ -96,7 +96,7 @@ private:
 
 // Entry point for Linux & Tizen applications
 //
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv );
   TiltController test( application );

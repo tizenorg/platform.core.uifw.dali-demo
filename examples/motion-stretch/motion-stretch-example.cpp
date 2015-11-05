@@ -167,7 +167,6 @@ public:
     winHandle.AddAvailableOrientation( Dali::Window::PORTRAIT_INVERSE  );
     winHandle.AddAvailableOrientation( Dali::Window::LANDSCAPE_INVERSE );
 
-   // winHandle.GetOrientation().ChangedSignal().Connect( this, &MotionStretchExampleApp::OnOrientationChanged );
     unsigned int degrees = 0;
     Rotate( static_cast< DeviceOrientation >( degrees ) );
 
@@ -176,8 +175,10 @@ public:
     //
     // Motion stretched actor
     //
-
-    mMotionStretchImageView = ImageView::New( MOTION_STRETCH_ACTOR_IMAGE1 );
+    mMotionStretchEffect = Toolkit::CreateMotionStretchEffect();
+    mMotionStretchEffect["url"] = MOTION_STRETCH_ACTOR_IMAGE1;
+    mMotionStretchImageView = ImageView::New();
+    mMotionStretchImageView.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionStretchEffect );
     mMotionStretchImageView.SetParentOrigin( ParentOrigin::CENTER );
     mMotionStretchImageView.SetAnchorPoint( AnchorPoint::CENTER );
     mMotionStretchImageView.SetSize( MOTION_STRETCH_ACTOR_WIDTH, MOTION_STRETCH_ACTOR_HEIGHT );
@@ -185,9 +186,7 @@ public:
     mContentLayer.Add( mMotionStretchImageView );
 
     // Create shader used for doing motion stretch
-    mMotionStretchEffect = Toolkit::CreateMotionStretchEffect();
     Toolkit::SetMotionStretchProperties( mMotionStretchImageView );
-    mMotionStretchImageView.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionStretchEffect );
   }
 
   //////////////////////////////////////////////////////////////
@@ -195,12 +194,6 @@ public:
   // Device Orientation Support
   //
   //
-
-  void OnOrientationChanged( Orientation orientation )
-  {
-    unsigned int degrees = orientation.GetDegrees();
-    Rotate( static_cast< DeviceOrientation >( degrees ) );
-  }
 
   void Rotate( DeviceOrientation orientation )
   {
@@ -397,8 +390,8 @@ public:
       mCurrentImage = 0;
     }
 
-    Image stretchImage = ResourceImage::New( MOTION_STRETCH_ACTOR_IMAGES[mCurrentImage] );
-    mMotionStretchImageView.SetImage(stretchImage);
+    mMotionStretchEffect["url"] = MOTION_STRETCH_ACTOR_IMAGES[mCurrentImage];
+    mMotionStretchImageView.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionStretchEffect );
   }
 
 
@@ -441,7 +434,7 @@ void RunTest(Application& app)
 
 // Entry point for Linux & Tizen applications
 //
-int main(int argc, char **argv)
+int DALI_EXPORT_API main(int argc, char **argv)
 {
   Application app = Application::New(&argc, &argv, DEMO_THEME_PATH);
 

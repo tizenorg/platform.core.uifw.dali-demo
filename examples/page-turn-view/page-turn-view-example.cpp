@@ -17,6 +17,8 @@
 
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali-toolkit/devel-api/image-atlas/image-atlas.h>
+#include <dali/devel-api/images/atlas.h>
 
 #include <assert.h>
 #include <cstdlib>
@@ -24,6 +26,7 @@
 #include <iostream>
 
 #include "shared/view.h"
+#include "shared/utility.h"
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -38,9 +41,9 @@ const char* const CHANGE_IMAGE_ICON_SELECTED( DEMO_IMAGE_DIR "icon-change-select
 // set a ratio to modify the current page number when the rotation is changed
 const float PAGE_NUMBER_CORRESPONDING_RATIO(1.25f);
 
-const char* BOOK_COVER_PORTRAIT = ( DEMO_IMAGE_DIR "book-portrait-cover.jpg" );
-const char* BOOK_COVER_LANDSCAPE = ( DEMO_IMAGE_DIR "book-landscape-cover.jpg" );
-const char* BOOK_COVER_BACK_LANDSCAPE = ( DEMO_IMAGE_DIR "book-landscape-cover-back.jpg" );
+const char* BOOK_COVER_PORTRAIT( DEMO_IMAGE_DIR "book-portrait-cover.jpg" );
+const char* BOOK_COVER_LANDSCAPE( DEMO_IMAGE_DIR "book-landscape-cover.jpg" );
+const char* BOOK_COVER_BACK_LANDSCAPE( DEMO_IMAGE_DIR "book-landscape-cover-back.jpg" );
 
 const char* PAGE_IMAGES_PORTRAIT[] =
 {
@@ -65,6 +68,21 @@ const char* PAGE_IMAGES_LANDSCAPE[] =
 };
 const unsigned int NUMBER_OF_LANDSCAPE_IMAGE( sizeof(PAGE_IMAGES_LANDSCAPE) / sizeof(PAGE_IMAGES_LANDSCAPE[0]) );
 
+Atlas LoadImages( const char*imagePath1, const char* imagePath2 )
+{
+  PixelData pixelData1 = DemoHelper::LoadPixelData( imagePath1, ImageDimensions(), FittingMode::DEFAULT, SamplingMode::DEFAULT );
+  PixelData pixelData2 = DemoHelper::LoadPixelData( imagePath2, ImageDimensions(), FittingMode::DEFAULT, SamplingMode::DEFAULT );
+
+  unsigned int width = pixelData1.GetWidth()+pixelData2.GetWidth();
+  unsigned int height = pixelData1.GetHeight() > pixelData2.GetHeight() ? pixelData1.GetHeight() : pixelData2.GetHeight();
+
+  Atlas image  = Atlas::New( width, height );
+  image.Upload( pixelData1, 0u, 0u );
+  image.Upload( pixelData2, pixelData1.GetWidth(), 0u );
+
+  return image;
+}
+
 }// end LOCAL STUFF
 
 class PortraitPageFactory : public PageFactory
@@ -78,21 +96,21 @@ class PortraitPageFactory : public PageFactory
     return 10*NUMBER_OF_PORTRAIT_IMAGE + 1;
   }
   /**
-   * Create an image actor to represent a page.
+   * Create an image to represent a page.
    * @param[in] pageId The ID of the page to create.
-   * @return An image actor, or an uninitialized pointer if the ID is out of range.
+   * @return An image, or an uninitialized pointer if the ID is out of range.
    */
-  virtual Actor NewPage( unsigned int pageId )
+  virtual Image NewPage( unsigned int pageId )
   {
-    ImageActor page;
+    Atlas page;
 
     if( pageId == 0 )
     {
-      page = ImageActor::New( ResourceImage::New( BOOK_COVER_PORTRAIT ) );
+      page = DemoHelper::LoadImage( BOOK_COVER_PORTRAIT );
     }
     else
     {
-      page = ImageActor::New( ResourceImage::New( PAGE_IMAGES_PORTRAIT[ (pageId-1) % NUMBER_OF_PORTRAIT_IMAGE ] ) );
+      page = DemoHelper::LoadImage( PAGE_IMAGES_PORTRAIT[ (pageId-1) % NUMBER_OF_PORTRAIT_IMAGE ] );
     }
 
     return page;
@@ -101,6 +119,7 @@ class PortraitPageFactory : public PageFactory
 
 class LandscapePageFactory : public PageFactory
 {
+
   /**
    * Query the number of pages available from the factory.
    * The maximum available page has an ID of GetNumberOfPages()-1.
@@ -110,28 +129,25 @@ class LandscapePageFactory : public PageFactory
     return 10*NUMBER_OF_LANDSCAPE_IMAGE / 2 + 1;
   }
   /**
-   * Create an image actor to represent a page.
+   * Create an image to represent a page.
    * @param[in] pageId The ID of the page to create.
-   * @return An image actor, or an uninitialized pointer if the ID is out of range.
+   * @return An image, or an uninitialized pointer if the ID is out of range.
    */
-  virtual Actor NewPage( unsigned int pageId )
+  virtual Image NewPage( unsigned int pageId )
   {
-    ImageActor pageFront;
-    ImageActor pageBack;
+
+    Atlas page;
     if( pageId == 0 )
     {
-       pageFront = ImageActor::New( ResourceImage::New( BOOK_COVER_LANDSCAPE ) );
-       pageBack = ImageActor::New( ResourceImage::New( BOOK_COVER_BACK_LANDSCAPE ) );
+      page = LoadImages( BOOK_COVER_LANDSCAPE, BOOK_COVER_BACK_LANDSCAPE );
     }
     else
     {
       unsigned int imageId = (pageId-1)*2;
-      pageFront = ImageActor::New( ResourceImage::New( PAGE_IMAGES_LANDSCAPE[ imageId % NUMBER_OF_LANDSCAPE_IMAGE ] ) );
-      pageBack = ImageActor::New( ResourceImage::New( PAGE_IMAGES_LANDSCAPE[ (imageId+1) % NUMBER_OF_LANDSCAPE_IMAGE ] ) );
+      page = LoadImages( PAGE_IMAGES_LANDSCAPE[ imageId % NUMBER_OF_LANDSCAPE_IMAGE ], PAGE_IMAGES_LANDSCAPE[ (imageId+1) % NUMBER_OF_LANDSCAPE_IMAGE ] );
     }
-    pageFront.Add(pageBack);
 
-    return pageFront;
+    return page;
   }
 };
 
@@ -345,7 +361,7 @@ void PageTurnController::OnPageFinishedPan( PageTurnView pageTurnView )
 }
 
 // Entry point for applications
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application app = Application::New(&argc, &argv, DEMO_THEME_PATH);
   PageTurnController test ( app );

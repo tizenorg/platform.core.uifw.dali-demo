@@ -172,8 +172,7 @@ void RadialMenuExample::OnInit(Application& app)
   mRadialSweepView3.SetInitialActorAngle(Degree(-110));
   mRadialSweepView3.SetFinalActorAngle(Degree(0));
 
-  Image dial = ResourceImage::New( TEST_DIAL_FILENAME );
-  mDialView = ImageView::New( dial );
+  mDialView = ImageView::New( TEST_DIAL_FILENAME );
   mDialView.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
   mDialView.SetParentOrigin( ParentOrigin::CENTER );
   mDialView.SetScale(scale);
@@ -254,8 +253,7 @@ RadialSweepView RadialMenuExample::CreateSweepView( std::string imageName,
                                                     Degree finalAngle)
 {
   // Create the image
-  Image image = ResourceImage::New(imageName);
-  mImageView = ImageView::New(image);
+  mImageView = ImageView::New(imageName);
   mImageView.SetParentOrigin(ParentOrigin::CENTER);
   mImageView.SetAnchorPoint(AnchorPoint::CENTER);
   mImageView.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
@@ -299,7 +297,7 @@ void RunTest(Application app)
 }
 
 // Entry point for Linux & Tizen applications
-int main(int argc, char **argv)
+int DALI_EXPORT_API main(int argc, char **argv)
 {
   Application app = Application::New(&argc, &argv, DEMO_THEME_PATH);
 

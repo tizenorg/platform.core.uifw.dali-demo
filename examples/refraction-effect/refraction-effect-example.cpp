@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/dali.h>
-#include <dali/devel-api/rendering/renderer.h>
+#include <dali/public-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 #include <fstream>
@@ -26,6 +26,7 @@
 
 // INTERNAL INCLUDES
 #include "shared/view.h"
+#include "shared/utility.h"
 
 using namespace Dali;
 
@@ -72,19 +73,6 @@ struct LightOffsetConstraint
 
   float mRadius;
 };
-
-/**
- * @brief Load an image, scaled-down to no more than the stage dimensions.
- *
- * Uses image scaling mode SCALE_TO_FILL to resize the image at
- * load time to cover the entire stage with pixels with no borders,
- * and filter mode BOX_THEN_LINEAR to sample the image with maximum quality.
- */
-ResourceImage LoadStageFillingImage( const char * const imagePath )
-{
-  Size stageSize = Stage::GetCurrent().GetSize();
-  return ResourceImage::New( imagePath, ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
-}
 
 /**
  * structure of the vertex in the mesh
@@ -280,11 +268,12 @@ private:
     mShaderFlat = Shader::New( VERTEX_SHADER_FLAT, FRAGMENT_SHADER_FLAT );
     mGeometry = CreateGeometry( MESH_FILES[mCurrentMeshId] );
 
-    Image texture = LoadStageFillingImage( TEXTURE_IMAGES[mCurrentTextureId] );
-    mMaterial = Material::New( mShaderFlat );
-    mMaterial.AddTexture( texture, "sTexture" );
+    Texture texture = DemoHelper::LoadStageFillingTexture( TEXTURE_IMAGES[mCurrentTextureId] );
+    mTextureSet = TextureSet::New();
+    mTextureSet.SetTexture( 0u, texture );
 
-    mRenderer = Renderer::New( mGeometry, mMaterial );
+    mRenderer = Renderer::New( mGeometry, mShaderFlat );
+    mRenderer.SetTextures( mTextureSet );
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
@@ -293,7 +282,7 @@ private:
     mContent.Add( mMeshActor );
 
     // Connect the callback to the touch signal on the mesh actor
-    mContent.TouchedSignal().Connect( this, &RefractionEffectExample::OnTouch );
+    mContent.TouchSignal().Connect( this, &RefractionEffectExample::OnTouch );
 
     // shader used when the finger is touching the screen. render refraction effect
     mShaderRefraction = Shader::New( VERTEX_SHADER_REFRACTION, FRAGMENT_SHADER_REFRACTION );
@@ -342,21 +331,20 @@ private:
   bool OnChangeTexture( Toolkit::Button button )
   {
     mCurrentTextureId = ( mCurrentTextureId + 1 ) % NUM_TEXTURE_IMAGES;
-    Image texture = LoadStageFillingImage( TEXTURE_IMAGES[mCurrentTextureId] );
-    mMaterial.SetTextureImage( 0, texture );
+    Texture texture = DemoHelper::LoadStageFillingTexture( TEXTURE_IMAGES[mCurrentTextureId] );
+    mTextureSet.SetTexture( 0u, texture );
     return true;
   }
 
-  bool OnTouch( Actor actor , const TouchEvent& event )
+  bool OnTouch( Actor actor, const TouchData& event )
   {
-    const TouchPoint &point = event.GetPoint(0);
-    switch(point.state)
+    switch( event.GetState( 0 ) )
     {
-      case TouchPoint::Down:
+      case PointState::DOWN:
       {
-        mMaterial.SetShader( mShaderRefraction );
+        mRenderer.SetShader( mShaderRefraction );
 
-        SetLightXYOffset( point.screen );
+        SetLightXYOffset( event.GetScreenPosition( 0 ) );
 
         mLightAnimation.Play();
 
@@ -371,15 +359,15 @@ private:
 
         break;
       }
-      case TouchPoint::Motion:
+      case PointState::MOTION:
       {
         // make the light position following the finger movement
-        SetLightXYOffset( point.screen );
+        SetLightXYOffset( event.GetScreenPosition( 0 ) );
         break;
       }
-      case TouchPoint::Up:
-      case TouchPoint::Leave:
-      case TouchPoint::Interrupted:
+      case PointState::UP:
+      case PointState::LEAVE:
+      case PointState::INTERRUPTED:
       {
         mLightAnimation.Pause();
 
@@ -393,9 +381,7 @@ private:
         mStrenghAnimation.Play();
         break;
       }
-      case TouchPoint::Stationary:
-      case TouchPoint::Last:
-      default:
+      case PointState::STATIONARY:
       {
         break;
       }
@@ -406,7 +392,7 @@ private:
 
   void OnTouchFinished( Animation& source )
   {
-    mMaterial.SetShader( mShaderFlat );
+    mRenderer.SetShader( mShaderFlat );
     SetLightXYOffset( Vector2::ZERO );
   }
 
@@ -563,7 +549,7 @@ private:
 
   Application&   mApplication;
   Layer          mContent;
-  Material       mMaterial;
+  TextureSet     mTextureSet;
   Geometry       mGeometry;
   Renderer       mRenderer;
   Actor          mMeshActor;
@@ -596,8 +582,7 @@ RunTest(Application& app)
 
 /*****************************************************************************/
 
-int
-main(int argc, char **argv)
+int DALI_EXPORT_API main(int argc, char **argv)
 {
   Application app = Application::New(&argc, &argv, DEMO_THEME_PATH);
 

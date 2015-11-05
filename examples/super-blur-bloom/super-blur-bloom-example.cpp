@@ -19,6 +19,7 @@
 #include <dali-toolkit/devel-api/controls/super-blur-view/super-blur-view.h>
 #include <dali-toolkit/devel-api/controls/bloom-view/bloom-view.h>
 #include "shared/view.h"
+#include "shared/utility.h"
 
 using namespace Dali;
 
@@ -42,20 +43,7 @@ const char* BACKGROUND_IMAGES[]=
   DEMO_IMAGE_DIR "background-magnifier.jpg",
 };
 const unsigned int NUM_BACKGROUND_IMAGES( sizeof( BACKGROUND_IMAGES ) / sizeof( BACKGROUND_IMAGES[0] ) );
-}
 
-/**
- * @brief Load an image, scaled-down to no more than the stage dimensions.
- *
- * Uses image scaling mode FittingMode::SCALE_TO_FILL to resize the image at
- * load time to cover the entire stage with pixels with no borders,
- * and filter mode BOX_THEN_LINEAR to sample the image with
- * maximum quality.
- */
-ResourceImage LoadStageFillingImage( const char * const imagePath )
-{
-  Size stageSize = Stage::GetCurrent().GetSize();
-  return ResourceImage::New( imagePath, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
 }
 
 class BlurExample : public ConnectionTracker
@@ -116,7 +104,7 @@ private:
     mSuperBlurView.SetParentOrigin( ParentOrigin::CENTER );
     mSuperBlurView.SetAnchorPoint( AnchorPoint::CENTER );
     mSuperBlurView.BlurFinishedSignal().Connect(this, &BlurExample::OnBlurFinished);
-    mCurrentImage = LoadStageFillingImage( BACKGROUND_IMAGES[mImageIndex] );
+    mCurrentImage = DemoHelper::LoadStageFillingImage( BACKGROUND_IMAGES[mImageIndex] );
     mSuperBlurView.SetImage( mCurrentImage );
     mBackground.Add( mSuperBlurView );
     mIsBlurring = true;
@@ -130,17 +118,16 @@ private:
     mBloomView.Add( mBloomActor );
 
     // Connect the callback to the touch signal on the background
-    mSuperBlurView.TouchedSignal().Connect( this, &BlurExample::OnTouch );
-    mBloomView.TouchedSignal().Connect( this, &BlurExample::OnTouch );
+    mSuperBlurView.TouchSignal().Connect( this, &BlurExample::OnTouch );
+    mBloomView.TouchSignal().Connect( this, &BlurExample::OnTouch );
   }
 
   // Callback function of the touch signal on the background
-  bool OnTouch(Dali::Actor actor, const Dali::TouchEvent& event)
+  bool OnTouch(Dali::Actor actor, const Dali::TouchData& event)
   {
-    const TouchPoint &point = event.GetPoint(0);
-    switch(point.state)
+    switch( event.GetState( 0 ) )
     {
-      case TouchPoint::Down:
+      case PointState::DOWN:
       {
         if( mAnimation )
         {
@@ -159,9 +146,9 @@ private:
         mAnimation.Play();
         break;
       }
-      case TouchPoint::Up:
-      case TouchPoint::Leave:
-      case TouchPoint::Interrupted:
+      case PointState::UP:
+      case PointState::LEAVE:
+      case PointState::INTERRUPTED:
       {
         if( mAnimation )
         {
@@ -180,10 +167,8 @@ private:
         mAnimation.Play();
         break;
       }
-      case TouchPoint::Motion:
-      case TouchPoint::Stationary:
-      case TouchPoint::Last:
-      default:
+      case PointState::MOTION:
+      case PointState::STATIONARY:
       {
         break;
       }
@@ -218,7 +203,7 @@ private:
     }
 
     mImageIndex = (mImageIndex+1u)%NUM_BACKGROUND_IMAGES;
-    mCurrentImage = LoadStageFillingImage( BACKGROUND_IMAGES[mImageIndex] );
+    mCurrentImage = DemoHelper::LoadStageFillingImage( BACKGROUND_IMAGES[mImageIndex] );
 
     if( mSuperBlurView.OnStage() )
     {
@@ -311,8 +296,7 @@ RunTest(Application& app)
 
 /*****************************************************************************/
 
-int
-main(int argc, char **argv)
+int DALI_EXPORT_API main(int argc, char **argv)
 {
   Application app = Application::New(&argc, &argv, DEMO_THEME_PATH);
 

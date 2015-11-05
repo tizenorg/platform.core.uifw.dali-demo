@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/rendering/renderer.h>
+#include <dali/public-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 // INTERNAL INCLUDES
 #include "shared/view.h"
+#include "shared/utility.h"
 
 using namespace Dali;
 
@@ -104,7 +105,7 @@ Geometry CreateGeometry()
   // Create the geometry object
   Geometry polyhedraGeometry = Geometry::New();
   polyhedraGeometry.AddVertexBuffer( polyhedraVertices );
-  polyhedraGeometry.SetGeometryType( Geometry::POINTS );
+  polyhedraGeometry.SetType( Geometry::POINTS );
 
   return polyhedraGeometry;
 }
@@ -152,18 +153,19 @@ public:
     // Hide the indicator bar
     application.GetWindow().ShowIndicator( Dali::Window::INVISIBLE );
 
-    mImage = ResourceImage::New( MATERIAL_SAMPLE );
-    Image image = ResourceImage::New( MATERIAL_SAMPLE2 );
+    Texture texture0 = DemoHelper::LoadTexture( MATERIAL_SAMPLE );
+    Texture texture1 = DemoHelper::LoadTexture( MATERIAL_SAMPLE2 );
 
-    mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
+    Shader shader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
 
-    mMaterial = Material::New( mShader );
-    mMaterial.AddTexture(mImage, "sTexture1");
-    mMaterial.AddTexture(image, "sTexture2");
+    TextureSet textureSet = TextureSet::New();
+    textureSet.SetTexture( 0u, texture0 );
+    textureSet.SetTexture( 1u, texture1 );
 
-    mGeometry = CreateGeometry();
+    Geometry geometry = CreateGeometry();
 
-    mRenderer = Renderer::New( mGeometry, mMaterial );
+    mRenderer = Renderer::New( geometry, shader );
+    mRenderer.SetTextures( textureSet );
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
@@ -219,10 +221,6 @@ private:
   Application&  mApplication;                             ///< Application instance
   Vector3 mStageSize;                                     ///< The size of the stage
 
-  Image    mImage;
-  Shader   mShader;
-  Material mMaterial;
-  Geometry mGeometry;
   Renderer mRenderer;
   Actor    mMeshActor;
   Renderer mRenderer2;
@@ -239,7 +237,7 @@ void RunTest( Application& application )
 
 // Entry point for Linux & SLP applications
 //
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv );
 

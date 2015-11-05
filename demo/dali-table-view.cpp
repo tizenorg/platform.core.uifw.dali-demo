@@ -241,7 +241,7 @@ void DaliTableView::Initialize( Application& application )
   mScrollView.SetAxisAutoLock( true );
   mScrollView.ScrollCompletedSignal().Connect( this, &DaliTableView::OnScrollComplete );
   mScrollView.ScrollStartedSignal().Connect( this, &DaliTableView::OnScrollStart );
-  mScrollView.TouchedSignal().Connect( this, &DaliTableView::OnScrollTouched );
+  mScrollView.TouchSignal().Connect( this, &DaliTableView::OnScrollTouched );
 
   mScrollViewLayer = Layer::New();
 
@@ -298,8 +298,6 @@ void DaliTableView::Initialize( Application& application )
   // Set initial orientation
   unsigned int degrees = 0;
   Rotate( degrees );
-
-  //orientation.ChangedSignal().Connect( this, &DaliTableView::OrientationChanged );
 
   winHandle.ShowIndicator( Dali::Window::INVISIBLE );
 
@@ -415,11 +413,6 @@ void DaliTableView::Populate()
   mScrollView.SetRulerY( mScrollRulerY );
 }
 
-void DaliTableView::OrientationChanged( Orientation orientation )
-{
-  // TODO: Implement if orientation change required
-}
-
 void DaliTableView::Rotate( unsigned int degrees )
 {
   // Resize the root actor
@@ -483,7 +476,7 @@ Actor DaliTableView::CreateTile( const std::string& name, const std::string& tit
   content.SetKeyboardFocusable(true);
 
   // connect to the touch events
-  content.TouchedSignal().Connect( this, &DaliTableView::OnTilePressed );
+  content.TouchSignal().Connect( this, &DaliTableView::OnTilePressed );
   content.HoveredSignal().Connect( this, &DaliTableView::OnTileHovered );
 
   return content;
@@ -492,7 +485,6 @@ Actor DaliTableView::CreateTile( const std::string& name, const std::string& tit
 Toolkit::ImageView DaliTableView::NewStencilImage()
 {
   Toolkit::ImageView stencil = ImageView::New( TILE_BACKGROUND_ALPHA );
-
   stencil.SetParentOrigin( ParentOrigin::CENTER );
   stencil.SetAnchorPoint( AnchorPoint::CENTER );
   stencil.SetDrawMode( DrawMode::STENCIL );
@@ -503,12 +495,16 @@ Toolkit::ImageView DaliTableView::NewStencilImage()
   return stencil;
 }
 
-bool DaliTableView::OnTilePressed( Actor actor, const TouchEvent& event )
+bool DaliTableView::OnTilePressed( Actor actor, const TouchData& event )
+{
+  return DoTilePress( actor, event.GetState( 0 ) );
+}
+
+bool DaliTableView::DoTilePress( Actor actor, PointState::Type pointState )
 {
   bool consumed = false;
 
-  const TouchPoint& point = event.GetPoint( 0 );
-  if( TouchPoint::Down == point.state )
+  if( PointState::DOWN == pointState )
   {
     mPressedActor = actor;
     consumed = true;
@@ -516,7 +512,7 @@ bool DaliTableView::OnTilePressed( Actor actor, const TouchEvent& event )
 
   // A button press is only valid if the Down & Up events
   // both occurred within the button.
-  if( ( TouchPoint::Up == point.state ) &&
+  if( ( PointState::UP == pointState ) &&
       ( mPressedActor == actor ) )
   {
     // ignore Example button presses when scrolling or button animating.
@@ -588,10 +584,9 @@ void DaliTableView::OnScrollComplete( const Dali::Vector2& position )
   accessibilityManager.SetCurrentFocusActor(mPages[mScrollView.GetCurrentPage()].GetChildAt(0) );
 }
 
-bool DaliTableView::OnScrollTouched( Actor actor, const TouchEvent& event )
+bool DaliTableView::OnScrollTouched( Actor actor, const TouchData& event )
 {
-  const TouchPoint& point = event.GetPoint( 0 );
-  if( TouchPoint::Down == point.state )
+  if( PointState::DOWN == event.GetState( 0 ) )
   {
     mPressedActor = actor;
   }
@@ -721,6 +716,7 @@ void DaliTableView::AddBackgroundActors( Actor layer, int count, BufferImage dis
     Dali::Property::Map effect = Toolkit::CreateDistanceFieldEffect();
     dfActor.SetProperty( Toolkit::ImageView::Property::IMAGE, effect );
     dfActor.SetColor( BUBBLE_COLOR[ i%NUMBER_OF_BUBBLE_COLOR ] );
+
     layer.Add( dfActor );
   }
 
@@ -794,8 +790,7 @@ void DaliTableView::GenerateCircle( const Size& size, std::vector< unsigned char
 
 ImageView DaliTableView::CreateLogo( std::string imagePath )
 {
-  Image image = ResourceImage::New( imagePath );
-  ImageView logo = ImageView::New( image );
+  ImageView logo = ImageView::New( imagePath );
 
   logo.SetAnchorPoint( AnchorPoint::CENTER );
   logo.SetParentOrigin( ParentOrigin::CENTER );
@@ -908,9 +903,7 @@ void DaliTableView::OnFocusedActorActivated( Dali::Actor activatedActor )
     mPressedActor = activatedActor;
 
     // Activate the current focused actor;
-    TouchEvent touchEventUp;
-    touchEventUp.points.push_back( TouchPoint ( 0, TouchPoint::Up, 0.0f, 0.0f ) );
-    OnTilePressed(mPressedActor, touchEventUp);
+    DoTilePress( mPressedActor, PointState::UP );
   }
 }
 

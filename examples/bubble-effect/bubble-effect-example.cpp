@@ -19,6 +19,7 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/controls/bubble-effect/bubble-emitter.h>
 #include "shared/view.h"
+#include "shared/utility.h"
 
 using namespace Dali;
 
@@ -52,20 +53,6 @@ const unsigned int NUM_BUBBLE_SHAPE_IMAGES( sizeof( BUBBLE_SHAPE_IMAGES ) / size
 
 const Vector2 DEFAULT_BUBBLE_SIZE( 10.f, 30.f );
 const unsigned int DEFAULT_NUMBER_OF_BUBBLES( 1000 );
-
-/**
- * @brief Load an image, scaled-down to no more than the stage dimensions.
- *
- * Uses image scaling mode FittingMode::SCALE_TO_FILL to resize the image at
- * load time to cover the entire stage with pixels with no borders,
- * and filter mode BOX_THEN_LINEAR to sample the image with
- * maximum quality.
- */
-ResourceImage LoadStageFillingImage( const char * const imagePath )
-{
-  Size stageSize = Stage::GetCurrent().GetSize();
-  return ResourceImage::New( imagePath, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
-}
 
 }// end LOCAL_STUFF
 
@@ -130,10 +117,10 @@ private:
 
     // Create and initialize the BubbleEmitter object
     mBubbleEmitter = Toolkit::BubbleEmitter::New( stageSize,
-                                                  ResourceImage::New( BUBBLE_SHAPE_IMAGES[mCurrentBubbleShapeImageId] ),
+                                                  DemoHelper::LoadImage( BUBBLE_SHAPE_IMAGES[mCurrentBubbleShapeImageId] ),
                                                   DEFAULT_NUMBER_OF_BUBBLES,
                                                   DEFAULT_BUBBLE_SIZE);
-    mBackgroundImage = LoadStageFillingImage( BACKGROUND_IMAGES[mCurrentBackgroundImageId] );
+    mBackgroundImage = DemoHelper::LoadStageFillingImage( BACKGROUND_IMAGES[mCurrentBackgroundImageId] );
     mBubbleEmitter.SetBackground( mBackgroundImage, mHSVDelta );
 
     // Get the root actor of all bubbles, and add it to stage.
@@ -150,7 +137,7 @@ private:
     mTimerForBubbleEmission.TickSignal().Connect(this, &BubbleEffectExample::OnTimerTick);
 
     // Connect the callback to the touch signal on the background
-    mBackground.TouchedSignal().Connect( this, &BubbleEffectExample::OnTouch );
+    mBackground.TouchSignal().Connect( this, &BubbleEffectExample::OnTouch );
   }
 
 
@@ -205,24 +192,22 @@ private:
   }
 
   // Callback function of the touch signal on the background
-  bool OnTouch(Dali::Actor actor, const Dali::TouchEvent& event)
+  bool OnTouch(Dali::Actor actor, const Dali::TouchData& event)
   {
-    const TouchPoint &point = event.GetPoint(0);
-    switch(point.state)
+    switch( event.GetState( 0 ) )
     {
-      case TouchPoint::Down:
+      case PointState::DOWN:
       {
-        mCurrentTouchPosition = point.screen;
-        mEmitPosition = point.screen;
+        mCurrentTouchPosition = mEmitPosition = event.GetScreenPosition( 0 );
         mTimerForBubbleEmission.Start();
         mNonMovementCount = 0;
 
         break;
       }
-      case TouchPoint::Motion:
+      case PointState::MOTION:
       {
-        Vector2 displacement = point.screen - mCurrentTouchPosition;
-        mCurrentTouchPosition = point.screen;
+        Vector2 displacement = event.GetScreenPosition( 0 ) - mCurrentTouchPosition;
+        mCurrentTouchPosition = event.GetScreenPosition( 0 );
         //emit multiple bubbles along the moving direction when the finger moves quickly
         float step = std::min(5.f, displacement.Length());
         for( float i=0.25f; i<step; i=i+1.f)
@@ -231,9 +216,9 @@ private:
         }
         break;
       }
-      case TouchPoint::Up:
-      case TouchPoint::Leave:
-      case TouchPoint::Interrupted:
+      case PointState::UP:
+      case PointState::LEAVE:
+      case PointState::INTERRUPTED:
       {
         mTimerForBubbleEmission.Stop();
         mEmitAnimation.Play();
@@ -241,8 +226,7 @@ private:
         mAnimateComponentCount = 0;
         break;
       }
-      case TouchPoint::Stationary:
-      case TouchPoint::Last:
+      case PointState::STATIONARY:
       default:
       {
         break;
@@ -256,7 +240,7 @@ private:
   {
     if(button == mChangeBackgroundButton)
     {
-      mBackgroundImage = LoadStageFillingImage( BACKGROUND_IMAGES[ ++mCurrentBackgroundImageId % NUM_BACKGROUND_IMAGES  ] );
+      mBackgroundImage = DemoHelper::LoadStageFillingImage( BACKGROUND_IMAGES[ ++mCurrentBackgroundImageId % NUM_BACKGROUND_IMAGES  ] );
 
       mBubbleEmitter.SetBackground( mBackgroundImage, mHSVDelta );
 
@@ -264,7 +248,7 @@ private:
     }
     else if( button == mChangeBubbleShapeButton )
     {
-      mBubbleEmitter.SetShapeImage( ResourceImage::New( BUBBLE_SHAPE_IMAGES[ ++mCurrentBubbleShapeImageId % NUM_BUBBLE_SHAPE_IMAGES ] ) );
+      mBubbleEmitter.SetShapeImage( DemoHelper::LoadImage( BUBBLE_SHAPE_IMAGES[ ++mCurrentBubbleShapeImageId % NUM_BUBBLE_SHAPE_IMAGES ] ) );
     }
     return true;
   }
@@ -319,8 +303,7 @@ RunTest(Application& app)
 
 /*****************************************************************************/
 
-int
-main(int argc, char **argv)
+int DALI_EXPORT_API main(int argc, char **argv)
 {
   Application app = Application::New(&argc, &argv, DEMO_THEME_PATH);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,36 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/rendering/renderer.h>
+#include <dali/public-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 // INTERNAL INCLUDES
 #include "shared/view.h"
 
+#include <sstream>
+
 using namespace Dali;
 
 namespace
 {
-const char* MATERIAL_SAMPLE( DEMO_IMAGE_DIR "gallery-small-48.jpg" );
-const char* MATERIAL_SAMPLE2( DEMO_IMAGE_DIR "gallery-medium-19.jpg" );
 
 #define MAKE_SHADER(A)#A
 
 const char* VERTEX_SHADER = MAKE_SHADER(
 attribute mediump vec2    aPosition1;
 attribute mediump vec2    aPosition2;
+attribute lowp    vec3    aColor;
 uniform   mediump mat4    uMvpMatrix;
 uniform   mediump vec3    uSize;
 uniform   mediump float   uMorphAmount;
+
+varying   lowp    vec3    vColor;
 
 void main()
 {
   mediump vec2 morphPosition = mix(aPosition1, aPosition2, uMorphAmount);
   mediump vec4 vertexPosition = vec4(morphPosition, 0.0, 1.0);
+  vColor = aColor;
   vertexPosition.xyz *= uSize;
   vertexPosition = uMvpMatrix * vertexPosition;
   gl_Position = vertexPosition;
@@ -52,59 +56,53 @@ const char* FRAGMENT_SHADER = MAKE_SHADER(
 uniform lowp  vec4    uColor;
 uniform sampler2D     sTexture;
 
+varying   lowp        vec3 vColor;
+
 void main()
 {
-  gl_FragColor = uColor;
+  gl_FragColor = uColor * vec4( vColor, 1.0 );
 }
 );
+
+const unsigned short INDEX_LINES[] = { 0, 1, 1, 2, 2, 3, 3, 4, 4, 0 };
+const unsigned short INDEX_LOOP[] =  { 0, 1, 2, 3, 4 };
+const unsigned short INDEX_STRIP[] = { 0, 1, 2, 3, 4, 0 };
+const unsigned short* INDICES[3] = { &INDEX_LINES[0], &INDEX_LOOP[0], &INDEX_STRIP[0] };
+const unsigned int INDICES_SIZE[3] = { sizeof(INDEX_LINES)/sizeof(INDEX_LINES[0]), sizeof(INDEX_LOOP)/sizeof(INDEX_LOOP[0]), sizeof(INDEX_STRIP)/sizeof(INDEX_STRIP[0])};
 
 Geometry CreateGeometry()
 {
   // Create vertices
-  struct Vertex { Vector2 position; };
+  struct Vertex
+  {
+    Vector2 position1;
+    Vector2 position2;
+    Vector3 color;
+  };
+
+  // Create new geometry object
   Vertex pentagonVertexData[5] =
     {
-      { Vector2(  0.0f,   1.00f) }, // 0
-      { Vector2( -0.95f,  0.31f) }, // 1
-      { Vector2( -0.59f, -0.81f) }, // 2
-      { Vector2(  0.59f, -0.81f) }, // 3
-      { Vector2(  0.95f,  0.31f) }, // 4
-    };
-
-  Vertex pentacleVertexData[5] =
-    {
-      { Vector2(  0.0f,  -1.00f) }, //
-      { Vector2(  0.59f,  0.81f) }, //
-      { Vector2( -0.95f, -0.31f) }, //
-      { Vector2(  0.95f, -0.31f) }, //
-      { Vector2( -0.59f,  0.81f) }, //
+      { Vector2(  0.0f,   1.00f),  Vector2(  0.0f,  -1.00f),  Vector3( 1.0f, 1.0f, 1.0f ) }, // 0
+      { Vector2( -0.95f,  0.31f),  Vector2(  0.59f,  0.81f),  Vector3( 1.0f, 0.0f, 0.0f ) }, // 1
+      { Vector2( -0.59f, -0.81f),  Vector2( -0.95f, -0.31f),  Vector3( 0.0f, 1.0f, 0.0f ) }, // 2
+      { Vector2(  0.59f, -0.81f),  Vector2(  0.95f, -0.31f),  Vector3( 0.0f, 0.0f, 1.0f ) }, // 3
+      { Vector2(  0.95f,  0.31f),  Vector2( -0.59f,  0.81f),  Vector3( 1.0f, 1.0f, 0.0f ) }, // 4
     };
 
   Property::Map pentagonVertexFormat;
   pentagonVertexFormat["aPosition1"] = Property::VECTOR2;
+  pentagonVertexFormat["aPosition2"] = Property::VECTOR2;
+  pentagonVertexFormat["aColor"] = Property::VECTOR3;
   PropertyBuffer pentagonVertices = PropertyBuffer::New( pentagonVertexFormat );
   pentagonVertices.SetData(pentagonVertexData, 5);
 
-  Property::Map pentacleVertexFormat;
-  pentacleVertexFormat["aPosition2"] = Property::VECTOR2;
-  PropertyBuffer pentacleVertices = PropertyBuffer::New( pentacleVertexFormat );
-  pentacleVertices.SetData( pentacleVertexData, 5 );
-
-  // Create indices
-  unsigned int indexData[10] = { 0, 1, 1, 2, 2, 3, 3, 4, 4, 0 };
-  Property::Map indexFormat;
-  indexFormat["indices"] = Property::INTEGER;
-  PropertyBuffer indices = PropertyBuffer::New( indexFormat );
-  indices.SetData( indexData, sizeof(indexData)/sizeof(indexData[0]) );
 
   // Create the geometry object
   Geometry pentagonGeometry = Geometry::New();
   pentagonGeometry.AddVertexBuffer( pentagonVertices );
-  pentagonGeometry.AddVertexBuffer( pentacleVertices );
-  pentagonGeometry.SetIndexBuffer( indices );
-
-  pentagonGeometry.SetGeometryType( Geometry::LINES );
-
+  pentagonGeometry.SetIndexBuffer( INDICES[0], INDICES_SIZE[0] );
+  pentagonGeometry.SetType( Geometry::LINES );
   return pentagonGeometry;
 }
 
@@ -142,24 +140,46 @@ public:
   void Create( Application& application )
   {
     Stage stage = Stage::GetCurrent();
+
+    // initial settings
+    mPrimitiveType = Geometry::LINES;
+    mCurrentIndexCount = 10;
+    mMaxIndexCount = 10;
+
+    CreateRadioButtons();
+
     stage.KeyEventSignal().Connect(this, &ExampleController::OnKeyEvent);
 
     mStageSize = stage.GetSize();
 
-    // The Init signal is received once (only) during the Application lifetime
+    Initialise();
 
     // Hide the indicator bar
     application.GetWindow().ShowIndicator( Dali::Window::INVISIBLE );
 
+    stage.SetBackgroundColor(Vector4(0.0f, 0.2f, 0.2f, 1.0f));
+  }
+
+  /**
+   * Invoked whenever application changes the type of geometry drawn
+   */
+  void Initialise()
+  {
+    Stage stage = Stage::GetCurrent();
+
+    // destroy mesh actor and its resources if already exists
+    if( mMeshActor )
+    {
+      stage.Remove( mMeshActor );
+      mMeshActor.Reset();
+    }
+
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
-
-    mMaterial = Material::New( mShader );
-    mImage = ResourceImage::New( MATERIAL_SAMPLE );
-    mMaterial.AddTexture(mImage, "sTexture");
-
     mGeometry = CreateGeometry();
+    mRenderer = Renderer::New( mGeometry, mShader );
 
-    mRenderer = Renderer::New( mGeometry, mMaterial );
+    mRenderer.SetIndexRange( 0, 10 ); // lines
+    mPrimitiveType = Geometry::LINES;
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
@@ -173,10 +193,6 @@ public:
     mMeshActor.SetAnchorPoint( AnchorPoint::CENTER );
     stage.Add( mMeshActor );
 
-    mChangeImageTimer = Timer::New( 5000 );
-    mChangeImageTimer.TickSignal().Connect( this, &ExampleController::OnTimer );
-    mChangeImageTimer.Start();
-
     Animation  animation = Animation::New(5);
     KeyFrames keyFrames = KeyFrames::New();
     keyFrames.Add(0.0f, 0.0f);
@@ -185,8 +201,87 @@ public:
     animation.AnimateBetween( Property( mMeshActor, morphAmountIndex ), keyFrames, AlphaFunction(AlphaFunction::SIN) );
     animation.SetLooping(true);
     animation.Play();
+  }
 
-    stage.SetBackgroundColor(Vector4(0.0f, 0.2f, 0.2f, 1.0f));
+  /**
+   * Invoked on create
+   */
+  void CreateRadioButtons()
+  {
+    Stage stage = Stage::GetCurrent();
+
+    Toolkit::TableView modeSelectTableView = Toolkit::TableView::New( 4, 1 );
+    modeSelectTableView.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    modeSelectTableView.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    modeSelectTableView.SetFitHeight( 0 );
+    modeSelectTableView.SetFitHeight( 1 );
+    modeSelectTableView.SetFitHeight( 2 );
+    modeSelectTableView.SetCellPadding( Vector2( 6.0f, 0.0f ) );
+    modeSelectTableView.SetScale( Vector3( 0.8f, 0.8f, 0.8f ));
+
+    const char* labels[] =
+    {
+      "LINES",
+      "LINE_LOOP",
+      "LINE_STRIP"
+    };
+
+    for( int i = 0; i < 3; ++i )
+    {
+      Property::Map labelMap;
+      labelMap[ "text" ]      = labels[i];
+      labelMap[ "textColor" ] = Vector4( 0.8f, 0.8f, 0.8f, 1.0f );
+
+      Dali::Toolkit::RadioButton radio = Dali::Toolkit::RadioButton::New();
+
+      radio.SetProperty( Dali::Toolkit::RadioButton::Property::LABEL, labelMap );
+      radio.SetParentOrigin( ParentOrigin::TOP_LEFT );
+      radio.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+      radio.SetSelected( i == 0 );
+      radio.PressedSignal().Connect( this, &ExampleController::OnButtonPressed );
+      mButtons[i] = radio;
+      modeSelectTableView.AddChild( radio, Toolkit::TableView::CellPosition( i,  0 ) );
+    }
+
+    Toolkit::TableView elementCountTableView = Toolkit::TableView::New( 1, 3 );
+    elementCountTableView.SetCellPadding( Vector2( 6.0f, 0.0f ) );
+    elementCountTableView.SetParentOrigin( ParentOrigin::BOTTOM_LEFT );
+    elementCountTableView.SetAnchorPoint( AnchorPoint::BOTTOM_LEFT );
+    elementCountTableView.SetFitHeight( 0 );
+    elementCountTableView.SetFitWidth( 0 );
+    elementCountTableView.SetFitWidth( 1 );
+    elementCountTableView.SetFitWidth( 2 );
+    mMinusButton = Toolkit::PushButton::New();
+    mMinusButton.SetLabelText( "<<" );
+    mMinusButton.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    mMinusButton.SetAnchorPoint( AnchorPoint::CENTER_LEFT );
+
+    Toolkit::PushButton mPlusButton = Toolkit::PushButton::New();
+    mPlusButton.SetLabelText( ">>" );
+    mPlusButton.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    mPlusButton.SetAnchorPoint( AnchorPoint::CENTER_RIGHT );
+
+    mMinusButton.ClickedSignal().Connect( this, &ExampleController::OnButtonClicked );
+    mPlusButton.ClickedSignal().Connect( this, &ExampleController::OnButtonClicked );
+
+    mIndicesCountLabel = Toolkit::TextLabel::New();
+    mIndicesCountLabel.SetParentOrigin( ParentOrigin::CENTER );
+    mIndicesCountLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+
+    std::stringstream str;
+    str << mCurrentIndexCount;
+    mIndicesCountLabel.SetProperty( Toolkit::TextLabel::Property::TEXT, str.str() );
+    mIndicesCountLabel.SetProperty( Toolkit::TextLabel::Property::TEXT_COLOR, Vector4( 1.0, 1.0, 1.0, 1.0 ) );
+    mIndicesCountLabel.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "BOTTOM");
+    mIndicesCountLabel.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::WIDTH );
+    mIndicesCountLabel.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::HEIGHT );
+
+    elementCountTableView.AddChild( mMinusButton, Toolkit::TableView::CellPosition( 0,  0 ) );
+    elementCountTableView.AddChild( mIndicesCountLabel, Toolkit::TableView::CellPosition( 0,  1 ) );
+    elementCountTableView.AddChild( mPlusButton, Toolkit::TableView::CellPosition( 0,  2 ) );
+
+    stage.Add(modeSelectTableView);
+    stage.Add(elementCountTableView);
   }
 
   /**
@@ -200,14 +295,6 @@ public:
     return true;
   }
 
-  bool OnTimer()
-  {
-    Image image = ResourceImage::New( MATERIAL_SAMPLE2 );
-
-    mMaterial.SetTextureImage(0,image);
-    return false;
-  }
-
   void OnKeyEvent(const KeyEvent& event)
   {
     if(event.state == KeyEvent::Down)
@@ -219,20 +306,76 @@ public:
     }
   }
 
+  bool OnButtonPressed( Toolkit::Button button )
+  {
+    int indicesArray;
+    if( button == mButtons[0] )
+    {
+      mCurrentIndexCount = 10;
+      mMaxIndexCount = 10;
+      mPrimitiveType = Geometry::LINES;
+      indicesArray = 0;
+    }
+    else if( button == mButtons[1] )
+    {
+      mCurrentIndexCount = 5;
+      mMaxIndexCount = 5;
+      mPrimitiveType = Geometry::LINE_LOOP;
+      indicesArray = 1;
+    }
+    else
+    {
+      mCurrentIndexCount = 6;
+      mMaxIndexCount = 6;
+      mPrimitiveType = Geometry::LINE_STRIP;
+      indicesArray = 2;
+    }
+
+    std::stringstream str;
+    str << mCurrentIndexCount;
+    mIndicesCountLabel.SetProperty( Toolkit::TextLabel::Property::TEXT, str.str() );
+    mGeometry.SetType( mPrimitiveType );
+    mGeometry.SetIndexBuffer( INDICES[ indicesArray ], INDICES_SIZE[ indicesArray ] );
+    mRenderer.SetIndexRange( 0, mCurrentIndexCount );
+    return true;
+  }
+
+  bool OnButtonClicked( Toolkit::Button button )
+  {
+    if( button == mMinusButton )
+    {
+      if (--mCurrentIndexCount < 2 )
+        mCurrentIndexCount = 2;
+    }
+    else
+    {
+      if (++mCurrentIndexCount > mMaxIndexCount )
+        mCurrentIndexCount = mMaxIndexCount;
+    }
+
+    std::stringstream str;
+    str << mCurrentIndexCount;
+    mIndicesCountLabel.SetProperty( Toolkit::TextLabel::Property::TEXT, str.str() );
+    mRenderer.SetIndexRange( 0, mCurrentIndexCount );
+    return true;
+  }
+
 private:
 
   Application&  mApplication;                             ///< Application instance
   Vector3 mStageSize;                                     ///< The size of the stage
 
-  Image    mImage;
   Shader   mShader;
-  Material mMaterial;
   Geometry mGeometry;
   Renderer mRenderer;
   Actor    mMeshActor;
-  Renderer mRenderer2;
-  Actor    mMeshActor2;
-  Timer    mChangeImageTimer;
+  Toolkit::RadioButton  mButtons[3];
+  Toolkit::PushButton   mMinusButton;
+  Toolkit::PushButton   mPlusButton;
+  Toolkit::TextLabel    mIndicesCountLabel;
+  Geometry::Type mPrimitiveType;
+  int      mCurrentIndexCount;
+  int      mMaxIndexCount;
 };
 
 void RunTest( Application& application )
@@ -244,7 +387,7 @@ void RunTest( Application& application )
 
 // Entry point for Linux & SLP applications
 //
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv );
 

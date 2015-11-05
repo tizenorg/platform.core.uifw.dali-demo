@@ -42,8 +42,8 @@
           "heightResizePolicy":"FILL_TO_PARENT",
           "sizeAspectRatio": false,
           "background": {
-            "rendererType": "color",
-            "blendColor": [1,1,1,1]
+            "visualType": "COLOR",
+            "mixColor": [1,1,1,1]
           },
           "color": [
             0.5686274509803921,
@@ -78,8 +78,8 @@
               "heightResizePolicy":"FILL_TO_PARENT",
               "sizeAspectRatio": false,
               "background": {
-                "rendererType": "color",
-                "blendColor": [1,1,1,1]
+                "visualType": "COLOR",
+                "mixColor": [1,1,1,1]
               },
               "color": [
                 0.17647058823529413,
@@ -114,8 +114,8 @@
                   "heightResizePolicy":"FILL_TO_PARENT",
                   "sizeAspectRatio": false,
                   "background": {
-                    "rendererType": "color",
-                    "blendColor": [1,1,1,1]
+                    "visualType": "COLOR",
+                    "mixColor": [1,1,1,1]
                   },
                   "color": [
                     0.7411764705882353,
@@ -146,8 +146,8 @@
               "heightResizePolicy":"FILL_TO_PARENT",
               "sizeAspectRatio": false,
               "background": {
-                "rendererType": "color",
-                "blendColor": [1,1,1,1]
+                "visualType": "COLOR",
+                "mixColor": [1,1,1,1]
               },
               "color": [
                 0.23137254901960785,
@@ -182,8 +182,8 @@
                   "heightResizePolicy":"FILL_TO_PARENT",
                   "sizeAspectRatio": false,
                   "background": {
-                    "rendererType": "color",
-                    "blendColor": [1,1,1,1]
+                    "visualType": "COLOR",
+                    "mixColor": [1,1,1,1]
                   },
                   "color": [
                     0.17647058823529413,
@@ -218,8 +218,8 @@
                       "heightResizePolicy":"FILL_TO_PARENT",
                       "sizeAspectRatio": false,
                       "background": {
-                        "rendererType": "color",
-                        "blendColor": [1,1,1,1]
+                        "visualType": "COLOR",
+                        "mixColor": [1,1,1,1]
                       },
                       "color": [
                         0.396078431372549,
@@ -250,8 +250,8 @@
                   "heightResizePolicy":"FILL_TO_PARENT",
                   "sizeAspectRatio": false,
                   "background": {
-                    "rendererType": "color",
-                    "blendColor": [1,1,1,1]
+                    "visualType": "COLOR",
+                    "mixColor": [1,1,1,1]
                   },
                   "color": [
                     0,
@@ -286,8 +286,8 @@
                       "heightResizePolicy":"FILL_TO_PARENT",
                       "sizeAspectRatio": false,
                       "background": {
-                        "rendererType": "color",
-                        "blendColor": [1,1,1,1]
+                        "visualType": "COLOR",
+                        "mixColor": [1,1,1,1]
                       },
                       "color": [
                         0.20784313725490197,
@@ -322,8 +322,8 @@
                           "heightResizePolicy":"FILL_TO_PARENT",
                           "sizeAspectRatio": false,
                           "background": {
-                            "rendererType": "color",
-                            "blendColor": [1,1,1,1]
+                            "visualType": "COLOR",
+                            "mixColor": [1,1,1,1]
                           },
                           "color": [
                             0.4196078431372549,
@@ -354,8 +354,8 @@
                       "heightResizePolicy":"FILL_TO_PARENT",
                       "sizeAspectRatio": false,
                       "background": {
-                        "rendererType": "color",
-                        "blendColor": [1,1,1,1]
+                        "visualType": "COLOR",
+                        "mixColor": [1,1,1,1]
                       },
                       "color": [
                         0.47843137254901963,
@@ -386,8 +386,8 @@
                   "heightResizePolicy":"FILL_TO_PARENT",
                   "sizeAspectRatio": false,
                   "background": {
-                    "rendererType": "color",
-                    "blendColor": [1,1,1,1]
+                    "visualType": "COLOR",
+                    "mixColor": [1,1,1,1]
                   },
                   "color": [
                     0.4470588235294118,
@@ -418,8 +418,8 @@
               "heightResizePolicy":"FILL_TO_PARENT",
               "sizeAspectRatio": false,
               "background": {
-                "rendererType": "color",
-                "blendColor": [1,1,1,1]
+                "visualType": "COLOR",
+                "mixColor": [1,1,1,1]
               },
               "color": [
                 1,
@@ -450,8 +450,8 @@
           "heightResizePolicy":"FILL_TO_PARENT",
           "sizeAspectRatio": false,
           "background": {
-            "rendererType": "color",
-            "blendColor": [1,1,1,1]
+            "visualType": "COLOR",
+            "mixColor": [1,1,1,1]
           },
           "color": [
             0.43137254901960786,
@@ -486,8 +486,8 @@
               "heightResizePolicy":"FILL_TO_PARENT",
               "sizeAspectRatio": false,
               "background": {
-                "rendererType": "color",
-                "blendColor": [1,1,1,1]
+                "visualType": "COLOR",
+                "mixColor": [1,1,1,1]
               },
               "color": [
                 0.8196078431372549,
@@ -518,8 +518,8 @@
           "heightResizePolicy":"FILL_TO_PARENT",
           "sizeAspectRatio": false,
           "background": {
-            "rendererType": "color",
-            "blendColor": [1,1,1,1]
+            "visualType": "COLOR",
+            "mixColor": [1,1,1,1]
           },
           "color": [
             0.6313725490196078,
@@ -557,8 +557,8 @@
                   "heightResizePolicy":"FILL_TO_PARENT",
                   "sizeAspectRatio": false,
                   "background": {
-                    "rendererType": "color",
-                    "blendColor": [1,1,1,1]
+                    "visualType": "COLOR",
+                    "mixColor": [1,1,1,1]
                   },
                   "color": [
                     0.9176470588235294,
@@ -589,8 +589,8 @@
               "heightResizePolicy":"FILL_TO_PARENT",
               "sizeAspectRatio": false,
               "background": {
-                "rendererType": "color",
-                "blendColor": [1,1,1,1]
+                "visualType": "COLOR",
+                "mixColor": [1,1,1,1]
               },
               "color": [
                 0.24313725490196078,
@@ -622,8 +622,8 @@
               "heightResizePolicy":"FILL_TO_PARENT",
               "sizeAspectRatio": false,
               "background": {
-                "rendererType": "color",
-                "blendColor": [1,1,1,1]
+                "visualType": "COLOR",
+                "mixColor": [1,1,1,1]
               },
               "color": [
                 0,
@@ -661,8 +661,8 @@
                       "heightResizePolicy":"FILL_TO_PARENT",
                       "sizeAspectRatio": false,
                       "background": {
-                        "rendererType": "color",
-                        "blendColor": [1,1,1,1]
+                        "visualType": "COLOR",
+                        "mixColor": [1,1,1,1]
                       },
                       "color": [
                         1,
@@ -693,8 +693,8 @@
                   "heightResizePolicy":"FILL_TO_PARENT",
                   "sizeAspectRatio": false,
                   "background": {
-                    "rendererType": "color",
-                    "blendColor": [1,1,1,1]
+                    "visualType": "COLOR",
+                    "mixColor": [1,1,1,1]
                   },
                   "color": [
                     0,
@@ -726,8 +726,8 @@
                   "heightResizePolicy":"FILL_TO_PARENT",
                   "sizeAspectRatio": false,
                   "background": {
-                    "rendererType": "color",
-                    "blendColor": [1,1,1,1]
+                    "visualType": "COLOR",
+                    "mixColor": [1,1,1,1]
                   },
                   "color": [
                     1,
@@ -758,8 +758,8 @@
               "heightResizePolicy":"FILL_TO_PARENT",
               "sizeAspectRatio": false,
               "background": {
-                "rendererType": "color",
-                "blendColor": [1,1,1,1]
+                "visualType": "COLOR",
+                "mixColor": [1,1,1,1]
               },
               "color": [
                 0.01568627450980392,
@@ -790,8 +790,8 @@
           "heightResizePolicy":"FILL_TO_PARENT",
           "sizeAspectRatio": false,
           "background": {
-            "rendererType": "color",
-            "blendColor": [1,1,1,1]
+            "visualType": "COLOR",
+            "mixColor": [1,1,1,1]
           },
           "color": [
             0.2784313725490196,
@@ -823,8 +823,8 @@
       "sizeModeFactor": [0.25,0.166667,1],
       "sizeAspectRatio": false,
       "background": {
-        "rendererType": "color",
-        "blendColor": [1,1,1,1]
+        "visualType": "COLOR",
+        "mixColor": [1,1,1,1]
       },
       "color": [
         0.1568627450980392,

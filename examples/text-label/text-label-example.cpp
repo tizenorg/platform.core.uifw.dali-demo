@@ -111,11 +111,10 @@ public:
     stage.Add( mContainer );
 
     // Resize the center layout when the corner is grabbed
-    mGrabCorner = Control::New();
+    mGrabCorner = ImageView::New( BACKGROUND_IMAGE );
     mGrabCorner.SetName( "GrabCorner" );
     mGrabCorner.SetAnchorPoint( AnchorPoint::TOP_CENTER );
     mGrabCorner.SetParentOrigin( ParentOrigin::BOTTOM_RIGHT );
-    mGrabCorner.SetBackgroundImage( ResourceImage::New( BACKGROUND_IMAGE ) );
     mGrabCorner.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
     mContainer.Add( mGrabCorner );
 
@@ -295,7 +294,7 @@ void RunTest( Application& application )
 }
 
 /** Entry point for Linux & Tizen applications */
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv, DEMO_THEME_PATH );
 

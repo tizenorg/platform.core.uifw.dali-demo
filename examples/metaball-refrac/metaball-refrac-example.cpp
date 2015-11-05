@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
  */
 
 #include <dali/dali.h>
-#include <dali/devel-api/rendering/renderer.h>
+#include <dali/devel-api/images/texture-set-image.h>
+#include <dali/public-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 #include <cstdio>
 #include <string>
+#include "shared/utility.h"
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -164,7 +166,7 @@ public:
   ~MetaballRefracController();
 
   void Create( Application& app );
-  bool OnTouch( Actor actor, const TouchEvent& touch );
+  bool OnTouch( Actor actor, const TouchData& touch );
   void OnKeyEvent(const KeyEvent& event);
 
   void SetGravity(const Vector2 & gravity);
@@ -196,8 +198,10 @@ private:
   Vector2           mGravityVar;
 
   Renderer          mRendererRefraction;
-  Material          mMaterialRefraction;
-  Material          mMaterialNormal;
+  TextureSet        mTextureSetRefraction;
+  Shader            mShaderRefraction;
+  TextureSet        mTextureSetNormal;
+  Shader            mShaderNormal;
 
   //Animations
   Animation         mGravityAnimation[METABALL_NUMBER];
@@ -268,7 +272,7 @@ void MetaballRefracController::Create( Application& app )
   stage.SetBackgroundColor(Color::BLACK);
 
   //Set background image for the view
-  mBackImage = ResourceImage::New( BACKGROUND_IMAGE );
+  mBackImage = DemoHelper::LoadImage( BACKGROUND_IMAGE );
 
   mGravity = Vector2(GRAVITY_X,GRAVITY_Y);
   mGravityVar = Vector2(0,0);
@@ -281,7 +285,7 @@ void MetaballRefracController::Create( Application& app )
   CreateAnimations();
 
   // Connect the callback to the touch signal on the mesh actor
-  stage.GetRootLayer().TouchedSignal().Connect( this, &MetaballRefracController::OnTouch );
+  stage.GetRootLayer().TouchSignal().Connect( this, &MetaballRefracController::OnTouch );
 }
 
 /**
@@ -320,8 +324,6 @@ Geometry MetaballRefracController::CreateGeometry()
     { Vector3(0.0f, 0.0f, 1.0f) }
   };
 
-  int indices[] = { 0, 3, 1, 0, 2, 3 };
-
   unsigned int numberOfVertices = sizeof(vertices)/sizeof(VertexPosition);
 
   //Vertices
@@ -343,11 +345,7 @@ Geometry MetaballRefracController::CreateGeometry()
   normalVertices.SetData( normals, numberOfVertices );
 
   //Indices
-  Property::Map indicesVertexFormat;
-  indicesVertexFormat["aIndices"] = Property::INTEGER;
-  PropertyBuffer indicesToVertices = PropertyBuffer::New( indicesVertexFormat );
-  indicesToVertices.SetData( indices, 6 );
-
+  unsigned short indices[] = { 0, 3, 1, 0, 2, 3 };
 
   // Create the geometry object
   Geometry texturedQuadGeometry = Geometry::New();
@@ -355,7 +353,7 @@ Geometry MetaballRefracController::CreateGeometry()
   texturedQuadGeometry.AddVertexBuffer( textureVertices );
   texturedQuadGeometry.AddVertexBuffer( normalVertices );
 
-  texturedQuadGeometry.SetIndexBuffer ( indicesToVertices );
+  texturedQuadGeometry.SetIndexBuffer ( &indices[0], 6 );
 
   return texturedQuadGeometry;
 }
@@ -396,8 +394,6 @@ Geometry MetaballRefracController::CreateGeometryComposition()
     { Vector3(0.0f, 0.0f, 1.0f) }
   };
 
-  int indices[] = { 0, 3, 1, 0, 2, 3 };
-
   unsigned int numberOfVertices = sizeof(vertices)/sizeof(VertexPosition);
 
   //Vertices
@@ -419,10 +415,7 @@ Geometry MetaballRefracController::CreateGeometryComposition()
   normalVertices.SetData( normals, numberOfVertices );
 
   //Indices
-  Property::Map indicesVertexFormat;
-  indicesVertexFormat["aIndices"] = Property::INTEGER;
-  PropertyBuffer indicesToVertices = PropertyBuffer::New( indicesVertexFormat );
-  indicesToVertices.SetData( indices, 6 );
+  unsigned short indices[] = { 0, 3, 1, 0, 2, 3 };
 
   // Create the geometry object
   Geometry texturedQuadGeometry = Geometry::New();
@@ -430,7 +423,7 @@ Geometry MetaballRefracController::CreateGeometryComposition()
   texturedQuadGeometry.AddVertexBuffer( textureVertices );
   texturedQuadGeometry.AddVertexBuffer( normalVertices );
 
-  texturedQuadGeometry.SetIndexBuffer ( indicesToVertices );
+  texturedQuadGeometry.SetIndexBuffer ( &indices[0], sizeof( indices )/ sizeof( indices[0] ) );
 
   return texturedQuadGeometry;
 }
@@ -444,13 +437,15 @@ void MetaballRefracController::CreateMetaballActors()
   //With MeshData Textured
   float aspect = (float)mScreenSize.y / (float)mScreenSize.x;
 
-  //Create the shader for the metaballs
-
+  //Create the renderer for the metaballs
   Shader shader = Shader::New( METABALL_VERTEX_SHADER, METABALL_FRAG_SHADER );
-
-  Material material = Material::New( shader );
-
   Geometry metaballGeom = CreateGeometry();
+  Renderer renderer = Renderer::New( metaballGeom, shader );
+  renderer.SetProperty( Renderer::Property::BLEND_MODE, BlendMode::ON );
+  renderer.SetProperty( Renderer::Property::BLEND_FACTOR_SRC_RGB,    BlendFactor::ONE );
+  renderer.SetProperty( Renderer::Property::BLEND_FACTOR_DEST_RGB,   BlendFactor::ONE );
+  renderer.SetProperty( Renderer::Property::BLEND_FACTOR_SRC_ALPHA,  BlendFactor::ONE );
+  renderer.SetProperty( Renderer::Property::BLEND_FACTOR_DEST_ALPHA, BlendFactor::ONE  );
 
   //Each metaball has a different radius
   mMetaballs[0].radius = mMetaballs[0].initRadius = 0.0145f;
@@ -468,9 +463,7 @@ void MetaballRefracController::CreateMetaballActors()
     mMetaballs[i].actor.SetScale( 1.0f );
     mMetaballs[i].actor.SetParentOrigin( ParentOrigin::CENTER );
 
-    Renderer renderer = Renderer::New( metaballGeom, material );
-    renderer.SetProperty( Renderer::Property::BLENDING_MODE, BlendingMode::ON );
-    renderer.SetBlendFunc(BlendingFactor::ONE, BlendingFactor::ONE, BlendingFactor::ONE, BlendingFactor::ONE);
+
     mMetaballs[i].actor.AddRenderer( renderer );
 
     mMetaballs[i].positionIndex = mMetaballs[i].actor.RegisterProperty( "uPositionMetaball", mMetaballs[i].position );
@@ -536,22 +529,19 @@ void MetaballRefracController::AddRefractionImage()
   Geometry metaballGeom = CreateGeometryComposition();
 
   //Create Refraction shader and renderer
-  Shader shader = Shader::New( METABALL_VERTEX_SHADER, REFRACTION_FRAG_SHADER );
-  //Create new material
-  mMaterialRefraction = Material::New( shader );
+  mShaderRefraction = Shader::New( METABALL_VERTEX_SHADER, REFRACTION_FRAG_SHADER );
 
-  //Add Textures
-  mMaterialRefraction.AddTexture(mBackImage, "sTexture");
-  mMaterialRefraction.AddTexture(mMetaballFBO, "sEffect");
+  //Create new texture set
+  mTextureSetRefraction = TextureSet::New();
+  TextureSetImage( mTextureSetRefraction, 0u, mBackImage );
+  TextureSetImage( mTextureSetRefraction, 1u, mMetaballFBO );
 
   //Create normal shader
-  Shader shaderNormal = Shader::New( METABALL_VERTEX_SHADER, FRAG_SHADER );
-  //Create new material
-  mMaterialNormal = Material::New( shaderNormal );
+  mShaderNormal = Shader::New( METABALL_VERTEX_SHADER, FRAG_SHADER );
 
-  //Add samplers
-  mMaterialNormal.AddTexture(mBackImage, "sTexture");
-
+  //Create new texture set
+  mTextureSetNormal = TextureSet::New();
+  TextureSetImage( mTextureSetNormal, 0u, mBackImage );
 
   //Create actor
   mCompositionActor = Actor::New( );
@@ -559,8 +549,8 @@ void MetaballRefracController::AddRefractionImage()
   mCompositionActor.SetPosition(Vector3(0.0f, 0.0f, 0.0f));
   mCompositionActor.SetSize(mScreenSize.x, mScreenSize.y);
 
-
-  mRendererRefraction = Renderer::New( metaballGeom, mMaterialNormal );
+  mRendererRefraction = Renderer::New( metaballGeom, mShaderNormal );
+  mRendererRefraction.SetTextures( mTextureSetNormal );
   mCompositionActor.AddRenderer( mRendererRefraction );
 
   Stage stage = Stage::GetCurrent();
@@ -743,7 +733,8 @@ void MetaballRefracController::StopAfterClickAnimations()
  */
 void MetaballRefracController::ResetMetaballsState()
 {
-  mRendererRefraction.SetMaterial(mMaterialNormal);
+  mRendererRefraction.SetTextures(mTextureSetNormal);
+  mRendererRefraction.SetShader( mShaderNormal );
 
   for (int i = 0 ; i < METABALL_NUMBER ; i++)
   {
@@ -770,13 +761,12 @@ void MetaballRefracController::SetPositionToMetaballs(Vector2 & metaballCenter)
   }
 }
 
-bool MetaballRefracController::OnTouch( Actor actor, const TouchEvent& touch )
+bool MetaballRefracController::OnTouch( Actor actor, const TouchData& touch )
 {
-  const TouchPoint &point = touch.GetPoint(0);
   float aspectR = mScreenSize.y / mScreenSize.x;
-  switch(point.state)
+  switch( touch.GetState( 0 ) )
   {
-    case TouchPoint::Down:
+    case PointState::DOWN:
     {
       StopAfterClickAnimations();
       for (int i = 0 ; i < METABALL_NUMBER ; i++)
@@ -785,19 +775,20 @@ bool MetaballRefracController::OnTouch( Actor actor, const TouchEvent& touch )
       mRadiusVarAnimation[3].Play();
 
       //We draw with the refraction-composition shader
-      mRendererRefraction.SetMaterial(mMaterialRefraction);
-
-      mCurrentTouchPosition = point.screen;
+      mRendererRefraction.SetTextures(mTextureSetRefraction);
+      mRendererRefraction.SetShader( mShaderRefraction );
+      mCurrentTouchPosition = touch.GetScreenPosition( 0 );
 
       //we use the click position for the metaballs
-      Vector2 metaballCenter = Vector2((point.screen.x / mScreenSize.x) - 0.5, (aspectR * (mScreenSize.y - point.screen.y) / mScreenSize.y) - 0.5) * 2.0;
+      Vector2 metaballCenter = Vector2((mCurrentTouchPosition.x / mScreenSize.x) - 0.5, (aspectR * (mScreenSize.y - mCurrentTouchPosition.y) / mScreenSize.y) - 0.5) * 2.0;
       SetPositionToMetaballs(metaballCenter);
       break;
     }
-    case TouchPoint::Motion:
+    case PointState::MOTION:
     {
-      Vector2 displacement = point.screen - mCurrentTouchPosition;
-      mCurrentTouchPosition = point.screen;
+      Vector2 screen = touch.GetScreenPosition( 0 );
+      Vector2 displacement = screen - mCurrentTouchPosition;
+      mCurrentTouchPosition = screen;
 
       mMetaballPosVariationTo.x += (displacement.x / mScreenSize.x) * 2.2;
       mMetaballPosVariationTo.y += (- displacement.y / mScreenSize.y) * 2.2;
@@ -814,13 +805,13 @@ bool MetaballRefracController::OnTouch( Actor actor, const TouchEvent& touch )
       mPositionVarAnimation[1].Play();
 
       //we use the click position for the metaballs
-      Vector2 metaballCenter = Vector2((point.screen.x / mScreenSize.x) - 0.5, (aspectR * (mScreenSize.y - point.screen.y) / mScreenSize.y) - 0.5) * 2.0;
+      Vector2 metaballCenter = Vector2((screen.x / mScreenSize.x) - 0.5, (aspectR * (mScreenSize.y - screen.y) / mScreenSize.y) - 0.5) * 2.0;
       SetPositionToMetaballs(metaballCenter);
       break;
     }
-    case TouchPoint::Up:
-    case TouchPoint::Leave:
-    case TouchPoint::Interrupted:
+    case PointState::UP:
+    case PointState::LEAVE:
+    case PointState::INTERRUPTED:
     {
       //Stop click animations
       StopClickAnimations();
@@ -866,7 +857,7 @@ void RunTest( Application& application )
 
 // Entry point for Linux & Tizen applications
 //
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv );
 

@@ -289,8 +289,8 @@ private:
 
     mPaddle.SetPosition( stageSize * Vector3( PADDLE_START_POSITION ) );
     mContentLayer.Add(mPaddle);
-    mPaddle.TouchedSignal().Connect(this, &ExampleController::OnTouchPaddle);
-    mContentLayer.TouchedSignal().Connect(this, &ExampleController::OnTouchLayer);
+    mPaddle.TouchSignal().Connect(this, &ExampleController::OnTouchPaddle);
+    mContentLayer.TouchSignal().Connect(this, &ExampleController::OnTouchLayer);
 
     const float margin(BALL_SIZE.width * stageSize.width * 0.5f);
 
@@ -361,6 +361,17 @@ private:
     mContentLayer.Add( mLevelContainer );
 
     mBrickCount = 0;
+
+    if( mBrickImageMap.Empty() )
+    {
+      Vector2 stageSize(Stage::GetCurrent().GetSize());
+      const Vector2 brickSize(BRICK_SIZE * Vector2(stageSize.x, stageSize.x));
+
+      mBrickImageMap["desiredWidth"] = static_cast<int>( brickSize.width );
+      mBrickImageMap["desiredHeight"] = static_cast<int>( brickSize.height );
+      mBrickImageMap["fittingMode"] = "SCALE_TO_FILL";
+      mBrickImageMap["samplingMode"] = "BOX_THEN_LINEAR";
+    }
 
     switch(level%TOTAL_LEVELS)
     {
@@ -519,14 +530,11 @@ private:
    */
   Actor CreateBrick( const Vector2& position, int type )
   {
-    Vector2 stageSize(Stage::GetCurrent().GetSize());
-    const Vector2 brickSize(BRICK_SIZE * Vector2(stageSize.x, stageSize.x));
-
-    Image img = ResourceImage::New( BRICK_IMAGE_PATH[type], Dali::ImageDimensions( 128, 64 ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
-    ImageView brick = ImageView::New(img);
+    mBrickImageMap["url"] = BRICK_IMAGE_PATH[type];
+    ImageView brick = ImageView::New();
+    brick.SetProperty( ImageView::Property::IMAGE, mBrickImageMap );
     brick.SetParentOrigin(ParentOrigin::TOP_LEFT);
     brick.SetAnchorPoint(AnchorPoint::CENTER);
-    brick.SetSize( brickSize );
     brick.SetPosition( Vector3( position ) );
 
     // Add a constraint on the brick between it and the ball generating a collision-property
@@ -579,15 +587,15 @@ private:
    * @param[in] actor The actor touched
    * @param[in] event The touch event
    */
-  bool OnTouchPaddle(Actor actor, const TouchEvent& event)
+  bool OnTouchPaddle(Actor actor, const TouchData& event)
   {
     if(event.GetPointCount()>0)
     {
-      const TouchPoint& point = event.GetPoint(0);
-      if(point.state==TouchPoint::Down) // Commence dragging
+      if( event.GetState( 0 ) == PointState::DOWN ) // Commence dragging
       {
         // Get point where user touched paddle (relative to paddle's center)
-        mRelativeDragPoint = Vector3(point.screen.x, point.screen.y, 0.0f);
+        Vector2 screenPoint = event.GetScreenPosition( 0 );
+        mRelativeDragPoint = screenPoint;
         mRelativeDragPoint -= actor.GetCurrentPosition();
 
         mDragActor = actor;
@@ -605,17 +613,16 @@ private:
    * @param[in] actor The actor touched
    * @param[in] event The touch event
    */
-  bool OnTouchLayer(Actor actor, const TouchEvent& event)
+  bool OnTouchLayer(Actor actor, const TouchData& event)
   {
     if(event.GetPointCount()>0)
     {
-      const TouchPoint& point = event.GetPoint(0);
       if(mDragActor)
       {
-        Vector3 position(point.screen.x, point.screen.y, 0.0f);
+        Vector3 position( event.GetScreenPosition( 0 ) );
         mPaddle.SetPosition( position - mRelativeDragPoint );
 
-        if(point.state==TouchPoint::Up) // Stop dragging
+        if( event.GetState( 0 ) == PointState::UP ) // Stop dragging
         {
           mDragAnimation = Animation::New(0.25f);
           mDragAnimation.AnimateTo( Property(mDragActor, Actor::Property::SCALE), Vector3(1.0f, 1.0f, 1.0f), AlphaFunction::EASE_IN);
@@ -816,6 +823,7 @@ private:
   Animation mWobbleAnimation;                           ///< Paddle's animation when hit (wobbles)
   Property::Index mWobbleProperty;                      ///< The wobble property (generated from animation)
   Actor mLevelContainer;                                ///< The level container (contains bricks)
+  Property::Map mBrickImageMap;                       ///< The property map used to load the brick
 
   // actor - dragging functionality
 
@@ -836,7 +844,7 @@ void RunTest(Application& app)
   app.MainLoop();
 }
 
-int main(int argc, char **argv)
+int DALI_EXPORT_API main(int argc, char **argv)
 {
   Application app = Application::New(&argc, &argv, DEMO_THEME_PATH);
 

@@ -438,10 +438,10 @@ public:
     stage.Add(mScrollParent);
 
     // Respond to a click anywhere on the stage
-    stage.GetRootLayer().TouchedSignal().Connect( this, &HomescreenBenchmark::OnTouch );
+    stage.GetRootLayer().TouchSignal().Connect( this, &HomescreenBenchmark::OnTouch );
   }
 
-  bool OnTouch( Actor actor, const TouchEvent& touch )
+  bool OnTouch( Actor actor, const TouchData& touch )
   {
     // quit the application
     mApplication.Quit();
@@ -677,7 +677,7 @@ void RunTest( Application& application, const HomescreenBenchmark::Config& confi
 
 // Entry point for Linux & Tizen applications
 //
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   // default settings
   HomescreenBenchmark::Config config;

@@ -87,8 +87,8 @@ public:
     button.SetSelectedImage( FOLDER_OPEN_ICON_IMAGE );
     button.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     button.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
-    ResourceImage imageClosed = ResourceImage::New( FOLDER_ICON_IMAGE );
-    button.SetSize( imageClosed.GetWidth(), imageClosed.GetHeight() );
+    ImageDimensions imageSize = ResourceImage::GetImageSize( FOLDER_ICON_IMAGE );
+    button.SetSize( imageSize.GetWidth(), imageSize.GetHeight() );
 
     return button;
   }
@@ -136,7 +136,7 @@ public:
     popup.SetSize( width, 0.0f );
     popup.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::HEIGHT );
     popup.SetSizeModeFactor( POPUP_SIZE_FACTOR_TO_PARENT );
-    popup.TouchedSignal().Connect( this, &TextFieldExample::OnPopupTouched );
+    popup.TouchSignal().Connect( this, &TextFieldExample::OnPopupTouched );
 
     return popup;
   }
@@ -159,15 +159,14 @@ public:
     mField.Reset();
   }
 
-  bool OnPopupTouched( Actor actor, const TouchEvent& event )
+  bool OnPopupTouched( Actor actor, const TouchData& event )
   {
     // End edit mode for TextField if parent Popup touched.
     if(event.GetPointCount() > 0)
     {
-      const TouchPoint& point = event.GetPoint(0);
-      switch(point.state)
+      switch( event.GetState( 0 ) )
       {
-        case TouchPoint::Down:
+        case PointState::DOWN:
         {
           // Update the folder text and lose focus for Key events
           if( mButton && mField )
@@ -224,7 +223,7 @@ void RunTest( Application& application )
 }
 
 /** Entry point for Linux & Tizen applications */
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   // DALI_DEMO_THEME_PATH not passed to Application so TextField example uses default Toolkit style sheet.
   Application application = Application::New( &argc, &argv );

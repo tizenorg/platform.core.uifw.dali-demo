@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ extern "C"
 #define DALI_DEMO_STR_TITLE_CUBE_TRANSITION dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_TITLE_CUBE_TRANSITION")
 #define DALI_DEMO_STR_TITLE_DISSOLVE_TRANSITION dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_TITLE_DISSOLVE_TRANSITION")
 #define DALI_DEMO_STR_TITLE_ITEM_VIEW dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_TITLE_ITEM_VIEW")
+#define DALI_DEMO_STR_TITLE_RENDERER_STENCIL dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_TITLE_RENDERER_STENCIL")
 #define DALI_DEMO_STR_TITLE_MAGNIFIER dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_TITLE_MAGNIFIER")
 #define DALI_DEMO_STR_TITLE_MOTION_BLUR dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_TITLE_MOTION_BLUR")
 #define DALI_DEMO_STR_TITLE_MOTION_STRETCH dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_TITLE_MOTION_STRETCH")
@@ -62,6 +63,7 @@ extern "C"
 #define DALI_DEMO_STR_TITLE_LINE_MESH dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_LINE_MESH")
 #define DALI_DEMO_STR_TITLE_COLOR_GRADIENT dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_COLOR_GRADIENT")
 #define DALI_DEMO_STR_TITLE_SUPER_BLUR_BLOOM dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_SUPER_BLUR_BLOOM")
+#define DALI_DEMO_STR_TITLE_EFFECTS_VIEW dgettext(DALI_DEMO_DOMAIN_LOCAL, "DALI_DEMO_STR_EFFECTS_VIEW")
 
 #else // !INTERNATIONALIZATION_ENABLED
 
@@ -70,6 +72,7 @@ extern "C"
 #define DALI_DEMO_STR_TITLE_CUBE_TRANSITION           "Cube Effect"
 #define DALI_DEMO_STR_TITLE_DISSOLVE_TRANSITION       "Dissolve Effect"
 #define DALI_DEMO_STR_TITLE_ITEM_VIEW                 "Item View"
+#define DALI_DEMO_STR_TITLE_RENDERER_STENCIL          "Renderer Stencils"
 #define DALI_DEMO_STR_TITLE_MAGNIFIER                 "Magnifier"
 #define DALI_DEMO_STR_TITLE_MODEL_3D_VIEWER           "Model 3D Viewer"
 #define DALI_DEMO_STR_TITLE_MOTION_BLUR               "Motion Blur"
@@ -86,6 +89,8 @@ extern "C"
 #define DALI_DEMO_STR_TITLE_TEXT_LABEL                "Text Label"
 #define DALI_DEMO_STR_TITLE_TEXT_LABEL_MULTI_LANGUAGE "Text Scripts"
 #define DALI_DEMO_STR_TITLE_EMOJI_TEXT                "Emoji Text"
+#define DALI_DEMO_STR_TITLE_TEXT_SCROLLING            "Text Scrolling"
+#define DALI_DEMO_STR_TITLE_TEXT_EDITOR               "Text Editor"
 #define DALI_DEMO_STR_TITLE_NEGOTIATE_SIZE            "Negotiate Size"
 #define DALI_DEMO_STR_TITLE_POPUP                     "Popup"
 #define DALI_DEMO_STR_TITLE_BUTTONS                   "Buttons"
@@ -102,6 +107,10 @@ extern "C"
 #define DALI_DEMO_STR_TITLE_IMAGE_VIEW_ALPHA_BLENDING "Image View Alpha Blending"
 #define DALI_DEMO_STR_TITLE_IMAGE_VIEW_SVG            "Image View SVG"
 #define DALI_DEMO_STR_TITLE_SUPER_BLUR_BLOOM          "Super Blur and Bloom"
+#define DALI_DEMO_STR_TITLE_EFFECTS_VIEW              "Effects View"
+#define DALI_DEMO_STR_TITLE_NATIVE_IMAGE_SOURCE       "Native Image Source"
+#define DALI_DEMO_STR_TITLE_MESH_VISUAL               "Mesh Visual"
+#define DALI_DEMO_STR_TITLE_PRIMITIVE_SHAPES          "Primitive Shapes"
 
 #endif
 

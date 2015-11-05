@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/rendering/renderer.h>
+#include <dali/public-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 // INTERNAL INCLUDES
@@ -292,11 +292,8 @@ public:
     application.GetWindow().ShowIndicator( Dali::Window::INVISIBLE );
 
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
-
-    mMaterial = Material::New( mShader );
     mGeometry = CreateGeometry();
-
-    mRenderer = Renderer::New( mGeometry, mMaterial );
+    mRenderer = Renderer::New( mGeometry, mShader );
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
@@ -346,7 +343,6 @@ private:
   Vector3 mStageSize;                                     ///< The size of the stage
 
   Shader   mShader;
-  Material mMaterial;
   Geometry mGeometry;
   Renderer mRenderer;
   Actor    mMeshActor;
@@ -362,7 +358,7 @@ void RunTest( Application& application )
 
 // Entry point for Linux & SLP applications
 //
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv );
 

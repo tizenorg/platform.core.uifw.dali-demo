@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/rendering/renderer.h>
+#include <dali/public-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <stdio.h>
 #include <sstream>
@@ -24,13 +24,14 @@
 
 // INTERNAL INCLUDES
 #include "shared/view.h"
+#include "shared/utility.h"
 
 using namespace Dali;
 
 namespace
 {
 
-const char* MATERIAL_SAMPLES[] =
+const char* IMAGES[] =
 {
   DEMO_IMAGE_DIR "people-medium-1.jpg",
   DEMO_IMAGE_DIR "people-medium-4.jpg",
@@ -39,7 +40,7 @@ const char* MATERIAL_SAMPLES[] =
   DEMO_IMAGE_DIR "people-medium-15.jpg",
   DEMO_IMAGE_DIR "people-medium-6.jpg",
 };
-const unsigned int NUMBER_OF_SAMPLES(sizeof(MATERIAL_SAMPLES)/sizeof(const char*));
+const unsigned int NUMBER_OF_SAMPLES(sizeof(IMAGES)/sizeof(const char*));
 
 
 #define MAKE_SHADER(A)#A
@@ -83,38 +84,6 @@ void main()
   gl_FragColor = texture2D( sTexture, vTexCoord ) * uColor * vec4(vGlobColor, 1.0) ;
 }
 );
-
-Geometry CreateGeometry()
-{
-  // Create vertices
-  const float halfQuadSize = .5f;
-  struct TexturedQuadVertex { Vector2 position; Vector2 textureCoordinates; };
-  TexturedQuadVertex texturedQuadVertexData[4] = {
-    { Vector2(-halfQuadSize, -halfQuadSize), Vector2(0.f, 0.f) },
-    { Vector2( halfQuadSize, -halfQuadSize), Vector2(1.f, 0.f) },
-    { Vector2(-halfQuadSize,  halfQuadSize), Vector2(0.f, 1.f) },
-    { Vector2( halfQuadSize,  halfQuadSize), Vector2(1.f, 1.f) } };
-
-  Property::Map texturedQuadVertexFormat;
-  texturedQuadVertexFormat["aPosition"] = Property::VECTOR2;
-  texturedQuadVertexFormat["aTexCoord"] = Property::VECTOR2;
-  PropertyBuffer texturedQuadVertices = PropertyBuffer::New( texturedQuadVertexFormat );
-  texturedQuadVertices.SetData( texturedQuadVertexData, 4 );
-
-  // Create indices
-  unsigned int indexData[6] = { 0, 3, 1, 0, 2, 3 };
-  Property::Map indexFormat;
-  indexFormat["indices"] = Property::INTEGER;
-  PropertyBuffer indices = PropertyBuffer::New( indexFormat );
-  indices.SetData( indexData, 6 );
-
-  // Create the geometry object
-  Geometry texturedQuadGeometry = Geometry::New();
-  texturedQuadGeometry.AddVertexBuffer( texturedQuadVertices );
-  texturedQuadGeometry.SetIndexBuffer( indices );
-
-  return texturedQuadGeometry;
-}
 
 } // anonymous namespace
 
@@ -162,18 +131,19 @@ public:
     application.GetWindow().ShowIndicator( Dali::Window::INVISIBLE );
 
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
-    mGeometry = CreateGeometry();
+    mGeometry = DemoHelper::CreateTexturedQuad();
 
-    Material firstMat;
+    TextureSet firstTextureSet;
 
     for( unsigned i=0; i<NUMBER_OF_SAMPLES; ++i)
     {
-      Image image = ResourceImage::New( MATERIAL_SAMPLES[i] );
-      Material material = Material::New( mShader );
-      material.AddTexture(image, "sTexture");
-      if( i==0 ) { firstMat = material; }
+      Texture texture = DemoHelper::LoadTexture( IMAGES[i] );
+      TextureSet textureSet = TextureSet::New();
+      textureSet.SetTexture( 0u, texture );
+      if( i==0 ) { firstTextureSet = textureSet; }
 
-      Renderer renderer = Renderer::New( mGeometry, material );
+      Renderer renderer = Renderer::New( mGeometry, mShader );
+      renderer.SetTextures( textureSet );
       Actor meshActor = Actor::New();
       mActors[i] = meshActor;
       meshActor.AddRenderer( renderer );
@@ -190,16 +160,16 @@ public:
 
       meshActor.RegisterProperty("uHue", i/(float)NUMBER_OF_SAMPLES);
 
-      meshActor.TouchedSignal().Connect(this, &ExampleController::OnTouched);
+      meshActor.TouchSignal().Connect(this, &ExampleController::OnTouched);
       std::ostringstream oss;
       oss << "Mesh Actor " << i;
       meshActor.SetName(oss.str());
       stage.Add( meshActor );
     }
 
-    mActors[NUMBER_OF_SAMPLES-2].GetRendererAt(0).SetMaterial( firstMat );
+    mActors[NUMBER_OF_SAMPLES-2].GetRendererAt(0).SetTextures( firstTextureSet );
 
-    stage.GetRootLayer().TouchedSignal().Connect(this, &ExampleController::OnStageTouched);
+    stage.GetRootLayer().TouchSignal().Connect(this, &ExampleController::OnStageTouched);
   }
 
   void PrintDepths()
@@ -230,9 +200,9 @@ public:
     printf("\n");
   }
 
-  bool OnTouched( Actor actor, const TouchEvent& event )
+  bool OnTouched( Actor actor, const TouchData& event )
   {
-    if( event.GetPoint(0).state == TouchPoint::Finished )
+    if( event.GetState( 0 ) == PointState::UP )
     {
       int index = actor.GetProperty<int>(actor.GetPropertyIndex("index"));
 
@@ -247,9 +217,9 @@ public:
     return true;
   }
 
-  bool OnStageTouched( Actor rootLayer, const TouchEvent& event )
+  bool OnStageTouched( Actor rootLayer, const TouchData& event )
   {
-    if( event.GetPoint(0).state == TouchPoint::Finished )
+    if( event.GetState( 0 ) == PointState::UP )
     {
       switch( mZMode )
       {
@@ -335,7 +305,7 @@ void RunTest( Application& application )
 
 // Entry point for Linux & SLP applications
 //
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv );
 

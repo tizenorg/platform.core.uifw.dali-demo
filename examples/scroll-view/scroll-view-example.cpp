@@ -450,16 +450,23 @@ private:
    * @param[in] width the width of the image in texels
    * @param[in] height the height of the image in texels.
    */
-  ImageView CreateImage( const std::string& filename, unsigned int width = IMAGE_THUMBNAIL_WIDTH, unsigned int height = IMAGE_THUMBNAIL_HEIGHT )
+  ImageView CreateImage( const std::string& filename, int width = IMAGE_THUMBNAIL_WIDTH, int height = IMAGE_THUMBNAIL_HEIGHT )
   {
-    Image img = ResourceImage::New(filename, ImageDimensions( width, height ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+    ImageView actor = ImageView::New();
+    Property::Map map;
+    map[Visual::Property::TYPE] = Visual::IMAGE;
+    map[ImageVisual::Property::URL] = filename;
+    map[ImageVisual::Property::DESIRED_WIDTH] = width;
+    map[ImageVisual::Property::DESIRED_HEIGHT] = height;
+    map[ImageVisual::Property::FITTING_MODE] = FittingMode::SCALE_TO_FILL;
+    map[ImageVisual::Property::SAMPLING_MODE] = SamplingMode::BOX_THEN_LINEAR;
+    actor.SetProperty( ImageView::Property::IMAGE, map );
 
-    ImageView actor = ImageView::New(img);
     actor.SetName( filename );
     actor.SetParentOrigin(ParentOrigin::CENTER);
     actor.SetAnchorPoint(AnchorPoint::CENTER);
 
-    actor.TouchedSignal().Connect( this, &ExampleController::OnTouchImage );
+    actor.TouchSignal().Connect( this, &ExampleController::OnTouchImage );
     return actor;
   }
 
@@ -487,14 +494,13 @@ private:
    * Upon Touching an image (Release), make it spin
    * (provided we're not scrolling).
    * @param[in] actor The actor touched
-   * @param[in] event The TouchEvent.
+   * @param[in] event The touch information.
    */
-  bool OnTouchImage( Actor actor, const TouchEvent& event )
+  bool OnTouchImage( Actor actor, const TouchData& event )
   {
-    if( (event.points.size() > 0) && (!mScrolling) )
+    if( (event.GetPointCount() > 0) && (!mScrolling) )
     {
-      TouchPoint point = event.points[0];
-      if(point.state == TouchPoint::Up)
+      if( event.GetState( 0 ) == PointState::UP )
       {
         // Spin the Image a few times.
         Animation animation = Animation::New(SPIN_DURATION);
@@ -579,7 +585,7 @@ private:
   Toolkit::PushButton mEffectChangeButton;              ///< Effect Change Button
 };
 
-int main(int argc, char **argv)
+int DALI_EXPORT_API main(int argc, char **argv)
 {
   Application app = Application::New(&argc, &argv, DEMO_THEME_PATH);
   ExampleController test(app);

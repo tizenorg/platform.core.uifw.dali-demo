@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,18 @@
  *
  */
 
-//External includes
+// EXTERNAL INCLUDES
 #include <cstdio>
 #include <string>
 
-//Internal includes
+// INTERNAL INCLUDES
 #include <dali/dali.h>
-#include <dali/devel-api/rendering/renderer.h>
+#include <dali/devel-api/images/texture-set-image.h>
+#include <dali/public-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 #include "shared/view.h"
+#include "shared/utility.h"
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -192,7 +194,7 @@ public:
   /**
    * Touch event function
    */
-  bool OnTouch( Actor actor, const TouchEvent& touch );
+  bool OnTouch( Actor actor, const TouchData& touch );
 
   /**
    * Key event function
@@ -328,7 +330,7 @@ void MetaballExplosionController::Create( Application& app )
   stage.SetBackgroundColor(Color::BLACK);
 
   //Set background image for the view
-  mBackImage = ResourceImage::New( BACKGROUND_IMAGE );
+  mBackImage = DemoHelper::LoadImage( BACKGROUND_IMAGE );
 
   srand((unsigned)time(0));
 
@@ -344,7 +346,7 @@ void MetaballExplosionController::Create( Application& app )
   mTimerDispersion.TickSignal().Connect(this, &MetaballExplosionController::OnTimerDispersionTick);
 
   // Connect the callback to the touch signal on the mesh actor
-  stage.GetRootLayer().TouchedSignal().Connect( this, &MetaballExplosionController::OnTouch );
+  stage.GetRootLayer().TouchSignal().Connect( this, &MetaballExplosionController::OnTouch );
 }
 
 Geometry MetaballExplosionController::CreateGeometry()
@@ -373,8 +375,6 @@ Geometry MetaballExplosionController::CreateGeometry()
     { Vector2(1.0f, 1.0f * aspect) }
   };
 
-  int indices[] = { 0, 3, 1, 0, 2, 3 };
-
   unsigned int numberOfVertices = sizeof(vertices)/sizeof(VertexPosition);
 
   //Vertices
@@ -390,17 +390,14 @@ Geometry MetaballExplosionController::CreateGeometry()
   textureVertices.SetData( textures, numberOfVertices );
 
   //Indices
-  Property::Map indicesVertexFormat;
-  indicesVertexFormat["aIndices"] = Property::INTEGER;
-  PropertyBuffer indicesToVertices = PropertyBuffer::New( indicesVertexFormat );
-  indicesToVertices.SetData( indices, 6 );
+  unsigned short indices[] = { 0, 3, 1, 0, 2, 3 };
 
   // Create the geometry object
   Geometry texturedQuadGeometry = Geometry::New();
   texturedQuadGeometry.AddVertexBuffer( positionVertices );
   texturedQuadGeometry.AddVertexBuffer( textureVertices );
 
-  texturedQuadGeometry.SetIndexBuffer ( indicesToVertices );
+  texturedQuadGeometry.SetIndexBuffer ( &indices[0], sizeof( indices )/ sizeof( indices[0] ) );
 
   return texturedQuadGeometry;
 }
@@ -431,8 +428,6 @@ Geometry MetaballExplosionController::CreateGeometryComposition()
     { Vector2(1.0f, 1.0f) }
   };
 
-  int indices[] = { 0, 3, 1, 0, 2, 3 };
-
   unsigned int numberOfVertices = sizeof(vertices)/sizeof(VertexPosition);
 
   //Vertices
@@ -448,17 +443,14 @@ Geometry MetaballExplosionController::CreateGeometryComposition()
   textureVertices.SetData( textures, numberOfVertices );
 
   //Indices
-  Property::Map indicesVertexFormat;
-  indicesVertexFormat["aIndices"] = Property::INTEGER;
-  PropertyBuffer indicesToVertices = PropertyBuffer::New( indicesVertexFormat );
-  indicesToVertices.SetData( indices, 6 );
+  unsigned short indices[] = { 0, 3, 1, 0, 2, 3 };
 
   // Create the geometry object
   Geometry texturedQuadGeometry = Geometry::New();
   texturedQuadGeometry.AddVertexBuffer( positionVertices );
   texturedQuadGeometry.AddVertexBuffer( textureVertices );
 
-  texturedQuadGeometry.SetIndexBuffer ( indicesToVertices );
+  texturedQuadGeometry.SetIndexBuffer ( &indices[0], sizeof( indices )/ sizeof( indices[0] ) );
 
   return texturedQuadGeometry;
 }
@@ -474,8 +466,13 @@ void MetaballExplosionController::CreateMetaballActors()
   //Create the shader for the metaballs
   Shader shader = Shader::New( METABALL_VERTEX_SHADER, METABALL_FRAG_SHADER );
 
-  Material material = Material::New( shader );
   Geometry metaballGeom = CreateGeometry();
+  Renderer renderer = Renderer::New( metaballGeom, shader );
+  renderer.SetProperty( Renderer::Property::BLEND_MODE, BlendMode::ON );
+  renderer.SetProperty( Renderer::Property::BLEND_FACTOR_SRC_RGB,    BlendFactor::ONE );
+  renderer.SetProperty( Renderer::Property::BLEND_FACTOR_DEST_RGB,   BlendFactor::ONE );
+  renderer.SetProperty( Renderer::Property::BLEND_FACTOR_SRC_ALPHA,  BlendFactor::ONE );
+  renderer.SetProperty( Renderer::Property::BLEND_FACTOR_DEST_ALPHA, BlendFactor::ONE  );
 
   //Initialization of each of the metaballs
   for( int i = 0; i < METABALL_NUMBER; i++ )
@@ -487,11 +484,6 @@ void MetaballExplosionController::CreateMetaballActors()
     mMetaballs[i].actor.SetName("Metaball");
     mMetaballs[i].actor.SetScale( 1.0f );
     mMetaballs[i].actor.SetParentOrigin( ParentOrigin::CENTER );
-
-    Renderer renderer = Renderer::New( metaballGeom, material );
-    renderer.SetProperty( Renderer::Property::BLENDING_MODE, BlendingMode::ON );
-    renderer.SetBlendFunc(BlendingFactor::ONE, BlendingFactor::ONE, BlendingFactor::ONE, BlendingFactor::ONE);
-
     mMetaballs[i].actor.AddRenderer( renderer );
 
     mMetaballs[i].positionIndex = mMetaballs[i].actor.RegisterProperty( "uPositionMetaball", mMetaballs[i].position );
@@ -557,17 +549,17 @@ void MetaballExplosionController::AddRefractionImage()
 
   //Create new shader
   Shader shader = Shader::New( METABALL_VERTEX_SHADER, REFRACTION_FRAG_SHADER );
-  //Create new material
-  Material material = Material::New( shader );
 
-  //Add Textures
-  material.AddTexture(mBackImage, "sTexture");
-  material.AddTexture(fbo, "sEffect");
+  //Create new texture set
+  TextureSet textureSet = TextureSet::New();
+  TextureSetImage( textureSet, 0u, mBackImage );
+  TextureSetImage( textureSet, 1u, fbo );
 
   //Create geometry
   Geometry metaballGeom = CreateGeometryComposition();
 
-  Renderer mRenderer = Renderer::New( metaballGeom, material );
+  Renderer mRenderer = Renderer::New( metaballGeom, shader );
+  mRenderer.SetTextures( textureSet );
 
   mCompositionActor = Actor::New( );
   mCompositionActor.SetParentOrigin(ParentOrigin::CENTER);
@@ -691,31 +683,32 @@ void MetaballExplosionController::SetPositionToMetaballs(Vector2 & metaballCente
   mCompositionActor.SetProperty( mPositionIndex, metaballCenter );
 }
 
-bool MetaballExplosionController::OnTouch( Actor actor, const TouchEvent& touch )
+bool MetaballExplosionController::OnTouch( Actor actor, const TouchData& touch )
 {
-  const TouchPoint &point = touch.GetPoint(0);
   float aspectR = mScreenSize.y / mScreenSize.x;
 
-  switch( point.state )
+  switch( touch.GetState( 0 ) )
   {
-    case TouchPoint::Down:
+    case PointState::DOWN:
     {
       ResetMetaballs(true);
 
-      Vector2 metaballCenter = Vector2((point.screen.x / mScreenSize.x) - 0.5, (aspectR * (mScreenSize.y - point.screen.y) / mScreenSize.y) - 0.5) * 2.0;
+      const Vector2 screen = touch.GetScreenPosition( 0 );
+      Vector2 metaballCenter = Vector2((screen.x / mScreenSize.x) - 0.5, (aspectR * (mScreenSize.y - screen.y) / mScreenSize.y) - 0.5) * 2.0;
       SetPositionToMetaballs(metaballCenter);
 
       break;
     }
-    case TouchPoint::Motion:
+    case PointState::MOTION:
     {
-      Vector2 metaballCenter = Vector2((point.screen.x / mScreenSize.x) - 0.5, (aspectR * (mScreenSize.y - point.screen.y) / mScreenSize.y) - 0.5) * 2.0;
+      const Vector2 screen = touch.GetScreenPosition( 0 );
+      Vector2 metaballCenter = Vector2((screen.x / mScreenSize.x) - 0.5, (aspectR * (mScreenSize.y - screen.y) / mScreenSize.y) - 0.5) * 2.0;
       SetPositionToMetaballs(metaballCenter);
       break;
     }
-    case TouchPoint::Up:
-    case TouchPoint::Leave:
-    case TouchPoint::Interrupted:
+    case PointState::UP:
+    case PointState::LEAVE:
+    case PointState::INTERRUPTED:
     {
       mTimerDispersion.Start();
       break;
@@ -753,7 +746,7 @@ void RunTest( Application& application )
 
 // Entry point for Linux & Tizen applications
 //
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv );
 

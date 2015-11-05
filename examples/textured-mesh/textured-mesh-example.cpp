@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/rendering/renderer.h>
+#include <dali/public-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 // INTERNAL INCLUDES
 #include "shared/view.h"
+#include "shared/utility.h"
 
 using namespace Dali;
 
@@ -60,38 +61,6 @@ void main()
   gl_FragColor = texture2D( sTexture, vTexCoord ) * uColor * uFadeColor;
 }
 );
-
-Geometry CreateGeometry()
-{
-  // Create vertices
-  const float halfQuadSize = .5f;
-  struct TexturedQuadVertex { Vector2 position; Vector2 textureCoordinates; };
-  TexturedQuadVertex texturedQuadVertexData[4] = {
-    { Vector2(-halfQuadSize, -halfQuadSize), Vector2(0.f, 0.f) },
-    { Vector2( halfQuadSize, -halfQuadSize), Vector2(1.f, 0.f) },
-    { Vector2(-halfQuadSize,  halfQuadSize), Vector2(0.f, 1.f) },
-    { Vector2( halfQuadSize,  halfQuadSize), Vector2(1.f, 1.f) } };
-
-  Property::Map texturedQuadVertexFormat;
-  texturedQuadVertexFormat["aPosition"] = Property::VECTOR2;
-  texturedQuadVertexFormat["aTexCoord"] = Property::VECTOR2;
-  PropertyBuffer texturedQuadVertices = PropertyBuffer::New( texturedQuadVertexFormat );
-  texturedQuadVertices.SetData( texturedQuadVertexData, 4 );
-
-  // Create indices
-  unsigned int indexData[6] = { 0, 3, 1, 0, 2, 3 };
-  Property::Map indexFormat;
-  indexFormat["indices"] = Property::INTEGER;
-  PropertyBuffer indices = PropertyBuffer::New( indexFormat );
-  indices.SetData( indexData, sizeof(indexData)/sizeof(indexData[0]) );
-
-  // Create the geometry object
-  Geometry texturedQuadGeometry = Geometry::New();
-  texturedQuadGeometry.AddVertexBuffer( texturedQuadVertices );
-  texturedQuadGeometry.SetIndexBuffer( indices );
-
-  return texturedQuadGeometry;
-}
 
 /**
  * Sinusoidal curve starting at zero with 2 cycles
@@ -144,19 +113,20 @@ public:
     // Hide the indicator bar
     application.GetWindow().ShowIndicator( Dali::Window::INVISIBLE );
 
-    mImage = ResourceImage::New( MATERIAL_SAMPLE );
-    Image image = ResourceImage::New( MATERIAL_SAMPLE2 );
+    Texture texture1 = DemoHelper::LoadTexture( MATERIAL_SAMPLE );
+    Texture texture2 = DemoHelper::LoadTexture( MATERIAL_SAMPLE2 );
 
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
-    mMaterial1 = Material::New( mShader );
-    mMaterial1.AddTexture(mImage, "sTexture");
+    mTextureSet1 = TextureSet::New();
+    mTextureSet1.SetTexture( 0u, texture1 );
 
-    mMaterial2 = Material::New( mShader );
-    mMaterial2.AddTexture(image, "sTexture");
+    mTextureSet2 = TextureSet::New();
+    mTextureSet2.SetTexture( 0u, texture2 );
 
-    mGeometry = CreateGeometry();
+    mGeometry = DemoHelper::CreateTexturedQuad();
 
-    mRenderer = Renderer::New( mGeometry, mMaterial1 );
+    mRenderer = Renderer::New( mGeometry, mShader );
+    mRenderer.SetTextures( mTextureSet1 );
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
@@ -169,7 +139,8 @@ public:
     mMeshActor.SetAnchorPoint( AnchorPoint::TOP_CENTER );
     stage.Add( mMeshActor );
 
-    mRenderer2 = Renderer::New( mGeometry, mMaterial2 );
+    mRenderer2 = Renderer::New( mGeometry, mShader );
+    mRenderer2.SetTextures( mTextureSet2 );
 
     mMeshActor2 = Actor::New();
     mMeshActor2.AddRenderer( mRenderer2 );
@@ -260,10 +231,9 @@ private:
   Application&  mApplication;                             ///< Application instance
   Vector3 mStageSize;                                     ///< The size of the stage
 
-  Image    mImage;
   Shader   mShader;
-  Material mMaterial1;
-  Material mMaterial2;
+  TextureSet mTextureSet1;
+  TextureSet mTextureSet2;
   Geometry mGeometry;
   Renderer mRenderer;
   Actor    mMeshActor;
@@ -281,7 +251,7 @@ void RunTest( Application& application )
 
 // Entry point for Linux & SLP applications
 //
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv );
 

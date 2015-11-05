@@ -177,12 +177,12 @@ public:
 
     // Background image:
     Dali::Property::Map backgroundImage;
-    backgroundImage.Insert( "rendererType",  "image" );
-    backgroundImage.Insert( "imageUrl",  BACKGROUND_IMAGE );
-    backgroundImage.Insert( "imageDesiredWidth",   stage.GetSize().width );
-    backgroundImage.Insert( "imageDesiredHeight",   stage.GetSize().height );
-    backgroundImage.Insert( "imageFittingMode",   "scaleToFill" );
-    backgroundImage.Insert( "imageSamplingMode",   "boxThenNearest" );
+    backgroundImage.Insert( Toolkit::Visual::Property::TYPE,  Toolkit::Visual::IMAGE );
+    backgroundImage.Insert( Toolkit::ImageVisual::Property::URL,  BACKGROUND_IMAGE );
+    backgroundImage.Insert( Toolkit::ImageVisual::Property::DESIRED_WIDTH, stage.GetSize().width );
+    backgroundImage.Insert( Toolkit::ImageVisual::Property::DESIRED_HEIGHT, stage.GetSize().height );
+    backgroundImage.Insert( Toolkit::ImageVisual::Property::FITTING_MODE,   FittingMode::SCALE_TO_FILL );
+    backgroundImage.Insert( Toolkit::ImageVisual::Property::SAMPLING_MODE,   SamplingMode::BOX_THEN_NEAREST );
 
     Toolkit::ImageView background = Toolkit::ImageView::New();
     background.SetProperty( Toolkit::ImageView::Property::IMAGE, backgroundImage );
@@ -284,8 +284,7 @@ public:
 
     // Back and next image buttons in corners of stage:
     unsigned int playWidth = std::min( stage.GetSize().x * (1 / 5.0f), 58.0f );
-    Image playImage = ResourceImage::New( DALI_ICON_PLAY, ImageDimensions( playWidth, playWidth ), FittingMode::SHRINK_TO_FIT, SamplingMode::BOX_THEN_LINEAR );
-    Toolkit::ImageView imagePrevious = Toolkit::ImageView::New( playImage );
+    Toolkit::ImageView imagePrevious = Toolkit::ImageView::New( DALI_ICON_PLAY, ImageDimensions( playWidth, playWidth ) );
 
     // Last image button:
     imagePrevious.SetAnchorPoint( AnchorPoint::TOP_LEFT );
@@ -295,17 +294,17 @@ public:
     imagePrevious.SetOpacity( 0.6f );
     controlsLayer.Add( imagePrevious );
     imagePrevious.SetName( PREVIOUS_BUTTON_ID );
-    imagePrevious.TouchedSignal().Connect( this, &ImageScalingAndFilteringController::OnControlTouched );
+    imagePrevious.TouchSignal().Connect( this, &ImageScalingAndFilteringController::OnControlTouched );
 
     // Next image button:
-    Toolkit::ImageView imageNext = Toolkit::ImageView::New( playImage );
+    Toolkit::ImageView imageNext = Toolkit::ImageView::New( DALI_ICON_PLAY, ImageDimensions( playWidth, playWidth ) );
     imageNext.SetAnchorPoint( AnchorPoint::TOP_RIGHT );
     imageNext.SetY( playWidth * 0.5f );
     imageNext.SetX( stage.GetSize().x - playWidth * 0.5f );
     imageNext.SetOpacity( 0.6f );
     controlsLayer.Add( imageNext );
     imageNext.SetName( NEXT_BUTTON_ID );
-    imageNext.TouchedSignal().Connect( this, &ImageScalingAndFilteringController::OnControlTouched );
+    imageNext.TouchSignal().Connect( this, &ImageScalingAndFilteringController::OnControlTouched );
 
     // Buttons to popup selectors for fitting and sampling modes:
 
@@ -535,14 +534,13 @@ public:
     }
   }
 
-  bool OnControlTouched( Actor actor, const TouchEvent& event )
+  bool OnControlTouched( Actor actor, const TouchData& event )
   {
     if(event.GetPointCount() > 0)
     {
-      const TouchPoint& point = event.GetPoint(0);
-      switch(point.state)
+      switch( event.GetState( 0 ) )
       {
-        case TouchPoint::Up:
+        case PointState::UP:
         {
           const std::string & name = actor.GetName();
           if( name == NEXT_BUTTON_ID )
@@ -759,7 +757,7 @@ void RunTest( Application& application )
 }
 
 // Entry point for Linux & Tizen applications
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv, DEMO_THEME_PATH );
 

@@ -74,13 +74,12 @@ private:
     animation.Play();
 
     // Respond to a click anywhere on the stage
-    stage.GetRootLayer().TouchedSignal().Connect( this, &ImageViewPixelAreaApp::OnTouch );
+    stage.GetRootLayer().TouchSignal().Connect( this, &ImageViewPixelAreaApp::OnTouch );
   }
 
-  bool OnTouch( Actor actor, const TouchEvent& touch )
+  bool OnTouch( Actor actor, const TouchData& touch )
   {
-    const TouchPoint &point = touch.GetPoint(0);
-    if(point.state == TouchPoint::Down)
+    if( touch.GetState( 0 ) == PointState::DOWN )
     {
       mIndex++;
       for( int i=0; i<3;i++ )
@@ -118,7 +117,7 @@ void RunTest( Application& application )
 
 // Entry point for Linux & Tizen applications
 //
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv );
 

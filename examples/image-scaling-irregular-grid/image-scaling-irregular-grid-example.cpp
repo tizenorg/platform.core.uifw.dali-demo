@@ -461,7 +461,7 @@ public:
       ImageView image = CreateImageView( imageSource.configuration.path, imageSize.x, imageSize.y, fittingMode );
       image.SetPosition( Vector3( imagePosition.x, imagePosition.y, 0 ) );
       image.SetSize( imageSize );
-      image.TouchedSignal().Connect( this, &ImageScalingIrregularGridController::OnTouchImage );
+      image.TouchSignal().Connect( this, &ImageScalingIrregularGridController::OnTouchImage );
       mFittingModes[image.GetId()] = fittingMode;
       mResourceUrls[image.GetId()] = imageSource.configuration.path;
       mSizes[image.GetId()] = imageSize;
@@ -475,14 +475,13 @@ public:
  /**
   * Upon Touching an image (Release), change its scaling mode and make it spin, provided we're not scrolling.
   * @param[in] actor The actor touched
-  * @param[in] event The TouchEvent.
+  * @param[in] event The Touch information.
   */
-  bool OnTouchImage( Actor actor, const TouchEvent& event )
+  bool OnTouchImage( Actor actor, const TouchData& event )
   {
-    if( (event.points.size() > 0) && (!mScrolling) )
+    if( ( event.GetPointCount() > 0 ) && ( !mScrolling ) )
     {
-      TouchPoint point = event.points[0];
-      if(point.state == TouchPoint::Up)
+      if( event.GetState( 0 ) == PointState::UP )
       {
         // Spin the image a few times:
         Animation animation = Animation::New(SPIN_DURATION);
@@ -614,7 +613,7 @@ void RunTest( Application& application )
 }
 
 /** Entry point for Linux & Tizen applications */
-int main( int argc, char **argv )
+int DALI_EXPORT_API main( int argc, char **argv )
 {
   Application application = Application::New( &argc, &argv, DEMO_THEME_PATH );
 
