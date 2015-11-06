@@ -64,7 +64,8 @@ const char* const IMAGE1 = DALI_IMAGE_DIR "gallery-medium-5.jpg";
 const char* const IMAGE2 = DALI_IMAGE_DIR "background-magnifier.jpg";
 
 // Control area image.
-const char*   DEFAULT_CONTROL_AREA_IMAGE_PATH = DALI_IMAGE_DIR "popup_button_background.9.png"; ///< Control area image for the popup.
+const char*   DEFAULT_CONTROL_AREA_IMAGE_PATH = DALI_IMAGE_DIR "popup_button_background.png"; ///< Control area image for the popup.
+const Vector4 DEFAULT_CONTROL_AREA_9_PATCH_BORDER( 13.0f, 8.0f, 13.0f, 8.0f );           ///< Nine patch information for the control area background.
 
 const ButtonItem POPUP_BUTTON_ITEMS[] = {
     { POPUP_BUTTON_COMPLEX_ID,                     "Complex" },
@@ -351,7 +352,10 @@ public:
     if( numberOfButtons > 0 )
     {
       // Start with a control area image.
-      Toolkit::ImageView footer = Toolkit::ImageView::New( DEFAULT_CONTROL_AREA_IMAGE_PATH );
+      ImageActor footer = ImageActor::New( ResourceImage::New( DEFAULT_CONTROL_AREA_IMAGE_PATH ) );
+      // Nine patch information is only used for the default control area image.
+      footer.SetStyle( ImageActor::STYLE_NINE_PATCH );
+      footer.SetNinePatchBorder( DEFAULT_CONTROL_AREA_9_PATCH_BORDER );
       footer.SetName( "control-area-image" );
       // Set up the container's layout.
       footer.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
@@ -522,7 +526,7 @@ public:
     else if( button.GetName() == POPUP_BUTTON_CONTENT_IMAGE_ID )
     {
       mPopup = CreatePopup();
-      Toolkit::ImageView image = Toolkit::ImageView::New( IMAGE2 );
+      ImageActor image = ImageActor::New( ResourceImage::New( IMAGE2 ) );
       image.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
       image.SetResizePolicy( ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT );
       image.SetPadding( Padding( 20.0f, 20.0f, 20.0f, 20.0f ) );
@@ -611,7 +615,7 @@ public:
 
       // Image
       {
-        Toolkit::ImageView image = Toolkit::ImageView::New( IMAGE1 );
+        ImageActor image = ImageActor::New( ResourceImage::New( IMAGE1 ) );
         image.SetName( "COMPLEX_IMAGE" );
         image.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
         image.SetResizePolicy( ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT );

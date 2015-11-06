@@ -119,16 +119,16 @@ public:
   void Create( Application& app );
   void Destroy( Application& app );
 
-  void AddBubbles( Actor& parentActor, const Vector2& stageSize);
-  void AddMeshActor( Actor& parentActor );
-  void AddBlendingImageActor( Actor& parentActor );
-  void AddTextLabel( Actor& parentActor );
+  void AddBubbles(const Vector2& stageSize);
+  void AddMeshActor();
+  void AddBlendingImageActor();
+  void AddTextLabel();
 
   ImageView CreateBlurredMirrorImage(const char* imageName);
-  FrameBufferImage CreateFrameBufferForImage( const char* imageName, Property::Map& shaderEffect, const Vector3& rgbDelta );
+  FrameBufferImage CreateFrameBufferForImage(const char* imageName, Image image, ShaderEffect shaderEffect);
   void SetUpBubbleEmission( const Vector2& emitPosition, const Vector2& direction );
   Geometry CreateMeshGeometry();
-  Dali::Property::Map CreateColorModifierer();
+  ShaderEffect CreateColorModifierer( const Vector3& rgbDelta );
 
   static void NewWindow(void);
 
@@ -185,8 +185,9 @@ void NewWindowController::Create( Application& app )
 
   Size stageSize = stage.GetSize();
   Image backgroundImage = ResourceImage::New( BACKGROUND_IMAGE, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
-  ImageView backgroundActor = ImageView::New( backgroundImage );
+  ImageActor backgroundActor = ImageActor::New( backgroundImage );
   backgroundActor.SetParentOrigin( ParentOrigin::CENTER );
+  backgroundActor.SetZ(-2.f);
   mContentLayer.Add(backgroundActor);
 
   // Point the default render task at the view
@@ -207,7 +208,7 @@ void NewWindowController::Create( Application& app )
   logoLayoutActor.SetParentOrigin(ParentOrigin::CENTER);
   logoLayoutActor.SetPosition(0.0f, -200.0f, 0.0f);
   logoLayoutActor.SetScale(0.5f);
-  backgroundActor.Add(logoLayoutActor);
+  mContentLayer.Add(logoLayoutActor);
 
   Image image = ResourceImage::New(LOGO_IMAGE);
   ImageView imageView = ImageView::New(image);
@@ -221,10 +222,10 @@ void NewWindowController::Create( Application& app )
   mirrorImageView.SetAnchorPoint(AnchorPoint::TOP_CENTER);
   logoLayoutActor.Add(mirrorImageView);
 
-  AddBubbles( backgroundActor, stage.GetSize());
-  AddMeshActor( backgroundActor );
-  AddBlendingImageActor( backgroundActor );
-  AddTextLabel( backgroundActor );
+  AddBubbles(stage.GetSize());
+  AddMeshActor();
+  AddBlendingImageActor();
+  AddTextLabel();
 
   stage.ContextLostSignal().Connect(this, &NewWindowController::OnContextLost);
   stage.ContextRegainedSignal().Connect(this, &NewWindowController::OnContextRegained);
@@ -235,7 +236,7 @@ void NewWindowController::Destroy( Application& app )
   UnparentAndReset(mTextActor);
 }
 
-void NewWindowController::AddBubbles( Actor& parentActor, const Vector2& stageSize)
+void NewWindowController::AddBubbles(const Vector2& stageSize)
 {
   mEmitter = Toolkit::BubbleEmitter::New( stageSize,
                                           ResourceImage::New( DALI_IMAGE_DIR "bubble-ball.png" ),
@@ -245,7 +246,7 @@ void NewWindowController::AddBubbles( Actor& parentActor, const Vector2& stageSi
   mEmitter.SetBackground( background, Vector3(0.5f, 0.f,0.5f) );
   mEmitter.SetBubbleDensity( 9.f );
   Actor bubbleRoot = mEmitter.GetRootActor();
-  parentActor.Add( bubbleRoot );
+  mContentLayer.Add( bubbleRoot );
   bubbleRoot.SetParentOrigin(ParentOrigin::CENTER);
   bubbleRoot.SetZ(0.1f);
 
@@ -254,7 +255,7 @@ void NewWindowController::AddBubbles( Actor& parentActor, const Vector2& stageSi
   mEmitTrackTimer.Start();
 }
 
-void NewWindowController::AddMeshActor( Actor& parentActor )
+void NewWindowController::AddMeshActor()
 {
   Geometry meshGeometry = CreateMeshGeometry();
 
@@ -271,7 +272,7 @@ void NewWindowController::AddMeshActor( Actor& parentActor )
   colorMeshActor.SetPosition(Vector3(0.0f, 50.0f, 0.0f));
   colorMeshActor.SetOrientation( Degree(75.f), Vector3::XAXIS );
   colorMeshActor.SetName("ColorMeshActor");
-  parentActor.Add( colorMeshActor );
+  mContentLayer.Add( colorMeshActor );
 
  // Create a textured mesh
   Image effectImage = ResourceImage::New(EFFECT_IMAGE);
@@ -288,17 +289,17 @@ void NewWindowController::AddMeshActor( Actor& parentActor )
   textureMeshActor.SetPosition(Vector3(0.0f, 200.0f, 0.0f));
   textureMeshActor.SetOrientation( Degree(75.f), Vector3::XAXIS );
   textureMeshActor.SetName("TextureMeshActor");
-  parentActor.Add( textureMeshActor );
+  mContentLayer.Add( textureMeshActor );
 }
 
-void NewWindowController::AddBlendingImageActor( Actor& parentActor )
+void NewWindowController::AddBlendingImageActor()
 {
-  Property::Map colorModifier = CreateColorModifierer();
-
-  FrameBufferImage fb2 = CreateFrameBufferForImage( EFFECT_IMAGE, colorModifier, Vector3( 0.5f, 0.5f, 0.5f ) );
+  ShaderEffect colorModifier = CreateColorModifierer(Vector3( 0.5f, 0.5f, 0.5f ));
+  Image effectImage = ResourceImage::New(EFFECT_IMAGE);
+  FrameBufferImage fb2 = CreateFrameBufferForImage( EFFECT_IMAGE, effectImage, colorModifier );
 
   ImageView tmpActor = ImageView::New(fb2);
-  parentActor.Add(tmpActor);
+  mContentLayer.Add(tmpActor);
   tmpActor.SetParentOrigin(ParentOrigin::CENTER_RIGHT);
   tmpActor.SetAnchorPoint(AnchorPoint::TOP_RIGHT);
   tmpActor.SetPosition(Vector3(0.0f, 150.0f, 0.0f));
@@ -316,16 +317,16 @@ void NewWindowController::AddBlendingImageActor( Actor& parentActor )
   blendActor.SetPosition(Vector3(0.0f, 100.0f, 0.0f));
   blendActor.SetSize(140, 140);
   blendActor.SetShaderEffect( blendShader );
-  parentActor.Add(blendActor);
+  mContentLayer.Add(blendActor);
 }
 
-void NewWindowController::AddTextLabel( Actor& parentActor )
+void NewWindowController::AddTextLabel()
 {
   mTextActor = TextLabel::New("Some text");
   mTextActor.SetParentOrigin(ParentOrigin::CENTER);
   mTextActor.SetColor(Color::RED);
   mTextActor.SetName("PushMe text");
-  parentActor.Add( mTextActor );
+  mContentLayer.Add( mTextActor );
 }
 
 ImageView NewWindowController::CreateBlurredMirrorImage(const char* imageName)
@@ -349,25 +350,26 @@ ImageView NewWindowController::CreateBlurredMirrorImage(const char* imageName)
   return blurredActor;
 }
 
-FrameBufferImage NewWindowController::CreateFrameBufferForImage(const char* imageName, Property::Map& shaderEffect, const Vector3& rgbDelta )
+FrameBufferImage NewWindowController::CreateFrameBufferForImage(const char* imageName, Image image, ShaderEffect shaderEffect)
 {
   Stage stage = Stage::GetCurrent();
-  Uint16Pair intFboSize = ResourceImage::GetImageSize( imageName );
+  Uint16Pair intFboSize = ResourceImage::GetImageSize(imageName);
   Vector2 FBOSize = Vector2(intFboSize.GetWidth(), intFboSize.GetHeight());
 
   FrameBufferImage framebuffer = FrameBufferImage::New(FBOSize.x, FBOSize.y );
 
   RenderTask renderTask = stage.GetRenderTaskList().CreateTask();
 
-  ImageView imageView = ImageView::New( imageName );
-  imageView.SetName("Source image actor");
-  imageView.SetProperty( ImageView::Property::IMAGE, shaderEffect );
-  imageView.RegisterProperty( "uRGBDelta", rgbDelta );
-
-  imageView.SetParentOrigin(ParentOrigin::CENTER);
-  imageView.SetAnchorPoint(AnchorPoint::CENTER);
-  imageView.SetScale(1.0f, -1.0f, 1.0f);
-  stage.Add(imageView); // Not in default image view
+  ImageActor imageActor = ImageActor::New(image);
+  imageActor.SetName("Source image actor");
+  if(shaderEffect)
+  {
+    imageActor.SetShaderEffect(shaderEffect);
+  }
+  imageActor.SetParentOrigin(ParentOrigin::CENTER);
+  imageActor.SetAnchorPoint(AnchorPoint::CENTER);
+  imageActor.SetScale(1.0f, -1.0f, 1.0f);
+  stage.Add(imageActor); // Not in default image view
 
   CameraActor cameraActor = CameraActor::New(FBOSize);
   cameraActor.SetParentOrigin(ParentOrigin::CENTER);
@@ -378,7 +380,7 @@ FrameBufferImage NewWindowController::CreateFrameBufferForImage(const char* imag
   cameraActor.SetPosition(0.0f, 0.0f, ((FBOSize.height * 0.5f) / tanf(Math::PI * 0.125f)));
   stage.Add(cameraActor);
 
-  renderTask.SetSourceActor(imageView);
+  renderTask.SetSourceActor(imageActor);
   renderTask.SetInputEnabled(false);
   renderTask.SetTargetFrameBuffer(framebuffer);
   renderTask.SetCameraActor( cameraActor );
@@ -449,16 +451,12 @@ Geometry NewWindowController::CreateMeshGeometry()
   return geometry;
 }
 
-Dali::Property::Map NewWindowController::CreateColorModifierer()
+ShaderEffect NewWindowController::CreateColorModifierer( const Vector3& rgbDelta )
 {
- const char* fragmentShader ( DALI_COMPOSE_SHADER (
+ std::string fragmentShader = MAKE_SHADER(
    precision highp float;\n
    uniform vec3 uRGBDelta;\n
    uniform float uIgnoreAlpha;\n
-   \n
-   varying mediump vec2 vTexCoord;\n
-   uniform sampler2D sTexture;\n
-   \n
    float rand(vec2 co) \n
    {\n
      return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453); \n}
@@ -473,14 +471,12 @@ Dali::Property::Map NewWindowController::CreateColorModifierer()
      color.rgb -= min(color.rgb*2.0, 0.0);\n
      gl_FragColor = color; \n
    }\n
- ) );
+ );
 
- Property::Map map;
- Property::Map customShader;
- customShader[ "fragment-shader" ] = fragmentShader;
- map[ "shader" ] = customShader;
+ ShaderEffect shaderEffect = ShaderEffect::New("", fragmentShader);
+ shaderEffect.SetUniform( "uRGBDelta", rgbDelta );
 
- return map;
+ return shaderEffect;
 }
 
 void NewWindowController::NewWindow(void)

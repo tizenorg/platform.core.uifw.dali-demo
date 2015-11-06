@@ -177,17 +177,21 @@ public:
     // Motion stretched actor
     //
 
-    mMotionStretchImageView = ImageView::New( MOTION_STRETCH_ACTOR_IMAGE1 );
-    mMotionStretchImageView.SetParentOrigin( ParentOrigin::CENTER );
-    mMotionStretchImageView.SetAnchorPoint( AnchorPoint::CENTER );
-    mMotionStretchImageView.SetSize( MOTION_STRETCH_ACTOR_WIDTH, MOTION_STRETCH_ACTOR_HEIGHT );
+    Image image = ResourceImage::New( MOTION_STRETCH_ACTOR_IMAGE1 );
+    mMotionStretchImageActor = ImageActor::New(image);
+    mMotionStretchImageActor.SetParentOrigin( ParentOrigin::CENTER );
+    mMotionStretchImageActor.SetAnchorPoint( AnchorPoint::CENTER );
+    mMotionStretchImageActor.SetSize(MOTION_STRETCH_ACTOR_WIDTH, MOTION_STRETCH_ACTOR_HEIGHT);
 
-    mContentLayer.Add( mMotionStretchImageView );
+    mContentLayer.Add( mMotionStretchImageActor );
 
     // Create shader used for doing motion stretch
     mMotionStretchEffect = Toolkit::CreateMotionStretchEffect();
-    Toolkit::SetMotionStretchProperties( mMotionStretchImageView );
-    mMotionStretchImageView.SetProperty( Toolkit::ImageView::Property::IMAGE, mMotionStretchEffect );
+    Dali::Property::Index uModelProperty = mMotionStretchEffect.GetPropertyIndex( "uModelLastFrame" );
+    Constraint constraint = Constraint::New<Matrix>( mMotionStretchEffect, uModelProperty, EqualToConstraint() );
+    constraint.AddSource( Source( mMotionStretchImageActor , Actor::Property::WORLD_MATRIX ) );
+    constraint.Apply();
+    mMotionStretchImageActor.SetShaderEffect( mMotionStretchEffect );
   }
 
   //////////////////////////////////////////////////////////////
@@ -264,9 +268,9 @@ public:
 
     float animDuration = 0.5f;
     mActorTapMovementAnimation = Animation::New( animDuration );
-    if ( mMotionStretchImageView )
+    if ( mMotionStretchImageActor )
     {
-      mActorTapMovementAnimation.AnimateTo( Property(mMotionStretchImageView, Actor::Property::POSITION), destPos, AlphaFunction::EASE_IN_OUT_SINE, TimePeriod(animDuration) );
+      mActorTapMovementAnimation.AnimateTo( Property(mMotionStretchImageActor, Actor::Property::POSITION), destPos, AlphaFunction::EASE_IN_OUT_SINE, TimePeriod(animDuration) );
     }
     mActorTapMovementAnimation.SetEndAction( Animation::Bake );
     mActorTapMovementAnimation.Play();
@@ -282,7 +286,7 @@ public:
         {
           float animDuration = 1.0f;
           mActorAnimation = Animation::New(animDuration);
-          mActorAnimation.AnimateBy( Property( mMotionStretchImageView, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f) ), Vector3::YAXIS ), AlphaFunction::EASE_IN_OUT );
+          mActorAnimation.AnimateBy( Property( mMotionStretchImageActor, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f) ), Vector3::YAXIS ), AlphaFunction::EASE_IN_OUT );
           mActorAnimation.SetEndAction( Animation::Bake );
           mActorAnimation.Play();
         }
@@ -293,7 +297,7 @@ public:
         {
           float animDuration = 1.0f;
           mActorAnimation = Animation::New(animDuration);
-          mActorAnimation.AnimateBy( Property( mMotionStretchImageView, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f) ), Vector3::ZAXIS ), AlphaFunction::EASE_IN_OUT );
+          mActorAnimation.AnimateBy( Property( mMotionStretchImageActor, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f) ), Vector3::ZAXIS ), AlphaFunction::EASE_IN_OUT );
           mActorAnimation.SetEndAction( Animation::Bake );
           mActorAnimation.Play();
         }
@@ -304,8 +308,8 @@ public:
         {
           float animDuration = 1.0f;
           mActorAnimation = Animation::New(animDuration);
-          mActorAnimation.AnimateBy( Property( mMotionStretchImageView, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f) ), Vector3::YAXIS ), AlphaFunction::EASE_IN_OUT );
-          mActorAnimation.AnimateBy( Property( mMotionStretchImageView, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f) ), Vector3::ZAXIS ), AlphaFunction::EASE_IN_OUT );
+          mActorAnimation.AnimateBy( Property( mMotionStretchImageActor, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f) ), Vector3::YAXIS ), AlphaFunction::EASE_IN_OUT );
+          mActorAnimation.AnimateBy( Property( mMotionStretchImageActor, Actor::Property::ORIENTATION ), Quaternion( Radian( Degree(360.0f) ), Vector3::ZAXIS ), AlphaFunction::EASE_IN_OUT );
           mActorAnimation.SetEndAction( Animation::Bake );
           mActorAnimation.Play();
         }
@@ -316,7 +320,7 @@ public:
         {
           float animDuration = 1.0f;
           mActorAnimation = Animation::New(animDuration);
-          mActorAnimation.AnimateBy( Property( mMotionStretchImageView, Actor::Property::SCALE ), Vector3(2.0f, 2.0f, 2.0f), AlphaFunction::BOUNCE, TimePeriod( 0.0f, 1.0f ) );
+          mActorAnimation.AnimateBy( Property( mMotionStretchImageActor, Actor::Property::SCALE ), Vector3(2.0f, 2.0f, 2.0f), AlphaFunction::BOUNCE, TimePeriod( 0.0f, 1.0f ) );
           mActorAnimation.SetEndAction( Animation::Bake );
           mActorAnimation.Play();
         }
@@ -398,7 +402,7 @@ public:
     }
 
     Image stretchImage = ResourceImage::New( MOTION_STRETCH_ACTOR_IMAGES[mCurrentImage] );
-    mMotionStretchImageView.SetImage(stretchImage);
+    mMotionStretchImageActor.SetImage(stretchImage);
   }
 
 
@@ -411,8 +415,8 @@ private:
   PushButton                 mActorEffectsButton;     ///< The actor effects toggling Button.
 
   // Motion stretch
-  Property::Map mMotionStretchEffect;
-  ImageView mMotionStretchImageView;
+  ShaderEffect mMotionStretchEffect;
+  ImageActor mMotionStretchImageActor;
 
   // animate actor to position where user taps screen
   Animation mActorTapMovementAnimation;
