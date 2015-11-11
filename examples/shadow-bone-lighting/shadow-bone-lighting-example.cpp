@@ -199,7 +199,8 @@ public:
     mShadowView.SetPointLightFieldOfView( Math::PI / 2.0f);
     mContents.Add(mShadowView);
 
-    mShadowPlaneBg = ImageView::New( DALI_IMAGE_DIR "brick-wall.jpg" );
+    Image brickWall = ResourceImage::New(DALI_IMAGE_DIR "brick-wall.jpg");
+    mShadowPlaneBg = ImageActor::New(brickWall);
     mShadowPlaneBg.SetParentOrigin(ParentOrigin::CENTER);
     mShadowPlaneBg.SetAnchorPoint(AnchorPoint::CENTER);
     mShadowPlaneBg.SetName("Plane");
@@ -207,7 +208,7 @@ public:
     mContents.Add(mShadowPlaneBg);
     mShadowPlaneBg.SetPosition(Vector3(50.0f, 50.0f, -200.0f));
 
-    mShadowView.SetShadowPlaneBackground(mShadowPlaneBg);
+    mShadowView.SetShadowPlane(mShadowPlaneBg);
     mShadowView.Activate();
 
     mLightAnchor = Actor::New();
@@ -453,8 +454,8 @@ private:
   Animation                 mSceneAnimation;
   bool                      mPaused;
   Toolkit::ShadowView       mShadowView;
-  ImageView                 mShadowPlaneBg;
-  ImageView                 mShadowPlane;
+  ImageActor                mShadowPlaneBg;
+  ImageActor                mShadowPlane;
   Actor                     mCastingLight;
   Actor                     mLightAnchor;
   ImageActor                mImageActor1;
