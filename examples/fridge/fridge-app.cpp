@@ -23,6 +23,11 @@
 using namespace Dali;
 using namespace Dali::Toolkit;
 
+#include <iostream>
+#include <sys/time.h>
+#include <dali/integration-api/debug.h>
+using namespace std;
+
 namespace
 {
 
@@ -99,8 +104,23 @@ FridgeApp::~FridgeApp()
 {
 }
 
+unsigned long long getMS()
+{
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  unsigned long long millisecondsSinceEpoch =
+    (unsigned long long)(tv.tv_sec) * 1000 +
+    (unsigned long long)(tv.tv_usec) / 1000;
+  return millisecondsSinceEpoch;
+}
+
 void FridgeApp::OnInitialize( Application& application )
 {
+  cout << endl << "(time-logger)Begin FridgeApp-OnInitialize: " << getMS() << endl;
+  DALI_LOG_ERROR("(time-logger)Begin FridgeApp-OnInitialize: %llu  ", getMS());
+
+  cout << endl << "(time-logger)Begin   init process: " << getMS() << endl;
+  DALI_LOG_ERROR("(time-logger)Begin   init process: %llu  ", getMS());
   application.InitSignal().Disconnect(this, &FridgeApp::OnInitialize);
 
   Stage stage( Stage::GetCurrent() );
@@ -127,10 +147,21 @@ void FridgeApp::OnInitialize( Application& application )
   mMenuItemSize = Vector3(stageSize.x / 8.0f, stageSize.y * 0.25f, 0.0f);
   mMenu.Initialize(mMenuItemSize);
 
+  cout << endl << "(time-logger)Begin   CreateBackground(): " << getMS() << endl;
+  DALI_LOG_ERROR("(time-logger)Begin   CreateBackground(): %llu  ", getMS());
   CreateBackground();
+  cout << endl << "(time-logger)Begin   CreatePosters(): " << getMS() << endl;
+  DALI_LOG_ERROR("(time-logger)Begin   CreatePosters(): %llu  ", getMS());
   CreatePosters();
+  cout << endl << "(time-logger)Begin   CreateTopPanel(): " << getMS() << endl;
+  DALI_LOG_ERROR("(time-logger)Begin   CreateTopPanel(): %llu  ", getMS());
   CreateTopPanel();
+  cout << endl << "(time-logger)Begin   CreateMenu(): " << getMS() << endl;
+  DALI_LOG_ERROR("(time-logger)Begin   CreateMenu(): %llu  ", getMS());
   CreateMenu();
+
+  cout << endl << "(time-logger)End__ FridgeApp-OnInitialize: " << getMS() << endl;
+  DALI_LOG_ERROR("(time-logger)End__ FridgeApp-OnInitialize: %llu  ", getMS());
 }
 
 void FridgeApp::OnTerminate( Application& application )
