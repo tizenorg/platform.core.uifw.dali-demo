@@ -23,6 +23,10 @@
 using namespace Dali;
 using namespace Dali::Toolkit;
 
+#include <iostream>
+#include <sys/time.h>
+using namespace std;
+
 namespace
 {
 
@@ -99,8 +103,19 @@ FridgeApp::~FridgeApp()
 {
 }
 
+long getMS()
+{
+  struct timeval tp;
+  gettimeofday(&tp, NULL);
+  long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+  return ms;
+}
+
 void FridgeApp::OnInitialize( Application& application )
 {
+  cout << endl << "(time-logger)Begin FridgeApp-OnInitialize: " << getMS() << endl;
+
+  cout << endl << "(time-logger)Begin   init process: " << getMS() << endl;
   application.InitSignal().Disconnect(this, &FridgeApp::OnInitialize);
 
   Stage stage( Stage::GetCurrent() );
@@ -127,10 +142,16 @@ void FridgeApp::OnInitialize( Application& application )
   mMenuItemSize = Vector3(stageSize.x / 8.0f, stageSize.y * 0.25f, 0.0f);
   mMenu.Initialize(mMenuItemSize);
 
+  cout << endl << "(time-logger)Begin   CreateBackground(): " << getMS() << endl;
   CreateBackground();
+  cout << endl << "(time-logger)Begin   CreatePosters(): " << getMS() << endl;
   CreatePosters();
+  cout << endl << "(time-logger)Begin   CreateTopPanel(): " << getMS() << endl;
   CreateTopPanel();
+  cout << endl << "(time-logger)Begin   CreateMenu(): " << getMS() << endl;
   CreateMenu();
+
+  cout << endl << "(time-logger)End__ FridgeApp::OnInitialize: " << getMS() << endl;
 }
 
 void FridgeApp::OnTerminate( Application& application )
