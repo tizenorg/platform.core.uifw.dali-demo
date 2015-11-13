@@ -95,6 +95,8 @@ extern "C"
 #define DALI_DEMO_STR_TITLE_LINE_MESH                 "Mesh Line"
 #define DALI_DEMO_STR_TITLE_COLOR_GRADIENT            "Color Gradient"
 #define DALI_DEMO_STR_TITLE_IMAGE_VIEW                "Image View"
+#define DALI_DEMO_STR_TITLE_FACE_CULLING              "Face Culling"
+
 
 #endif
 
