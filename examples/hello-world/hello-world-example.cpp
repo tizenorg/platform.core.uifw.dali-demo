@@ -15,70 +15,68 @@
  *
  */
 
+#include <iostream>
+
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
-using Dali::Toolkit::TextLabel;
 
-// This example shows how to create and display Hello World! using a simple TextActor
-//
-class HelloWorldController : public ConnectionTracker
+typedef Signal< void ()> TestSignalType1;
+
+class TestEmitter
 {
 public:
 
-  HelloWorldController( Application& application )
-  : mApplication( application )
+  TestEmitter()
   {
-    // Connect to the Application's Init signal
-    mApplication.InitSignal().Connect( this, &HelloWorldController::Create );
   }
 
-  ~HelloWorldController()
+  ~TestEmitter()
   {
-    // Nothing to do here;
   }
 
-  // The Init signal is received once (only) during the Application lifetime
-  void Create( Application& application )
-  {
-    // Get a handle to the stage
-    Stage stage = Stage::GetCurrent();
-    stage.SetBackgroundColor( Color::WHITE );
-
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "helloWorldLabel" );
-    stage.Add( textLabel );
-
-    // Respond to a click anywhere on the stage
-    stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
-  }
-
-  bool OnTouch( Actor actor, const TouchEvent& touch )
-  {
-    // quit the application
-    mApplication.Quit();
-    return true;
-  }
-
-private:
-  Application&  mApplication;
+  TestSignalType1 signal1;
 };
 
-void RunTest( Application& application )
+class TestController : public ConnectionTracker
 {
-  HelloWorldController test( application );
+public:
 
-  application.MainLoop();
+  TestController()
+  {
+  }
+
+  ~TestController()
+  {
+  }
+
+  void ConnectSignal1( TestEmitter& emitter )
+  {
+    emitter.signal1.Connect( this, &TestController::Callback1 );
+  }
+
+  void Callback1()
+  {
+    std::cout << "Callback 1" << std::endl;
+  }
+};
+
+void RunTest()
+{
+  TestEmitter emitter;
+
+  TestController controller;
+  controller.ConnectSignal1( emitter );
+
+  emitter.signal1.Emit();
 }
 
 // Entry point for Linux & Tizen applications
 //
 int main( int argc, char **argv )
 {
-  Application application = Application::New( &argc, &argv );
-
-  RunTest( application );
+  RunTest();
 
   return 0;
 }
+
