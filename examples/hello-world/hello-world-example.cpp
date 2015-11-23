@@ -15,6 +15,8 @@
  *
  */
 
+#include <iostream>
+
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
@@ -27,7 +29,9 @@ class HelloWorldController : public ConnectionTracker
 public:
 
   HelloWorldController( Application& application )
-  : mApplication( application )
+  : mApplication( application ),
+    mPositionX( 0.0f ),
+    mScale( 1.0f )
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect( this, &HelloWorldController::Create );
@@ -45,24 +49,53 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "helloWorldLabel" );
-    stage.Add( textLabel );
+    mTextLabel = TextLabel::New( "Hello World" );
+    mTextLabel.SetProperty( TextLabel::Property::RENDERING_BACKEND, Toolkit::Text::RENDERING_VECTOR_BASED );
+    mTextLabel.SetProperty( TextLabel::Property::POINT_SIZE, 13.0f );
+    mTextLabel.SetProperty( TextLabel::Property::FONT_FAMILY, "UbuntuMono" );
+    mTextLabel.SetProperty( TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+    mTextLabel.SetParentOrigin( AnchorPoint::CENTER );
+    mTextLabel.SetAnchorPoint( AnchorPoint::TOP_CENTER );
+    mTextLabel.SetScale( mScale, mScale, 1.0f );
+    stage.Add( mTextLabel );
 
-    // Respond to a click anywhere on the stage
-    stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
+    mTextLabel2 = TextLabel::New( "Hello World" );
+    mTextLabel2.SetProperty( TextLabel::Property::POINT_SIZE, 13.0f );
+    mTextLabel2.SetProperty( TextLabel::Property::FONT_FAMILY, "UbuntuMono" );
+    mTextLabel2.SetProperty( TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
+    mTextLabel2.SetParentOrigin( AnchorPoint::CENTER );
+    mTextLabel2.SetAnchorPoint( AnchorPoint::BOTTOM_CENTER );
+    mTextLabel2.SetScale( mScale, mScale, 1.0f );
+    stage.Add( mTextLabel2 );
+
+    mPanGestureDetector = PanGestureDetector::New();
+    mPanGestureDetector.Attach( stage.GetRootLayer() );
+    mPanGestureDetector.DetectedSignal().Connect( this, &HelloWorldController::OnPan );
   }
 
-  bool OnTouch( Actor actor, const TouchEvent& touch )
+  void OnPan( Actor actor, const PanGesture& gesture )
   {
-    // quit the application
-    mApplication.Quit();
-    return true;
+    Stage stage = Stage::GetCurrent();
+    mPositionX += gesture.displacement.x;
+    mTextLabel.SetX( mPositionX );
+    mTextLabel2.SetX( mPositionX );
+
+    mScale += gesture.displacement.y * -0.005f;
+    mTextLabel.SetScale( mScale, mScale, 1.0f );
+    mTextLabel2.SetScale( mScale, mScale, 1.0f );
   }
 
 private:
+
   Application&  mApplication;
+
+  TextLabel mTextLabel;
+  TextLabel mTextLabel2;
+
+  PanGestureDetector mPanGestureDetector;
+
+  float mPositionX;
+  float mScale;
 };
 
 void RunTest( Application& application )
