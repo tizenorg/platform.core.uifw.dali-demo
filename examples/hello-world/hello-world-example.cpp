@@ -46,6 +46,7 @@ public:
     stage.SetBackgroundColor( Color::WHITE );
 
     TextLabel textLabel = TextLabel::New( "Hello World" );
+    textLabel.SetProperty( TextLabel::Property::RENDERING_BACKEND, Toolkit::Text::RENDERING_GLYPHY );
     textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     textLabel.SetName( "helloWorldLabel" );
     stage.Add( textLabel );
