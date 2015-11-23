@@ -15,6 +15,8 @@
  *
  */
 
+#include <iostream>
+
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
@@ -46,8 +48,13 @@ public:
     stage.SetBackgroundColor( Color::WHITE );
 
     TextLabel textLabel = TextLabel::New( "Hello World" );
+    textLabel.SetProperty( TextLabel::Property::RENDERING_BACKEND, Toolkit::Text::RENDERING_GLYPHY );
+    textLabel.SetProperty( TextLabel::Property::POINT_SIZE, 13.0f );
+    textLabel.SetProperty( TextLabel::Property::FONT_FAMILY, "UbuntuMono" );
     textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     textLabel.SetName( "helloWorldLabel" );
+    //std::cout << "Demo scale: " << (96.0f*(1.0f/72.0f)) << std::endl;
+    //textLabel.SetScale( 96.0f*(1.0f/72.0f) );
     stage.Add( textLabel );
 
     // Respond to a click anywhere on the stage
