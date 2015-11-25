@@ -21,6 +21,7 @@ BuildRequires:  pkgconfig(capi-media-player)
 BuildRequires:  dali-toolkit-devel
 BuildRequires:  dali-adaptor-devel
 BuildRequires:  pkgconfig(dlog)
+BuildRequires:  pkgconfig(libtbm)
 BuildRequires:  gettext-tools
 
 %description
