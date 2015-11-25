@@ -23,6 +23,10 @@ BuildRequires:  dali-adaptor-devel
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  gettext-tools
 
+%if %{with wayland}
+BuildRequires:  pkgconfig(libtbm)
+%endif
+
 %description
 The OpenGLES Canvas Core Demo is a collection of examples and demonstrations
 of the capability of the toolkit.
@@ -52,7 +56,12 @@ LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -fPIC"
 CXXFLAGS+=" -D_ARCH_ARM_"
 %endif
 
+%if %{with wayland}
+cd %{_builddir}/%{name}-%{version}/build/tizen && cmake -DDALI_APP_DIR=%{dali_app_ro_dir} -DLOCALE_DIR=%{locale_dir} -DLOCAL_STYLE_DIR=%{local_style_dir} -DWAYLAND=%{wayland} .
+%else
 cd %{_builddir}/%{name}-%{version}/build/tizen && cmake -DDALI_APP_DIR=%{dali_app_ro_dir} -DLOCALE_DIR=%{locale_dir} -DLOCAL_STYLE_DIR=%{local_style_dir} .
+%endif
+
 
 make %{?jobs:-j%jobs}
 
