@@ -142,6 +142,11 @@ public:
   // Resize the text-label with pan gesture
   void OnPan( Actor actor, const PanGesture& gesture )
   {
+    if( gesture.state == Gesture::Started )
+    {
+      mLayoutSize = mContainer.GetCurrentSize();
+    }
+
     mLayoutSize.x += gesture.displacement.x * 2.0f;
     mLayoutSize.y += gesture.displacement.y * 2.0f;
 
