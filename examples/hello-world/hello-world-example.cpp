@@ -45,10 +45,12 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "helloWorldLabel" );
-    stage.Add( textLabel );
+    ResourceImage image = ResourceImage::New(DALI_IMAGE_DIR "test.bmp");
+    ImageActor actor = ImageActor::New(image);
+    actor.SetParentOrigin(ParentOrigin::CENTER);
+    actor.SetAnchorPoint(AnchorPoint::CENTER);
+    actor.SetSize(720, 1280);
+    stage.Add(actor);
 
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
