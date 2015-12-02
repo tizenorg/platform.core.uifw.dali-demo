@@ -17,6 +17,7 @@
 
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali/devel-api/rendering/renderer.h>
+#include <dali/devel-api/rendering/sampler.h>
 #include <dali/public-api/common/dali-common.h>
 #include <dali/integration-api/resource-policies.h>
 #include <dali/integration-api/debug.h>
@@ -212,6 +213,7 @@ bool gNinePatch(false);
 unsigned int gRowsPerPage(25);
 unsigned int gColumnsPerPage( 25 );
 unsigned int gPageCount(13);
+float gDuration(10.0f);
 
 Renderer CreateRenderer( unsigned int index )
 {
@@ -247,9 +249,10 @@ Actor CreateMeshActor( unsigned int index)
 // -r NumberOfRows  (Modifies the number of rows per page)
 // -c NumberOfColumns (Modifies the number of columns per page)
 // -p NumberOfPages (Modifies the nimber of pages )
+// -t duration (sec )
 // --use-imageview ( Use ImageView instead of ImageActor )
 // --use-mesh ( Use new renderer API (as ImageView) but shares renderers between actors when possible )
-// --nine-patch ( Use nine patch images )
+// --use-nine-patch ( Use nine patch images )
 
 //
 class Benchmark : public ConnectionTracker
@@ -387,8 +390,10 @@ public:
     float xpos, ypos;
     mShow = Animation::New(0.0f);
 
-    float totalDuration( 10.0f );
-    float durationPerActor( 0.5f );
+    //float totalDuration( 10.0f );
+    float totalDuration( 0.0f );
+    //float durationPerActor( 0.5f );
+    float durationPerActor( 0.0f );
     float delayBetweenActors = ( totalDuration - durationPerActor) / (mRowsPerPage*mColumnsPerPage);
     for( size_t i(0); i<totalColumns; ++i )
     {
@@ -434,23 +439,25 @@ public:
     Stage stage = Stage::GetCurrent();
     Vector3 stageSize( stage.GetSize() );
 
-    mScroll = Animation::New(10.0f);
+    mScroll = Animation::New( gDuration );
     size_t actorCount( mRowsPerPage*mColumnsPerPage*mPageCount);
     for( size_t i(0); i<actorCount; ++i )
     {
       if( gUseImageView )
       {
-        mScroll.AnimateBy( Property( mImageView[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(0.0f,3.0f));
-        mScroll.AnimateBy( Property( mImageView[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(3.0f,3.0f));
-        mScroll.AnimateBy( Property( mImageView[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(6.0f,2.0f));
-        mScroll.AnimateBy( Property( mImageView[i], Actor::Property::POSITION), Vector3( 12.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(8.0f,2.0f));
+        //mScroll.AnimateBy( Property( mImageView[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(0.0f,3.0f));
+        //mScroll.AnimateBy( Property( mImageView[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(3.0f,3.0f));
+        //mScroll.AnimateBy( Property( mImageView[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(6.0f,2.0f));
+        //mScroll.AnimateBy( Property( mImageView[i], Actor::Property::POSITION), Vector3( 12.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(8.0f,2.0f));
+        mScroll.AnimateBy( Property( mImageView[i], Actor::Property::POSITION), Vector3( -(gPageCount-1.)*stageSize.x,0.0f, 0.0f));
       }
       else
       {
-        mScroll.AnimateBy( Property( mActor[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(0.0f,3.0f));
-        mScroll.AnimateBy( Property( mActor[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(3.0f,3.0f));
-        mScroll.AnimateBy( Property( mActor[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(6.0f,2.0f));
-        mScroll.AnimateBy( Property( mActor[i], Actor::Property::POSITION), Vector3( 12.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(8.0f,2.0f));
+        //mScroll.AnimateBy( Property( mActor[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(0.0f,3.0f));
+        //mScroll.AnimateBy( Property( mActor[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(3.0f,3.0f));
+        //mScroll.AnimateBy( Property( mActor[i], Actor::Property::POSITION), Vector3(-4.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(6.0f,2.0f));
+        //mScroll.AnimateBy( Property( mActor[i], Actor::Property::POSITION), Vector3( 12.0f*stageSize.x,0.0f, 0.0f), AlphaFunction::EASE_OUT, TimePeriod(8.0f,2.0f));
+        mScroll.AnimateBy( Property( mActor[i], Actor::Property::POSITION), Vector3( -(gPageCount-1.)*stageSize.x,0.0f, 0.0f));
       }
     }
     mScroll.Play();
@@ -465,8 +472,10 @@ public:
 
     unsigned int totalColumns = mColumnsPerPage * mPageCount;
 
-    float totalDuration( 5.0f);
-    float durationPerActor( 0.5f );
+    //float totalDuration( 5.0f);
+    float totalDuration( 0.0f);
+    //float durationPerActor( 0.5f );
+    float durationPerActor( 0.0f );
     float delayBetweenActors = ( totalDuration - durationPerActor) / (mRowsPerPage*mColumnsPerPage);
     for( size_t i(0); i<mRowsPerPage; ++i )
     {
@@ -553,6 +562,10 @@ int main( int argc, char **argv )
     else if( arg.compare(0, 2, "-p" ) == 0)
     {
       gPageCount = atoi( arg.substr( 2, arg.size()).c_str());
+    }
+    else if( arg.compare(0, 2, "-t" ) == 0)
+    {
+      gDuration = atof( arg.substr( 2, arg.size()).c_str());
     }
   }
 
