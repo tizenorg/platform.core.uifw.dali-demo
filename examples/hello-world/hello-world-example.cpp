@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,17 @@
 
 using namespace Dali;
 using Dali::Toolkit::TextLabel;
+
+//const char* IMAGE_FILENAME = DALI_IMAGE_DIR "comptex1.astc";
+//const char* IMAGE_FILENAME = DALI_IMAGE_DIR "comptex1.ktx";
+//const char* IMAGE_FILENAME = DALI_IMAGE_DIR "tx-etc1.ktx";
+//const char* IMAGE_FILENAME = DALI_IMAGE_DIR "tx-astc-4x4-linear.ktx";
+//const char* IMAGE_FILENAME = DALI_IMAGE_DIR "tx-astc-4x4-srgb.ktx";
+//const char* IMAGE_FILENAME = DALI_IMAGE_DIR "comptex1-wrapped-astc-nm.ktx";
+
+const char* IMAGE_FILENAME_ETC         = DALI_IMAGE_DIR "tx-etc1.ktx";
+const char* IMAGE_FILENAME_ASTC_LINEAR = DALI_IMAGE_DIR "tx-astc-4x4-linear.ktx";
+const char* IMAGE_FILENAME_ASTC_SRGB   = DALI_IMAGE_DIR "tx-astc-4x4-srgb.ktx";
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -46,9 +57,29 @@ public:
     stage.SetBackgroundColor( Color::WHITE );
 
     TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    textLabel.SetAnchorPoint( AnchorPoint::TOP_CENTER );
     textLabel.SetName( "helloWorldLabel" );
     stage.Add( textLabel );
+
+
+    Image image = ResourceImage::New( IMAGE_FILENAME_ETC );
+    Toolkit::ImageView imageView = Toolkit::ImageView::New( image );
+    imageView.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    imageView.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    stage.Add( imageView );
+
+    Image image2 = ResourceImage::New( IMAGE_FILENAME_ASTC_LINEAR );
+    Toolkit::ImageView imageView2 = Toolkit::ImageView::New( image2 );
+    imageView2.SetAnchorPoint( AnchorPoint::CENTER_LEFT );
+    imageView2.SetParentOrigin( ParentOrigin::CENTER_LEFT );
+    stage.Add( imageView2 );
+
+    Image image3 = ResourceImage::New( IMAGE_FILENAME_ASTC_SRGB );
+    Toolkit::ImageView imageView3 = Toolkit::ImageView::New( image3 );
+    imageView3.SetAnchorPoint( AnchorPoint::BOTTOM_LEFT );
+    imageView3.SetParentOrigin( ParentOrigin::BOTTOM_LEFT );
+    stage.Add( imageView3 );
+
 
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
