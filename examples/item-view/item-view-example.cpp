@@ -149,6 +149,8 @@ static Vector3 DepthLayoutItemSizeFunctionLandscape( float layoutWidth )
   return Vector3(width, width, width);
 }
 
+bool gBorderAntiAliasing(false);
+
 } // unnamed namespace
 
 /**
@@ -866,6 +868,7 @@ public: // From ItemFactory
     borderProperty.Insert( "rendererType", "borderRenderer" );
     borderProperty.Insert( "borderColor", Color::WHITE );
     borderProperty.Insert( "borderSize", ITEM_BORDER_SIZE );
+    borderProperty.Insert( "antiAliasing", gBorderAntiAliasing );
     borderActor.SetProperty( ImageView::Property::IMAGE, borderProperty );
 
     actor.Add(borderActor);
@@ -985,6 +988,15 @@ void RunTest(Application& app)
 int main(int argc, char **argv)
 {
   Application app = Application::New(&argc, &argv, DALI_DEMO_THEME_PATH);
+
+  for( int i(1) ; i < argc; ++i )
+  {
+    std::string arg( argv[i] );
+    if( arg.compare("--AA") == 0)
+    {
+      gBorderAntiAliasing = true;
+    }
+  }
 
   RunTest(app);
 
