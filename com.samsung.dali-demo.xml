@@ -130,4 +130,7 @@
 	<ui-application appid="native-image-source.example" exec="/usr/apps/com.samsung.dali-demo/bin/native-image-source.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>native image source</label>
 	</ui-application>
+	<ui-application appid="video-play.example" exec="/usr/apps/com.samsung.dali-demo/bin/video-play.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>video play</label>
+	</ui-application>
 </manifest>

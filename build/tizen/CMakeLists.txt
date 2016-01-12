@@ -68,7 +68,7 @@ ENDFOREACH(flag)
 INSTALL(FILES ${LOCAL_STYLE_DIR}/demo-theme.json DESTINATION ${STYLE_DIR})
 
 IF(DEFINED WAYLAND)
-	SET(PKG_LIST dali dali-toolkit libtbm)
+	SET(PKG_LIST dali dali-toolkit libtbm legacy-capi-media-player)
 	SET(DALI_WAYLAND 1)
 ELSE()
 	SET(PKG_LIST dali dali-toolkit)

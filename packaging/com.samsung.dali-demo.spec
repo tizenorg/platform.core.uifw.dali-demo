@@ -25,6 +25,7 @@ BuildRequires:  gettext-tools
 
 %if %{with wayland}
 BuildRequires:  pkgconfig(libtbm)
+BuildRequires:  pkgconfig(legacy-capi-media-player)
 %endif
 
 %description
