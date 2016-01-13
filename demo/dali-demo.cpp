@@ -72,6 +72,8 @@ int main(int argc, char **argv)
   demo.AddExample(Example("image-view-pixel-area.example", DALI_DEMO_STR_TITLE_IMAGE_VIEW_PIXEL_AREA));
   demo.AddExample(Example("super-blur-bloom.example", DALI_DEMO_STR_TITLE_SUPER_BLUR_BLOOM));
 
+  demo.AddExample(Example("image-view-alpha-blending.example", "ImageView Alpha Blending"));
+
   demo.SortAlphabetically( true );
 
   // Start the event loop
