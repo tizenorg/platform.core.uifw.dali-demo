@@ -72,6 +72,7 @@ int main(int argc, char **argv)
   demo.AddExample(Example("super-blur-bloom.example", DALI_DEMO_STR_TITLE_SUPER_BLUR_BLOOM));
 
   demo.AddExample(Example("image-view-pixel-area.example", "ImageView Pixel Area"));
+  demo.AddExample(Example("image-view-alpha-blending.example", "ImageView Alpha Blending"));
 
   demo.SortAlphabetically( true );
 
