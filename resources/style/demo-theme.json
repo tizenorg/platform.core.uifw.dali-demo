@@ -20,8 +20,17 @@ distributing this software or its derivatives.
 */
 
 {
+  "constants":
+  {
+    "DEMO_IMAGE_DIR":"@DEMO_STYLE_IMAGE_DIR@"
+  },
+
   "styles":
   {
+    "confirmationpopup":{
+      "popupBackgroundImage":"{DEMO_IMAGE_DIR}00_popup_bg.9.png"
+    },
+
     "textlabel-Rosemary":
     {
       "fontFamily":"Rosemary"
@@ -29,7 +38,7 @@ distributing this software or its derivatives.
     "textlabel":
     {
       "fontStyle":"Regular",
-      "pointSize":18
+      "pointSize":12
     },
     "launcherlabel":
     {
@@ -67,9 +76,9 @@ distributing this software or its derivatives.
       {
         "rendererType": "gradientRenderer",
         "gradientCenter": [240, 400],
-        "gradientRadius": 932,
+        "gradientRadius": 600,
         "gradientUnits": "userSpace",
-        "gradientStopColor": [[0.247,0.38,0.52,1.0],[0.055,0.18,0.286,1.0]],
+        "gradientStopColor": [[0.0,0.0,0.0,1.0],[1.0,1.0,1.0,1.0]],
         "gradientStopOffset":[0.0,1.0]
       }
     }
