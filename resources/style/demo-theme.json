@@ -20,8 +20,17 @@ distributing this software or its derivatives.
 */
 
 {
+  "constants":
+  {
+    "DEMO_IMAGE_DIR":"@DEMO_STYLE_IMAGE_DIR@"
+  },
+
   "styles":
   {
+    "confirmationpopup":{
+      "popupBackgroundImage":"{DEMO_IMAGE_DIR}00_popup_bg.9.png"
+    },
+
     "textlabel-Rosemary":
     {
       "fontFamily":"Rosemary"
