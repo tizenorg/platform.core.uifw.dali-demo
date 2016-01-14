@@ -4,25 +4,13 @@
       "type": "ImageActor",
       "name": "On",
       "relayoutEnabled": false,
-      "position": [
-        374,
-        215,
-        0
-      ],
-      "size": [
-        144,
-        144,
-	1
-      ],
+      "position": [ 374, 215, 0 ],
+      "size": [ 144, 144, 1 ],
       "sizeAspectRatio": false,
-      "color": [
-        1,
-        1,
-        1,
-        1
+      "color": [ 1, 1, 1, 1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}spot_button_on.png",
+        "filename": "{DEMO_IMAGE_DIR}spot_button_on.png",
         "width": 144,
         "height": 144,
         "loadPolicy": "IMMEDIATE",
@@ -35,25 +23,12 @@
       "type": "ImageActor",
       "name": "Off",
       "relayoutEnabled": false,
-      "position": [
-        129,
-        215,
-        0
-      ],
-      "size": [
-        144,
-        144,
-	1
-      ],
+      "position": [ 129, 215, 0 ],
+      "size": [ 144, 144, 1 ],
       "sizeAspectRatio": false,
-      "color": [
-        1,
-        1,
-        1,
-        1
-      ],
+      "color": [ 1, 1, 1, 1 ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}spot_button_off.png",
+        "filename": "{DEMO_IMAGE_DIR}spot_button_off.png",
         "width": 144,
         "height": 144,
         "loadPolicy": "IMMEDIATE",
@@ -66,26 +41,13 @@
       "type": "ImageActor",
       "name": "Right",
       "relayoutEnabled": false,
-      "position": [
-        418.5,
-        214.5,
-        0
-      ],
-      "size": [
-        85,
-        161,
-	1
-      ],
+      "position": [ 418.5, 214.5, 0 ],
+      "size": [ 85, 161, 1 ],
       "sizeAspectRatio": false,
       "visible": true,
-      "color": [
-        0,
-        0,
-        0,
-        1
-      ],
+      "color": [ 0, 0, 0, 1 ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}curve-right.png",
+        "filename": "{DEMO_IMAGE_DIR}curve-right.png",
         "width": 85,
         "height": 161,
         "loadPolicy": "IMMEDIATE",
@@ -98,26 +60,13 @@
       "type": "ImageActor",
       "name": "Left",
       "relayoutEnabled": false,
-      "position": [
-        331,
-        214.5,
-        0
-      ],
-      "size": [
-        88,
-        161,
-	1
-      ],
+      "position": [ 331, 214.5, 0 ],
+      "size": [ 88, 161, 1 ],
       "sizeAspectRatio": false,
       "visible": true,
-      "color": [
-        0,
-        0,
-        0,
-        1
-      ],
+      "color": [ 0, 0, 0, 1 ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}curve-left.png",
+        "filename": "{DEMO_IMAGE_DIR}curve-left.png",
         "width": 87,
         "height": 161,
         "loadPolicy": "IMMEDIATE",
@@ -153,7 +102,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}curve-middle.png",
+        "filename": "{DEMO_IMAGE_DIR}curve-middle.png",
         "width": 13,
         "height": 161,
         "loadPolicy": "IMMEDIATE",
@@ -184,7 +133,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}spot_jelly_on.png",
+        "filename": "{DEMO_IMAGE_DIR}spot_jelly_on.png",
         "width": 144,
         "height": 144,
         "loadPolicy": "IMMEDIATE",
@@ -263,7 +212,7 @@
         1
       ],
       "image": {
-        "filename": "{DALI_IMAGE_DIR}spot_jelly_off.png",
+        "filename": "{DEMO_IMAGE_DIR}spot_jelly_off.png",
         "width": 144,
         "height": 144,
         "loadPolicy": "IMMEDIATE",
