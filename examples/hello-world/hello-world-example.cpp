@@ -17,8 +17,15 @@
 
 #include <dali-toolkit/dali-toolkit.h>
 
+#include <iostream>
+
 using namespace Dali;
 using Dali::Toolkit::TextLabel;
+
+void EqualToPanPosition( Vector3& current, const PropertyInputContainer& inputs )
+{
+  current = inputs[0]->GetVector2();
+}
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -44,25 +51,59 @@ public:
     // Get a handle to the stage
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
+    stage.KeyEventSignal().Connect( this, &HelloWorldController::OnKeyEvent );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "helloWorldLabel" );
-    stage.Add( textLabel );
+    mControl = Toolkit::Control::New();
+    mControl.SetBackgroundColor( Color::RED );
+    mControl.SetAnchorPoint( AnchorPoint::CENTER );
+    mControl.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    mControl.SetSize( 200.0f, 200.0f );
+    stage.Add( mControl );
 
-    // Respond to a click anywhere on the stage
-    stage.GetRootLayer().TouchedSignal().Connect( this, &HelloWorldController::OnTouch );
-  }
+    // Attach a pan detector to the root layer
+    mPan = PanGestureDetector::New();
+    mPan.Attach( stage.GetRootLayer() );
 
-  bool OnTouch( Actor actor, const TouchEvent& touch )
-  {
-    // quit the application
-    mApplication.Quit();
-    return true;
+    // Constrain the position of the red control to the pan position
+    Constraint constraint = Constraint::New< Vector3 >( mControl, Actor::Property::POSITION, &EqualToPanPosition );
+    constraint.AddSource( Source( mPan, PanGestureDetector::Property::SCREEN_POSITION ) );
+    constraint.Apply();
+
+    // Create a linear constrainer to constraint the blue color of the control
+    mLinearConstrainer = LinearConstrainer::New();
+    Dali::Property::Value pointsProperty = Property::Value(Property::ARRAY);
+    Property::Array* array = pointsProperty.GetArray();
+
+    if( array )
+    {
+      array->PushBack(0.0f); // Fully transparent on the Left Margin
+      array->PushBack(1.0f); // Fully opaque in the Center
+      array->PushBack(0.0f); // Fully transparent on the Right Margin
+    }
+    mLinearConstrainer.SetProperty( LinearConstrainer::Property::VALUE, pointsProperty );
+
+    mLinearConstrainer.Apply( Dali::Property( mControl, Dali::Actor::Property::COLOR_ALPHA ),
+                              Dali::Property( mControl, Actor::Property::POSITION_X ),
+                              Vector2( 0, stage.GetSize().width ) );
   }
 
 private:
+
+  void OnKeyEvent(const KeyEvent& event)
+  {
+    if(event.state == KeyEvent::Down)
+    {
+      if( IsKey( event, Dali::DALI_KEY_ESCAPE) || IsKey( event, Dali::DALI_KEY_BACK) )
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
   Application&  mApplication;
+  Toolkit::Control mControl;
+  PanGestureDetector mPan;
+  LinearConstrainer mLinearConstrainer;
 };
 
 void RunTest( Application& application )
