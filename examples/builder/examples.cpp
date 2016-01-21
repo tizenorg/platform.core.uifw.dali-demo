@@ -608,7 +608,7 @@ private:
 //
 //
 //------------------------------------------------------------------------------
-int main(int argc, char **argv)
+int DALI_EXPORT_API main(int argc, char **argv)
 {
   if(argc > 2)
   {

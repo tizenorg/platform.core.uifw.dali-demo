@@ -561,7 +561,7 @@ void RunTest(Application& app)
 
 // Entry point for Linux & Tizen applications
 //
-int main(int argc, char **argv)
+int DALI_EXPORT_API main(int argc, char **argv)
 {
   gApplication = Application::New(&argc, &argv, DALI_DEMO_THEME_PATH);
   RunTest(gApplication);
