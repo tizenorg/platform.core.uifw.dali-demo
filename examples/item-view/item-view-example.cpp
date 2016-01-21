@@ -982,7 +982,7 @@ void RunTest(Application& app)
   app.MainLoop();
 }
 
-int main(int argc, char **argv)
+int DALI_EXPORT_API main(int argc, char **argv)
 {
   Application app = Application::New(&argc, &argv, DALI_DEMO_THEME_PATH);
 
