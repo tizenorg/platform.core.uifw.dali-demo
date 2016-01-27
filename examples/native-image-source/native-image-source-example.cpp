@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ using namespace Toolkit;
 namespace
 {
   const std::string JPG_FILENAME = DEMO_IMAGE_DIR "gallery-medium-1.jpg";
+  const std::string JPG_FILENAME2 = DEMO_IMAGE_DIR "gallery-medium-2.jpg";
   const std::string RAW_FILENAME = DEMO_IMAGE_DIR "background-3_720x1280RGB.raw";
   const std::string TEST_RESULT = "/tmp/rbackground-3_720x1280RGB.raw";
   const std::string TEST_RESULTPNG = "/tmp/dali-image.png";
@@ -86,6 +87,35 @@ public:
 
 #if DALI_WAYLAND
     SetPixelBufferIntoTBMsurface( mNativeImageSourcePtr->GetNativeImageSource(), RAW_FILENAME );
+#else
+    Actor sourceActor = ImageView::New(JPG_FILENAME2, ImageDimensions(216,216));
+    sourceActor.SetParentOrigin( ParentOrigin::CENTER);
+    sourceActor.SetAnchorPoint( AnchorPoint::CENTER );
+    stage.Add( sourceActor );
+
+    Animation animation = Animation::New(10.f);
+    Degree relativeRotationDegrees(180.0f);
+    Radian relativeRotationRadians(relativeRotationDegrees);
+    animation.AnimateTo( Property( sourceActor, Actor::Property::ORIENTATION ), Quaternion( relativeRotationRadians, Vector3::ZAXIS ), AlphaFunction::BOUNCE);
+    animation.SetLooping(true);
+    animation.Play();
+
+    CameraActor cameraActor = CameraActor::New(stage.GetSize());
+    cameraActor.SetParentOrigin(ParentOrigin::CENTER);
+    stage.Add(cameraActor);
+
+    FrameBufferImage targetBuffer = FrameBufferImage::New( *mNativeImageSourcePtr );
+
+    RenderTaskList taskList = Stage::GetCurrent().GetRenderTaskList();
+    RenderTask task = taskList.CreateTask();
+    task.SetRefreshRate( RenderTask::REFRESH_ALWAYS );
+    task.SetSourceActor( sourceActor );
+    task.SetExclusive(true);
+    task.SetClearColor( Color::TRANSPARENT );
+    task.SetClearEnabled(true);
+    task.SetCameraActor(cameraActor);
+    task.GetCameraActor().SetInvertYAxis(true);
+    task.SetTargetFrameBuffer( targetBuffer );
 #endif
     mNativeImage = NativeImage::New( *mNativeImageSourcePtr );
     mImageView = ImageView::New( mNativeImage );
