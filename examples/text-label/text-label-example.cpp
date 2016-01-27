@@ -92,6 +92,29 @@ public:
     // Nothing to do here.
   }
 
+
+  void CreateContainer( Control& control, std::string name , Size size )
+  {
+    control.SetName( name );
+    control.SetParentOrigin( ParentOrigin::CENTER_LEFT );
+    control.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    mLayoutSize = size;
+    control.SetSize( mLayoutSize );
+    control.SetDrawMode( DrawMode::OVERLAY_2D );
+  }
+
+  void SetUpLabel( TextLabel& label, std::string name )
+  {
+    label.SetName( name );
+    label.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    label.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+    label.SetProperty( TextLabel::Property::MULTI_LINE, false );
+    label.SetProperty( TextLabel::Property::TEXT_COLOR, Color::WHITE );
+    label.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2( 1.0f, 1.0f ) );
+    label.SetProperty( TextLabel::Property::SHADOW_COLOR, Color::BLACK );
+    label.SetBackgroundColor( Color::BLUE );
+  }
+
   /**
    * One-time setup in response to Application InitSignal.
    */
@@ -103,71 +126,25 @@ public:
     Vector2 stageSize = stage.GetSize();
 
     mContainer = Control::New();
-    mContainer.SetName( "Container" );
-    mContainer.SetParentOrigin( ParentOrigin::CENTER );
-    mLayoutSize = Vector2(stageSize.width*0.6f, stageSize.width*0.6f);
-    mContainer.SetSize( mLayoutSize );
-    mContainer.SetDrawMode( DrawMode::OVERLAY_2D );
+    CreateContainer( mContainer, "Container", Size(stageSize.width*0.6f, stageSize.width*0.25f) );
+    mContainer.SetPosition( 10.0f, 0.0f );
     stage.Add( mContainer );
 
-    // Resize the center layout when the corner is grabbed
-    mGrabCorner = Control::New();
-    mGrabCorner.SetName( "GrabCorner" );
-    mGrabCorner.SetAnchorPoint( AnchorPoint::TOP_CENTER );
-    mGrabCorner.SetParentOrigin( ParentOrigin::BOTTOM_RIGHT );
-    mGrabCorner.SetBackgroundImage( ResourceImage::New( BACKGROUND_IMAGE ) );
-    mGrabCorner.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
-    mContainer.Add( mGrabCorner );
-
-    mPanGestureDetector = PanGestureDetector::New();
-    mPanGestureDetector.Attach( mGrabCorner );
-    mPanGestureDetector.DetectedSignal().Connect( this, &TextLabelExample::OnPan );
+    Control mContainerTwo = Control::New();
+    CreateContainer( mContainerTwo, "ContainerTwo", Size(stageSize.width*0.6f, stageSize.width*0.25f) );
+    stage.Add( mContainerTwo );
+    mContainerTwo.SetPosition( 10.0f, -stageSize.width*0.6f );
 
     mLabel = TextLabel::New( "A Quick Brown Fox Jumps Over The Lazy Dog" );
-    mLabel.SetName( "TextLabel" );
-    mLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
-    mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT );
-    mLabel.SetProperty( TextLabel::Property::MULTI_LINE, true );
-    mLabel.SetProperty( TextLabel::Property::TEXT_COLOR, Color::BLUE );
-    mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2( 1.0f, 1.0f ) );
-    mLabel.SetProperty( TextLabel::Property::SHADOW_COLOR, Color::BLACK );
-    mLabel.SetBackgroundColor( Color::WHITE );
+    SetUpLabel( mLabel, "TextLabel" );
+    TextLabel smallLabel = TextLabel::New( "A Quick Brown Fox" );
+    SetUpLabel( smallLabel, "TextLabel" );
+
     mContainer.Add( mLabel );
+    mContainerTwo.Add( smallLabel );
 
     Property::Value labelText = mLabel.GetProperty( TextLabel::Property::TEXT );
     std::cout << "Displaying text: \"" << labelText.Get< std::string >() << "\"" << std::endl;
-  }
-
-  // Resize the text-label with pan gesture
-  void OnPan( Actor actor, const PanGesture& gesture )
-  {
-    // Reset mLayoutSize when the pan starts
-    if( gesture.state == Gesture::Started )
-    {
-      if( mLayoutSize.x < 2.0f )
-      {
-        mLayoutSize.x = 2.0f;
-      }
-
-      if( mLayoutSize.y < 2.0f )
-      {
-        mLayoutSize.y = 2.0f;
-      }
-    }
-
-    mLayoutSize.x += gesture.displacement.x * 2.0f;
-    mLayoutSize.y += gesture.displacement.y * 2.0f;
-
-    if( mLayoutSize.x >= 2.0f ||
-        mLayoutSize.y >= 2.0f )
-    {
-      // Avoid pixel mis-alignment issue
-      Vector2 clampedSize = Vector2( std::max( ConvertToEven( static_cast<int>( mLayoutSize.x )), 2 ),
-                                     std::max( ConvertToEven( static_cast<int>( mLayoutSize.y )), 2 ) );
-
-      mContainer.SetSize( clampedSize );
-    }
   }
 
   /**
@@ -277,9 +254,6 @@ private:
   TextLabel mLabel;
 
   Control mContainer;
-  Control mGrabCorner;
-
-  PanGestureDetector mPanGestureDetector;
 
   Vector2 mLayoutSize;
 
@@ -297,7 +271,7 @@ void RunTest( Application& application )
 /** Entry point for Linux & Tizen applications */
 int main( int argc, char **argv )
 {
-  Application application = Application::New( &argc, &argv, DEMO_THEME_PATH );
+  Application application = Application::New( &argc, &argv );
 
   RunTest( application );
 
