@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,10 @@ using namespace Toolkit;
 namespace
 {
   const std::string JPG_FILENAME = DEMO_IMAGE_DIR "gallery-medium-1.jpg";
+  const std::string JPG_FILENAME2 = DEMO_IMAGE_DIR "gallery-medium-2.jpg";
   const std::string RAW_FILENAME = DEMO_IMAGE_DIR "background-3_720x1280RGB.raw";
   const std::string TEST_RESULT = "/tmp/rbackground-3_720x1280RGB.raw";
   const std::string TEST_RESULTPNG = "/tmp/dali-image.png";
-  const int WIDTH = 720;
-  const int HEIGHT = 1280;
 }
 
 // This example shows how to create and display an image using a NativeImageSource with tbm_surface
@@ -80,13 +79,48 @@ public:
   bool Tick()
   {
     Stage stage = Stage::GetCurrent();
+    Vector2 size = stage.GetSize();
 
-    Any surface;
-    mNativeImageSourcePtr = NativeImageSource::New( WIDTH, HEIGHT, NativeImageSource::COLOR_DEPTH_DEFAULT );
+    mNativeImageSourcePtr = NativeImageSource::New( size.width, size.height, NativeImageSource::COLOR_DEPTH_DEFAULT );
 
 #if DALI_WAYLAND
     SetPixelBufferIntoTBMsurface( mNativeImageSourcePtr->GetNativeImageSource(), RAW_FILENAME );
+#else
+    Actor sourceActor = ImageView::New(JPG_FILENAME2);
+    sourceActor.SetParentOrigin( ParentOrigin::CENTER);
+    sourceActor.SetAnchorPoint( AnchorPoint::CENTER );
+    stage.Add( sourceActor );
+
+    Animation animation = Animation::New(2.4f);
+    Degree relativeRotationDegrees(90.0f);
+    Radian relativeRotationRadians(relativeRotationDegrees);
+    animation.AnimateTo( Property( sourceActor, Actor::Property::ORIENTATION ), Quaternion( relativeRotationRadians, Vector3::ZAXIS ), AlphaFunction::LINEAR, TimePeriod(0.f, 0.6f));
+    animation.AnimateBy( Property( sourceActor, Actor::Property::ORIENTATION ), Quaternion( relativeRotationRadians, Vector3::ZAXIS ), AlphaFunction::LINEAR, TimePeriod(0.6f, 0.6f));
+    animation.AnimateBy( Property( sourceActor, Actor::Property::ORIENTATION ), Quaternion( relativeRotationRadians, Vector3::ZAXIS ), AlphaFunction::LINEAR, TimePeriod(1.2f, 0.6f));
+    animation.AnimateBy( Property( sourceActor, Actor::Property::ORIENTATION ), Quaternion( relativeRotationRadians, Vector3::ZAXIS ), AlphaFunction::LINEAR, TimePeriod(1.8f, 0.6f));
+    animation.SetLooping(true);
+    animation.Play();
+
+    CameraActor cameraActor = CameraActor::New(stage.GetSize()/2.f);
+    cameraActor.SetParentOrigin(ParentOrigin::CENTER);
+    stage.Add(cameraActor);
+
+    FrameBufferImage targetBuffer = FrameBufferImage::New( *mNativeImageSourcePtr );
+
+    RenderTaskList taskList = Stage::GetCurrent().GetRenderTaskList();
+    RenderTask task = taskList.CreateTask();
+    task.SetSourceActor( sourceActor );
+    task.SetExclusive(true);
+    task.SetClearColor( Color::WHITE );
+    task.SetClearEnabled(true);
+    task.SetCameraActor(cameraActor);
+    task.GetCameraActor().SetInvertYAxis(true);
+    task.SetTargetFrameBuffer( targetBuffer );
+    task.SetRefreshRate( RenderTask::REFRESH_ALWAYS );
 #endif
+
+    mResourceImage = ResourceImage::New( JPG_FILENAME );
+
     mNativeImage = NativeImage::New( *mNativeImageSourcePtr );
     mImageView = ImageView::New( mNativeImage );
     mImageView.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
@@ -110,8 +144,8 @@ public:
 
     if( mChangeFlag == false )
     {
-      ResourceImage image = ResourceImage::New( JPG_FILENAME );
-      mImageView.SetImage( image );
+
+      mImageView.SetImage( mResourceImage );
       mChangeFlag = true;
     }
     else
@@ -279,6 +313,7 @@ private:
   NativeImageSourcePtr mNativeImageSourcePtr;
   NativeImage mNativeImage;
   ImageView mImageView;
+  ResourceImage mResourceImage;
 #if DALI_WAYLAND
   tbm_surface_h mSurface;
 #endif
