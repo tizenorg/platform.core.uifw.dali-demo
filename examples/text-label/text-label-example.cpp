@@ -65,10 +65,14 @@ namespace
 
   const unsigned int V_ALIGNMENT_STRING_COUNT = sizeof( V_ALIGNMENT_STRING_TABLE ) / sizeof( V_ALIGNMENT_STRING_TABLE[0u] );
 
-  int ConvertToEven(int value)
+  enum Labels
   {
-    return (value % 2 == 0) ? value : (value + 1);
-  }
+    SMALL = 1u << 0,
+    RTL = 1u << 1,
+    LARGE = 1u << 2,
+    NONE = 1u << 6,
+  };
+
 }
 
 /**
@@ -92,6 +96,115 @@ public:
     // Nothing to do here.
   }
 
+
+  void CreateContainer( Control& control, std::string name , Size size )
+  {
+    control.SetName( name );
+    control.SetParentOrigin( ParentOrigin::CENTER_LEFT );
+    control.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    mLayoutSize = size;
+    control.SetSize( mLayoutSize );
+    control.SetDrawMode( DrawMode::OVERLAY_2D );
+  }
+
+  void SetUpLabel( TextLabel& label, std::string name )
+  {
+    label.SetName( name );
+    label.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    label.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS );
+    label.SetProperty( TextLabel::Property::MULTI_LINE, false );
+    label.SetProperty( TextLabel::Property::TEXT_COLOR, Color::WHITE );
+    label.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2( 1.0f, 1.0f ) );
+    label.SetProperty( TextLabel::Property::SHADOW_COLOR, Color::BLACK );
+
+    Dali::Property::Map bgMap;
+    bgMap[ "rendererType" ] = "color";
+    bgMap[ "blendColor" ] = Color::BLUE;
+
+    label.SetProperty( Control::Property::BACKGROUND, bgMap );
+  }
+
+  void EnableScrolling( Labels labels )
+  {
+    Actor label;
+    switch( labels )
+    {
+      case LARGE:
+      {
+        label = mLabel;
+        break;
+      }
+      case RTL:
+      {
+        label = mRtlLabel;
+        break;
+      }
+      case SMALL:
+      {
+        label = mSmallLabel;
+        break;
+      }
+      case NONE:
+      {
+        return;
+      }
+    }
+
+    if ( labels != NONE )
+    {
+      Property::Value value = label.GetProperty( TextLabel::Property::ENABLE_AUTO_SCROLL);
+      if (value.Get< bool >())
+      {
+        std::cout <<"Button setting to false" << std::endl;
+        label.SetProperty( TextLabel::Property::ENABLE_AUTO_SCROLL, false  );
+      }
+      else
+      {
+        std::cout <<"Button setting to true" << std::endl;
+        label.SetProperty( TextLabel::Property::ENABLE_AUTO_SCROLL, true  );
+      }
+    }
+  }
+
+  bool OnRtlButtonClicked( Toolkit::Button button )
+  {
+//    Property::Value value = button.GetProperty( TextLabel::Property::ENABLE_AUTO_SCROLL);
+//
+//    if (value.Get< bool >())
+//    {
+//      std::cout <<"Button setting to false" << std::endl;
+//      button.SetProperty( TextLabel::Property::ENABLE_AUTO_SCROLL, false  );
+//    }
+//    else
+//    {
+//      std::cout <<"Button setting to true" << std::endl;
+//      button.SetProperty( TextLabel::Property::ENABLE_AUTO_SCROLL, true  );
+//    }
+//    return true;
+    EnableScrolling( RTL );
+    return true;
+  }
+
+  bool OnButtonClicked( Toolkit::Button button )
+  {
+//    Property::Value value = button.GetProperty( TextLabel::Property::ENABLE_AUTO_SCROLL);
+//
+//    if (value.Get< bool >())
+//    {
+//      std::cout <<"Button setting to false" << std::endl;
+//      button.SetProperty( TextLabel::Property::ENABLE_AUTO_SCROLL, false  );
+//    }
+//    else
+//    {
+//      std::cout <<"Button setting to true" << std::endl;
+//      button.SetProperty( TextLabel::Property::ENABLE_AUTO_SCROLL, true  );
+//    }
+//    return true;
+    EnableScrolling( LARGE );
+    return true;
+  }
+
+
   /**
    * One-time setup in response to Application InitSignal.
    */
@@ -103,71 +216,50 @@ public:
     Vector2 stageSize = stage.GetSize();
 
     mContainer = Control::New();
-    mContainer.SetName( "Container" );
-    mContainer.SetParentOrigin( ParentOrigin::CENTER );
-    mLayoutSize = Vector2(stageSize.width*0.6f, stageSize.width*0.6f);
-    mContainer.SetSize( mLayoutSize );
-    mContainer.SetDrawMode( DrawMode::OVERLAY_2D );
+    CreateContainer( mContainer, "Container", Size(stageSize.width*0.6f, stageSize.width*0.25f) );
+    mContainer.SetPosition( 10.0f, 0.0f );
     stage.Add( mContainer );
 
-    // Resize the center layout when the corner is grabbed
-    mGrabCorner = Control::New();
-    mGrabCorner.SetName( "GrabCorner" );
-    mGrabCorner.SetAnchorPoint( AnchorPoint::TOP_CENTER );
-    mGrabCorner.SetParentOrigin( ParentOrigin::BOTTOM_RIGHT );
-    mGrabCorner.SetBackgroundImage( ResourceImage::New( BACKGROUND_IMAGE ) );
-    mGrabCorner.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
-    mContainer.Add( mGrabCorner );
+    Control containerTwo = Control::New();
+    CreateContainer( containerTwo, "ContainerTwo", Size(stageSize.width*0.6f, stageSize.width*0.25f) );
+    stage.Add( containerTwo );
+    containerTwo.SetPosition( 10.0f, -stageSize.width*0.6f );
 
-    mPanGestureDetector = PanGestureDetector::New();
-    mPanGestureDetector.Attach( mGrabCorner );
-    mPanGestureDetector.DetectedSignal().Connect( this, &TextLabelExample::OnPan );
+    Control containerThree = Control::New();
+    CreateContainer( containerThree, "ContainerThree", Size(stageSize.width*0.6f, stageSize.width*0.25f) );
+    stage.Add( containerThree );
+    containerThree.SetPosition( 10.0f, -stageSize.width*0.3f );
 
     mLabel = TextLabel::New( "A Quick Brown Fox Jumps Over The Lazy Dog" );
-    mLabel.SetName( "TextLabel" );
-    mLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH );
-    mLabel.SetResizePolicy( ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT );
-    mLabel.SetProperty( TextLabel::Property::MULTI_LINE, true );
-    mLabel.SetProperty( TextLabel::Property::TEXT_COLOR, Color::BLUE );
-    mLabel.SetProperty( TextLabel::Property::SHADOW_OFFSET, Vector2( 1.0f, 1.0f ) );
-    mLabel.SetProperty( TextLabel::Property::SHADOW_COLOR, Color::BLACK );
-    mLabel.SetBackgroundColor( Color::WHITE );
+    mSmallLabel = TextLabel::New( "A Quick Brown Fox" );
+    mRtlLabel = TextLabel::New( "مرحبا بالعالم");
+
+    SetUpLabel( mLabel, "TextLabel" );
+    SetUpLabel( mSmallLabel, "smallLabel" );
+    SetUpLabel( mRtlLabel, "rtlLabel" );
+
+
+    mSmallLabel.SetProperty( TextLabel::Property::ENABLE_AUTO_SCROLL, true  );
+
     mContainer.Add( mLabel );
+    containerTwo.Add( mSmallLabel );
+    containerThree.Add( mRtlLabel );
 
-    Property::Value labelText = mLabel.GetProperty( TextLabel::Property::TEXT );
-    std::cout << "Displaying text: \"" << labelText.Get< std::string >() << "\"" << std::endl;
-  }
+    Toolkit::PushButton scrollButton = Toolkit::PushButton::New();
+    scrollButton.SetLabelText( "Scroll" );
+    scrollButton.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+    scrollButton.ClickedSignal().Connect( this, &TextLabelExample::OnButtonClicked );
+    scrollButton.SetParentOrigin( ParentOrigin::TOP_RIGHT );
+    scrollButton.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    mContainer.Add(scrollButton);
 
-  // Resize the text-label with pan gesture
-  void OnPan( Actor actor, const PanGesture& gesture )
-  {
-    // Reset mLayoutSize when the pan starts
-    if( gesture.state == Gesture::Started )
-    {
-      if( mLayoutSize.x < 2.0f )
-      {
-        mLayoutSize.x = 2.0f;
-      }
-
-      if( mLayoutSize.y < 2.0f )
-      {
-        mLayoutSize.y = 2.0f;
-      }
-    }
-
-    mLayoutSize.x += gesture.displacement.x * 2.0f;
-    mLayoutSize.y += gesture.displacement.y * 2.0f;
-
-    if( mLayoutSize.x >= 2.0f ||
-        mLayoutSize.y >= 2.0f )
-    {
-      // Avoid pixel mis-alignment issue
-      Vector2 clampedSize = Vector2( std::max( ConvertToEven( static_cast<int>( mLayoutSize.x )), 2 ),
-                                     std::max( ConvertToEven( static_cast<int>( mLayoutSize.y )), 2 ) );
-
-      mContainer.SetSize( clampedSize );
-    }
+    Toolkit::PushButton rtlScrollButton = Toolkit::PushButton::New();
+    rtlScrollButton.SetLabelText( "Scroll" );
+    rtlScrollButton.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+    rtlScrollButton.ClickedSignal().Connect( this, &TextLabelExample::OnRtlButtonClicked );
+    rtlScrollButton.SetParentOrigin( ParentOrigin::TOP_RIGHT );
+    rtlScrollButton.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    containerThree.Add(rtlScrollButton);
   }
 
   /**
@@ -275,11 +367,10 @@ private:
   Application& mApplication;
 
   TextLabel mLabel;
+  TextLabel mSmallLabel;
+  TextLabel mRtlLabel;
 
   Control mContainer;
-  Control mGrabCorner;
-
-  PanGestureDetector mPanGestureDetector;
 
   Vector2 mLayoutSize;
 
@@ -297,7 +388,7 @@ void RunTest( Application& application )
 /** Entry point for Linux & Tizen applications */
 int DALI_EXPORT_API main( int argc, char **argv )
 {
-  Application application = Application::New( &argc, &argv, DEMO_THEME_PATH );
+  Application application = Application::New( &argc, &argv );
 
   RunTest( application );
 
