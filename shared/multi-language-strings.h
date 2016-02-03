@@ -186,9 +186,19 @@ namespace MultiLanguageStrings
       "(Chinese)",
       "若要重新排列页面，您需要将视图类型更改为可自定义网格。"
     },
+    {
+      "Bidirectional",
+      "text:",
+      "Hello (world) demo عرض (مرحبا) العالم"
+    },
+    {
+      "ا Bidirectional",
+      "text:",
+      "عرض (مرحبا) العالم hello (world) demo"
+    }
   };
 
-  const unsigned int NUMBER_OF_LANGUAGES = 31u;
+  const unsigned int NUMBER_OF_LANGUAGES = 33u;
 
 } // MultiLanguageStrings
 
