@@ -210,10 +210,10 @@ Geometry& QuadMesh()
 bool gUseMesh(false);
 bool gUseImageView(false);
 bool gNinePatch(false);
-bool gAnimateParent(false);
-unsigned int gRowsPerPage(25);
-unsigned int gColumnsPerPage( 25 );
-unsigned int gPageCount(13);
+bool gAnimateParent(true);
+unsigned int gRowsPerPage(15);
+unsigned int gColumnsPerPage(15);
+unsigned int gPageCount(10);
 float gDuration(10.0f);
 
 Renderer CreateRenderer( unsigned int index )
@@ -577,22 +577,6 @@ int main( int argc, char **argv )
     else if( arg.compare("--nine-patch" ) == 0)
     {
       gNinePatch = true;
-    }
-    else if( arg.compare("--animate-parent" ) == 0)
-    {
-      gAnimateParent = true;
-    }
-    else if( arg.compare(0, 2, "-r" ) == 0)
-    {
-      gRowsPerPage = atoi( arg.substr( 2, arg.size()).c_str());
-    }
-    else if( arg.compare(0, 2, "-c" ) == 0)
-    {
-      gColumnsPerPage = atoi( arg.substr( 2, arg.size()).c_str());
-    }
-    else if( arg.compare(0, 2, "-p" ) == 0)
-    {
-      gPageCount = atoi( arg.substr( 2, arg.size()).c_str());
     }
     else if( arg.compare(0, 2, "-t" ) == 0)
     {
