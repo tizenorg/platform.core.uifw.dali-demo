@@ -73,6 +73,7 @@ int main(int argc, char **argv)
   demo.AddExample(Example("image-view-alpha-blending.example", DALI_DEMO_STR_TITLE_IMAGE_VIEW_ALPHA_BLENDING));
   demo.AddExample(Example("super-blur-bloom.example", DALI_DEMO_STR_TITLE_SUPER_BLUR_BLOOM));
 
+  demo.AddExample(Example("svg-rendering.example", "SVG Rendering"));
   demo.SortAlphabetically( true );
 
   // Start the event loop
