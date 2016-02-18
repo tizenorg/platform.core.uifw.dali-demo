@@ -260,7 +260,8 @@ void CubeTransitionApp::OnInit( Application& application )
   mCubeWaveEffect.TransitionCompletedSignal().Connect(this, &CubeTransitionApp::OnTransitionCompleted);
 
   mCubeWaveEffect.SetSize( mViewSize );
-  mCubeWaveEffect.SetPositionInheritanceMode( USE_PARENT_POSITION );
+  mCubeWaveEffect.SetParentOrigin( ParentOrigin::CENTER );
+  mCubeWaveEffect.SetAnchorPoint( AnchorPoint::CENTER );
   mCubeWaveEffect.SetCurrentImage( mCurrentImage );
 
   // use big cubes
@@ -270,7 +271,8 @@ void CubeTransitionApp::OnInit( Application& application )
   mCubeCrossEffect.TransitionCompletedSignal().Connect(this, &CubeTransitionApp::OnTransitionCompleted);
 
   mCubeCrossEffect.SetSize( mViewSize );
-  mCubeCrossEffect.SetPositionInheritanceMode( USE_PARENT_POSITION );
+  mCubeCrossEffect.SetParentOrigin( ParentOrigin::CENTER );
+  mCubeCrossEffect.SetAnchorPoint( AnchorPoint::CENTER );
   mCubeCrossEffect.SetCurrentImage( mCurrentImage );
 
   mCubeFoldEffect = Toolkit::CubeTransitionFoldEffect::New( NUM_ROWS_FOLD, NUM_COLUMNS_FOLD );
@@ -278,7 +280,8 @@ void CubeTransitionApp::OnInit( Application& application )
   mCubeFoldEffect.TransitionCompletedSignal().Connect(this, &CubeTransitionApp::OnTransitionCompleted);
 
   mCubeFoldEffect.SetSize( mViewSize );
-  mCubeFoldEffect.SetPositionInheritanceMode( USE_PARENT_POSITION );
+  mCubeFoldEffect.SetParentOrigin( ParentOrigin::CENTER );
+  mCubeFoldEffect.SetAnchorPoint( AnchorPoint::CENTER );
   mCubeFoldEffect.SetCurrentImage( mCurrentImage );
 
   mViewTimer = Timer::New( VIEWINGTIME );
