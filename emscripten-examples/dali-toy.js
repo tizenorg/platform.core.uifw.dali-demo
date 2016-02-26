@@ -1610,27 +1610,27 @@ var javascriptSources =
       "addTo(\"stage\",\n" +
       "      image({\n" +
       "        name:\"img\",\n" +
-      "        image:\"ducks\",\n" +
+      "        buffer:\"ducks\",\n" +
       "        size:[100,100,1]\n" +
       "      }),\n" +
       "      image({\n" +
       "        name:\"img2\",\n" +
       "        tag:\"listitem\",\n" +
-      "        image:\"field\",\n" +
+      "        buffer:\"field\",\n" +
       "        position:[100,0,0],\n" +
       "        size:[100,100,1]\n" +
       "      }),\n" +
       "      image({\n" +
       "        name:\"img3\",\n" +
       "        tag:\"listitem\",\n" +
-      "        image:\"funnyface\",\n" +
+      "        buffer:\"funnyface\",\n" +
       "        position:[100,0,0],\n" +
       "        size:[100,100,1]\n" +
       "      }),\n" +
       "      image({\n" +
       "        name:\"img4\",\n" +
       "        tag:\"listitem\",\n" +
-      "        image:\"girl1\",\n" +
+      "        buffer:\"girl1\",\n" +
       "        position:[100,0,0],\n" +
       "        size:[100,100,1]\n" +
       "      })\n" +
@@ -2873,7 +2873,6 @@ function App(theEventHandler) {
 //
 // Global
 //
-
 var eventHandler = new EventHandler();
 var app = new App(eventHandler);
 var canvas = document.getElementById("canvas");
@@ -2919,7 +2918,6 @@ canvas.onkeyup = keyUp;
 //
 //
 //
-
 function runRandomAnimation(actor) {
   "use strict";
   var a = new dali.Animation(0);
@@ -2961,8 +2959,13 @@ function _actorId(a) { // return id from [object|string name|id]
   if( typeof a === "object" ) {
     return a.getId();
   } else if( typeof a === "string" ) {
-    var child = dali.stage.findChildByName(a);
-    return child.getId();
+    var root = dali.stage.getRootLayer();
+    var child = root.findChildByName(a);
+    if(child) {
+      return child.getId();
+    } else {
+      return -1;
+    }
   } else {
     return a;
   }
@@ -2974,687 +2977,996 @@ function _actorId(a) { // return id from [object|string name|id]
 dali.Builder = function() {
   "use strict";
   this.data = _whenBuilder;
-  this.init();
-};
+
+  var self = this;
 
 /**
- * 
+ *
  */
-dali.Builder.prototype.init = function() {
-  var imageSize = 0.5; // half quad size
-  this.propertyBuffer("imageVerts",
-                       {format: [ ["aPosition", dali.PropertyType.VECTOR3],
-                                  ["aTexCoord", dali.PropertyType.VECTOR2] ],
-                        data: { "aPosition": [ [-imageSize, -imageSize, 0.0],
-                                               [+imageSize, -imageSize, 0.0],
-                                               [-imageSize, +imageSize, 0.0],
-                                               [+imageSize, +imageSize, 0.0]
-                                             ],
-                                "aTexCoord": [ [0, 0],
-                                               [1, 0],
-                                               [0, 1],
-                                               [1, 1]
-                                             ]
-                              }
-                       }
-                      );
+  this.init = function() {
+    var imageSize = 0.5; // half quad size
+    self.propertyBuffer("imageVerts",
+                        {format: [ ["aPosition", dali.PropertyType.VECTOR3],
+                                   ["aTexCoord", dali.PropertyType.VECTOR2] ],
+                         data: { "aPosition": [ [-imageSize, -imageSize, 0.0],
+                                                [+imageSize, -imageSize, 0.0],
+                                                [-imageSize, +imageSize, 0.0],
+                                                [+imageSize, +imageSize, 0.0]
+                                              ],
+                                 "aTexCoord": [ [0, 0],
+                                                [1, 0],
+                                                [0, 1],
+                                                [1, 1]
+                                              ]
+                               }
+                        }
+                       );
 
-  this.propertyBuffer("imageIndices",
-                      { format: [ ["indices", dali.PropertyType.INTEGER]],
-                        data: { "indices": [0, 3, 1, 0, 2, 3] } } );
+    self.propertyBuffer("imageIndices",
+                        { format: [ ["indices", dali.PropertyType.INTEGER]],
+                          data: { "indices": [0, 3, 1, 0, 2, 3] } } );
 
-  this.geometry("imageGeometry", {vertices: ["imageVerts"],
-                                  indices: "imageIndices",
-                                  type: "TRIANGLES",
-                                  requiresSelfDepthTest: false} );
+    self.geometry("imageGeometry", {vertices: ["imageVerts"],
+                                    indices: "imageIndices",
+                                    type: "TRIANGLES",
+                                    requiresSelfDepthTest: false} );
 
-  this.shader("imageShader",
-              {vertex: "\n" +
-               "attribute mediump vec3 aPosition;\n" +
-               "attribute mediump vec2 aTexCoord;\n" +
-               "varying mediump vec2 vTexCoord;\n" +
-               "uniform mediump vec3 uSize;\n" +
-               "uniform mediump mat4 uMvpMatrix;\n" +
-               "\n" +
-               "void main(void)\n" +
-               "{\n" +
-               "  mediump vec4 vertexPosition = vec4(aPosition, 1.0);\n" +
-               "  vertexPosition.xyz *= uSize;\n" +
-               "  gl_Position = uMvpMatrix * vertexPosition;\n" +
-               "  vTexCoord = aTexCoord;\n" +
-               "}\n" +
-               "\n" +
-               "",
-               fragment:
-               "precision mediump float;\n" +
-               "uniform sampler2D sTexture;\n" +
-               "uniform mediump vec4 uColor;\n" +
-               "varying mediump vec2 vTexCoord;\n" +
-               "\n" +
-               "void main()\n" +
-               "{\n" +
-               "  gl_FragColor =  texture2D( sTexture, vTexCoord ) * uColor;\n" +
-               "}\n" +
-               "\n" +
-               "",
-               hints: "HINTS_NONE"
-              });
-
-  var builtInImages = ["girl1","funnyface","ducks","field"];
-
-  var d;
-  for(var i=0; i < builtInImages.length; i++)
-  {
-    var imageName = builtInImages[i];
-
-    var samplerName = "sampler_" +  imageName;
-    this.sampler(samplerName,
+    self.sampler("imageSampler",
                  { "minification-filter":0,
                    "magnification-filter":0,
                    "u-wrap":0,
                    "v-wrap":0,
                    "affects-transparency":false});
 
-    var materialName ="material_" +  imageName;
-    this.material(materialName,
-                  {textures:
-                   [
-                     { image: imageName,
-                       uniform: "sTexture",
-                       sampler: samplerName
-                     }
-                   ],
-                   shader: "imageShader"} );
+    self.shader("imageShader",
+                {vertex: "\n" +
+                 "attribute mediump vec3 aPosition;\n" +
+                 "attribute mediump vec2 aTexCoord;\n" +
+                 "varying mediump vec2 vTexCoord;\n" +
+                 "uniform mediump vec3 uSize;\n" +
+                 "uniform mediump mat4 uMvpMatrix;\n" +
+                 "\n" +
+                 "void main(void)\n" +
+                 "{\n" +
+                 "  mediump vec4 vertexPosition = vec4(aPosition, 1.0);\n" +
+                 "  vertexPosition.xyz *= uSize;\n" +
+                 "  gl_Position = uMvpMatrix * vertexPosition;\n" +
+                 "  vTexCoord = aTexCoord;\n" +
+                 "}\n" +
+                 "\n" +
+                 "",
+                 fragment:
+                 "precision mediump float;\n" +
+                 "uniform sampler2D sTexture;\n" +
+                 "uniform mediump vec4 uColor;\n" +
+                 "varying mediump vec2 vTexCoord;\n" +
+                 "\n" +
+                 "void main()\n" +
+                 "{\n" +
+                 "  gl_FragColor =  texture2D( sTexture, vTexCoord ) * uColor;\n" +
+                 "}\n" +
+                 "\n" +
+                 "",
+                 hints: "HINTS_NONE"
+                });
 
-    this.renderer("render_" + imageName,
-                  {geometry: "imageGeometry",
-                   material: materialName});
 
-  }
+    self.propertyBuffer("quadIndices",  { format: [ ["indices", dali.PropertyType.INTEGER]],
+                                          data: { "indices": [0, 3, 1, 0, 2, 3] } } ) ;
 
-}; // init()
+    self.shader("quadShader",
+                {vertex:
+                 "attribute mediump vec3 aPosition;" +
+                 "attribute mediump vec4 aCol;" +
+                 "uniform mediump mat4 uMvpMatrix;" +
+                 "uniform mediump vec3 uSize;" +
+                 "uniform lowp vec4 uColor;" +
+                 "varying lowp vec4 vColor;" +
+                 "" +
+                 "void main()" +
+                 "{" +
+                 "  vColor = aCol * uColor;" +
+                 "  mediump vec4 vertexPosition = vec4(aPosition,1.0);" +
+                 "  vertexPosition.xyz *= uSize;" +
+                 "  gl_Position = uMvpMatrix * vertexPosition;" +
+                 "}",
+                 fragment:
+                 "varying lowp vec4 vColor;" +
+                 "uniform lowp vec4 uColor;" +
+                 "" +
+                 "void main()" +
+                 "{" +
+                 "  gl_FragColor = vColor * uColor;" +
+                 "}"
+                });
 
-/**
- * tags an actor
- */
-dali.Builder.prototype.tag = function(actor, tag) {
-  // tag an actor (multiple by seperated by space)
-  "use strict";
-  var names = tag.split();
-  var id = _actorId(actor);
-  for(var i = 0; i < names.length; i++) {
-    var name = names[i];
-    if(!(name in _whenBuilder.tags)) {
-      _whenBuilder.tags[name] = [];
+    var builtInImages = ["girl1","funnyface","ducks","field"];
+
+    var d;
+    for(var i=0; i < builtInImages.length; i++)
+    {
+      var imageName = builtInImages[i];
+
+      var materialName ="material_" +  imageName;
+      self.material(materialName,
+                    {textures:
+                     [
+                       { buffer: imageName,
+                         uniform: "sTexture",
+                         sampler: "imageSampler"
+                       }
+                     ],
+                     shader: "imageShader"} );
+
+      self.renderer("render_" + imageName,
+                    {geometry: "imageGeometry",
+                     material: materialName});
+
     }
-    var nameIndex = _whenBuilder.tags[name].indexOf(id);
-    if(nameIndex < 0) {
-      _whenBuilder.tags[name].push( id );
-    }
-  }
-};
 
-/**
- * unTags an actor
- */
-dali.Builder.prototype.unTag = function(actor, tag) {
-  // untag
-  "use strict";
-  var names = tag.split();
-  var id = _actorId(actor);
-  for(var i = 0; i < names.length; i++) {
-    var name = names[i];
-    if( name in _whenBuilder.tags ) {
+  }; // init()
+
+  /**
+   * tags an actor
+   */
+  this.tag = function(actorOrId, tagName) {
+    // tag an actor (can be multiple tags by seperated by space)
+    "use strict";
+    var names = tagName.split();
+    var id = _actorId(actorOrId);
+    for(var i = 0; i < names.length; i++) {
+      var name = names[i];
+      if(!(name in _whenBuilder.tags)) {
+        _whenBuilder.tags[name] = [];
+      }
       var nameIndex = _whenBuilder.tags[name].indexOf(id);
-      if(nameIndex >= 0) {
-        _whenBuilder.tags[name].splice(nameIndex, 1);
+      if(nameIndex < 0) {
+        _whenBuilder.tags[name].push( id );
       }
     }
-  }
-};
+  };
 
-/**
- * Gets list of actors tagged by 'tag'
- */
-dali.Builder.prototype.tagged = function(tag) {
-  // return all tagged
-  "use strict";
-  return _whenBuilder.tags[tag];
-};
-
-/**
- * Returns actorIdArray with actorOrArray removed
- */
-dali.Builder.prototype.excludeFrom = function(actorIdArray, actorOrArray)
-{
-  // return all except one
-  "use strict";
-  var item, id;
-  var excludes = {};
-  if("length" in actorOrArray) {
-    for(item in actorOrArray) {
-      id = _actorId(item);
-      excludes[id] = 1;
-    }
-  } else {
-    id = _actorId(actorOrArray);
-    excludes[id] = 1;
-  }
-
-  var ret = [];
-  for(item in actorIdArray) {
-    if( !(item in excludes) ) {
-      ret.push( item );
-    }
-  }
-  return ret;
-};
-
-/**
- * 
- */
-dali.Builder.prototype.path = function (d) {
-  // Stores paths in builder
-  // paths({name: {points: [[1,2,3],[4,5,6]], forward:[1,0,0]},
-  //        other:{points: [[1,2,3],[4,5,6]], forward:[1,0,0]}})
-  //
-  "use strict";
-  for(var name in d) {
-    var pathData = {point: [], forward: [1, 0, 0]};
-    pathData = dali.mergeObjects(pathData, d[name]);
-    var daliPath = new dali.Path();
-    daliPath.points = pathData.points;
-    dali.generateControlPoints(daliPath, pathData.curvature); // @todo remove magic number?
-    _whenBuilder.paths[name] = daliPath;
-  }
-};
-
-/**
- * Set style definition
- */
-dali.Builder.prototype.style = function(name, d) {
-  // Stores styles in builder
-  // style(name, {property1:value, prop2,value})
-  // style(other, {property1:value, prop2,value})
-  //
-  "use strict";
-  _whenBuilder.styles[name] = d;
-};
-
-//
-//  +------------------+          +---------------+
-//  | PropertyBuffer   | *      * | Geometry      |
-//  +------------------+ -------- +---------------+
-//  | format:          |          | vertex:PBuf   |1      * +-----------+         +------------+
-//  |   name:v2,name:v3|          | indices:PBuf  +---------| Renderer  |         | Actor      |
-//  | data             |          |               |         +-----------+ *     * +------------+
-//  +------------------+          +---------------+       * | geom      +---------| renderer(s)|
-//                                                     +----| material  |         |            |
-//  +-------------+ *      * +----------+ 1            |    |           |         |            |
-//  |Sampler      +----------|Material  +--------------+    +-----------+         +------------+
-//  +-------------+          +----------+
-//  |uniformName  |        * |sampler(s)|
-//  |Image        |       +--|shader    |
-//  |Filter/wrap  |       |  |facecull  |
-//  +-------------+       |  |blendfunc |
-//                        |  +----------+
-//  +-----------------+   |
-//  |Shader           |   |
-//  +-----------------+ 1 |
-//  |program:vert,frag|---+
-//  |hints            |
-//  +-----------------+
-//
-
-/**
- * Set template defintion
- */
-dali.Builder.prototype.template = function(name, d) {
-  // Stores templates in builder
-  // template("name":{ "type": "ImageActor", property1:value, prop2,value})
-  // template("other: { "type": "TextView", property1:value, prop2,value})
-  "use strict";
-  _whenBuilder.templates[name] = d;
-
-};
-
-/**
- * Set style definition
- */
-dali.Builder.prototype.imageBuffer = function(name, d) {
-  // stores imageBuffers
-  // imageBuffers("buffer1", { bufferName: "" }
-  //                         } )
-  "use strict";
-  _whenBuilder.imageBuffers[name] = d;
-};
-
-/**
- * Set property buffer definition
- */
-dali.Builder.prototype.propertyBuffer = function(name, d) {
-  // stores PropertyBuffers
-  // propertyBuffers("buffer1", { format: [ ["aPosition", dali.PropertyType.VECTOR2],
-  //                                       ["aTexCoord", dali.PropertyType.VECTOR2].
-  //                             data: {aPosition: [-0.5,-0.5,],
-  //                                               [+0.5,-0.5,],
-  //                                               [-0.5,+0.5,],
-  //                                               [+0.5,+0.5,],
-  //                                    aCol:      [0.0, 0.0],
-  //                                               [1.0, 0.0],
-  //                                               [0.0, 1.0],
-  //                                               [1.0, 1.0] }
-  //                           } )
-  "use strict";
-  _whenBuilder.propertyBuffers[name] = d;
-};
-
-/**
- * Set geometry definition
- */
-dali.Builder.prototype.geometry = function(name, d) {
-  // stores geometry meshes
-  // geometries("mesh1": { vertices: "buffer1",
-  //                       index: "index1",
-  //                       type: "TRIANGLES",
-  //                       requresDepthTest:false } )
-  "use strict";
-  _whenBuilder.geometries[name] = d;
-};
-
-/**
- * Set sample definition
- */
-dali.Builder.prototype.sampler = function(name, d) {
-  // stores samplers
-  // samplers("sampler1", { "minification-filter":0,
-  //                       "magnification-filter":0,
-  //                       "u-wrap":0,
-  //                       "v-wrap":0,
-  //                       "affects-transparency":false})
-  "use strict";
-  _whenBuilder.samplers[name] = d;
-};
-
-/**
- * Set shader definition
- */
-dali.Builder.prototype.shader = function(name, d) {
-  // stores shaders
-  // shaders("shader1", { vertex:"",
-  //                     fragment:"",
-  //                     hints:"NONE"} )
-  "use strict";
-  _whenBuilder.shaders[name] = d;
-};
-
-/**
- * Set material definition
- */
-dali.Builder.prototype.material = function(name, d) {
-  // stores materials meshes
-  // materials({"mat1",{ textures: [
-  //                       { image: animage,
-  //                         uniform: "uTexture"
-  //                         sampler: asampler
-  //                        }
-  //                    ],
-  //                    shader: "shader1",
-  //                    faceCulling: "BACK",
-  //                    blend: "AUTO",
-  //                    blendFunc : {srcFactorRGBA, destFactorRGBA},
-  //                    blendEquation : "",
-  //                    blendColor : [1,0,0,1] } )
-  //
-  "use strict";
-  var value; // check required things
-  value = this.GetRequiredKey(d, "shader");
-  this.GetRequiredKey(_whenBuilder.shaders, value);  // must already exist
-
-  // only support textures so must have textures section
-  this.GetRequiredKey(d, "textures");
-
-  var i;
-  for(i = 0; i < d.textures.length; i++)
-  {
-    if(typeof(d.textures[i]) == "string")
-    {
-      // the image must already exist
-      value = this.GetRequiredKey(d.textures[i], "image");
-      this.GetRequiredKey(_whenBuilder.imageBuffers, value);
-    }
-    else
-    {
-    }
-  }
-
-  // value = this.GetRequiredKey(d, "textures");
-  // this.GetRequiredKey(_whenBuilder.textures, value);
-  _whenBuilder.materials[name] = d;
-};
-
-/**
- * Set renderer definition
- */
-dali.Builder.prototype.renderer = function(name, d) {
-  // store renderer
-  // renderers("rend1",  {"geometry": "geom1",
-  //                     "material": "mat1",
-  //                     "depth-index"})
-  "use strict";
-  var value; // check required things
-  value = this.GetRequiredKey(d, "geometry");
-  this.GetRequiredKey(_whenBuilder.geometries, value);  // must already exist
-  value = this.GetRequiredKey(d, "material");
-  this.GetRequiredKey(_whenBuilder.materials, value);
-
-  _whenBuilder.renderers[name] = d;
-};
-
-dali.Builder.prototype.createOrGetDaliPropertyBuffer = function(name) {
-  "use strict";
-  consoleAssert(name in _whenBuilder.propertyBuffers, "property buffer not defined:" + name);
-  var ret;
-  if("daliObject" in _whenBuilder.propertyBuffers[name]) {
-    ret = _whenBuilder.propertyBuffers[name].daliObject;
-  } else {
-    var data = _whenBuilder.propertyBuffers[name];
-
-    ret = dali.createPropertyBuffer(data);
-
-    _whenBuilder.propertyBuffers[name].daliObject = ret;
-  }
-  return ret;
-};
-
-dali.Builder.prototype.createOrGetDaliGeometry = function(name) {
-  "use strict";
-  consoleAssert(name in _whenBuilder.geometries, "geometry not defined:" + name);
-  var ret;
-  if("daliObject" in _whenBuilder.geometries[name]) {
-    ret = _whenBuilder.geometries[name].daliObject;
-  } else {
-    var data = _whenBuilder.geometries[name];
-
-    ret = new dali.Geometry();
-
-    for(var i = 0; i < data.vertices.length; i++) {
-      ret.addVertexBuffer( this.createOrGetDaliPropertyBuffer(data.vertices[i] ) );
-    }
-
-    ret.setIndexBuffer( this.createOrGetDaliPropertyBuffer(data.indices) );
-
-    if("requiresSelfDepthTest" in data) {
-      ret.setRequiresDepthTesting(data.requiresSelfDepthTest);
-    }
-
-    _whenBuilder.geometries[name].daliObject = ret;
-  }
-  return ret;
-};
-
-dali.Builder.prototype.createOrGetDaliShader = function(name) {
-  "use strict";
-  consoleAssert(name in _whenBuilder.shaders, "shader not defined:" + name);
-  var ret = null;
-  if("daliObject" in _whenBuilder.shaders[name]) {
-    ret = _whenBuilder.shaders[name].daliObject;
-  } else {
-    var data = _whenBuilder.shaders[name];
-
-    ret = new dali.Shader(data.vertex,
-                          data.fragment,
-                          uiShaderTab.getDaliShaderHints(data.hints));
-
-    _whenBuilder.shaders[name].daliObject = ret;
-  }
-
-  return ret;
-};
-
-dali.Builder.prototype.createOrGetDaliImage = function(name) {
-  "use strict";
-  if(!(name in _whenBuilder.imageBuffers)) {
-    _whenBuilder.imageBuffers[name] = {};
-  }
-
-  var ret;
-  if("daliObject" in _whenBuilder.imageBuffers[name]) {
-    ret = _whenBuilder.imageBuffers[name].daliObject;
-  } else {
-    // get images from the ui buffer
-    ret = imageFromUiBuffer(name);
-    _whenBuilder.imageBuffers[name].daliObject = ret;
-  }
-  return ret;
-};
-
-dali.Builder.prototype.createOrGetDaliSampler = function(name) {
-  "use strict";
-  consoleAssert( name in _whenBuilder.samplers, "sampler not defined:" + name);
-  var ret;
-  if("daliObject" in _whenBuilder.samplers[name]) {
-    ret = _whenBuilder.samplers[name].daliObject;
-  } else {
-    var data = _whenBuilder.samplers[name];
-    ret = new dali.Sampler();
-    _whenBuilder.samplers[name].daliObject = ret;
-  }
-  return ret;
-};
-
-dali.Builder.prototype.createOrGetDaliMaterial = function(name) {
-  "use strict";
-  consoleAssert( name in _whenBuilder.materials, "Material not defined:" + name);
-  var ret;
-  if("daliObject" in _whenBuilder.materials[name]) {
-    ret = _whenBuilder.materials[name].daliObject;
-  } else {
-    var data = _whenBuilder.materials[name];
-
-    ret = new dali.Material(this.createOrGetDaliShader( data.shader ));
-
-    for(var i = 0; i < data.textures.length; i++) {
-      ret.addTexture( this.createOrGetDaliImage(data.textures[i].image),
-                      data.textures[i].uniform,
-                      this.createOrGetDaliSampler( data.textures[i].sampler ) );
-    }
-
-    _whenBuilder.materials[name].daliObject = ret;
-  }
-  return ret;
-};
-
-dali.Builder.prototype.createOrGetDaliRenderer = function(name) {
-  "use strict";
-  consoleAssert( name in _whenBuilder.renderers, "Renderer not defined:" + name);
-
-  var ret;
-  if("daliObject" in _whenBuilder.renderers[name]) {
-    ret = _whenBuilder.renderers[name].daliObject;
-  } else {
-    var data = _whenBuilder.renderers[name];
-
-    ret = new dali.Renderer(this.createOrGetDaliGeometry(data.geometry),
-                            this.createOrGetDaliMaterial(data.material));
-
-    _whenBuilder.renderers[name].daliObject = ret;
-  }
-  return ret;
-};
-
-dali.Builder.prototype.createActorTree = function(dictionary) {
-  "use strict";
-  var ret;
-  var i;
-  consoleAssert(typeof(dictionary) == "object", "createActorTree needs an object");
-
-  if("type" in dictionary) {
-    if( dictionary.type in dali ) {
-      ret = new dali[ dictionary.type ]();
-    } else if( dictionary.type in _whenBuilder.templates ) {
-      var realType = _whenBuilder.templates[ dictionary.type ].type;
-      ret = new dali[ realType ]();
-    } else {
-      consoleAssert(0, "Cannot find type to create:" + dictionary.type);
-    }
-  } else {
-    consoleAssert("render" in dictionary, "'type' or 'render needed to create dali object");
-    ret = new dali.Actor();
-  }
-
-  var tags = [];
-
-  for(var prop in dictionary) {
-    if( prop === "actors" ) {
-      var actors = dictionary[prop];
-      for(i = 0; i < actors.length; i++) {
-        ret.add( this.createActorTree( actors[i] ) );
-      }
-    } else if( prop === "tag" ) {
-      tags.push(dictionary.tag);
-    } else if( prop === "tags" ) {
-      tags.concat(dictionary.tags);
-    } else if( prop === "type" ) {
-      // ignore
-    } else if( prop === "render") {
-      var renderer;
-      if(typeof(dictionary.render) == "string")
-      {
-        renderer = this.createOrGetDaliRenderer(dictionary.render);
-        ret.addRenderer(renderer);
-      }
-      else
-      {
-        for(i = 0; i < dictionary.render.length; i++) {
-          renderer = this.createOrGetDaliRenderer(dictionary.render[i]);
-          ret.addRenderer(renderer);
+  /**
+   * unTags an actor (can be multiple tags separate by space)
+   */
+  this.unTag = function(actorOrId, tagName) {
+    // untag
+    "use strict";
+    var names = tagName.split();
+    var id = _actorId(actorOrId);
+    for(var i = 0; i < names.length; i++) {
+      var name = names[i];
+      if( name in _whenBuilder.tags ) {
+        var nameIndex = _whenBuilder.tags[name].indexOf(id);
+        if(nameIndex >= 0) {
+          _whenBuilder.tags[name].splice(nameIndex, 1);
         }
       }
+    }
+  };
+
+  /**
+   * Gets list of actors tagged by 'tag'
+   */
+  this.tagged = function(tagName) {
+    // return all tagged
+    "use strict";
+    return _whenBuilder.tags[tagName];
+  };
+
+  /**
+   * Returns actorIdArray with actorOrArray removed
+   */
+  this.excludeFrom = function(actorIdArrayToFilter, actorOrArray)
+  {
+    // return all except one
+    "use strict";
+    var item, id;
+    var excludes = {};
+
+    if( (typeof(actorOrArray) == "object") && ("length" in actorOrArray) ) {
+      for(item in actorOrArray) {
+        id = _actorId(item);
+        excludes[id] = 1;
+      }
     } else {
-      // a property set
-      ret[prop] = dictionary[prop];
+      id = _actorId(actorOrArray);
+      excludes[id] = 1;
     }
-  }
 
-  if(tags) {
-    for(i = 0; i < tags.length; i++) {
-      this.tag(ret, tags[i]);
+    var ret = [];
+    for(item in actorIdArrayToFilter) {
+      if( !(item in excludes) ) {
+        ret.push( item );
+      }
     }
-  }
+    return ret;
+  };
 
-  return ret;
-};
+  /**
+   *
+   */
+  this.path = function (d) {
+    // Stores paths in builder
+    // paths({name: {points: [[1,2,3],[4,5,6]], forward:[1,0,0]},
+    //        other:{points: [[1,2,3],[4,5,6]], forward:[1,0,0]}})
+    //
+    "use strict";
+    for(var name in d) {
+      var pathData = {point: [], forward: [1, 0, 0]};
+      pathData = dali.mergeObjects(pathData, d[name]);
+      var daliPath = new dali.Path();
+      daliPath.points = pathData.points;
+      dali.generateControlPoints(daliPath, pathData.curvature); // @todo remove magic number?
+      _whenBuilder.paths[name] = daliPath;
+    }
+  };
 
-/**
- * Adds actor defintions to stage.
- */
-dali.Builder.prototype.stage = function(/* actor definition array */) {
-  "use strict";
-  for(var i = 0; i < arguments.length; i++) {
-    dali.stage.add( this.createActorTree( arguments[i] ) );
-  }
-};
+  /**
+   * Set style definition
+   */
+  this.style = function(name, d) {
+    // Stores styles in builder
+    // style(name, {property1:value, prop2,value})
+    // style(other, {property1:value, prop2,value})
+    //
+    "use strict";
+    _whenBuilder.styles[name] = d;
+    return d;
+  };
 
-/**
- * Adds actor defintions to stage.
- */
-dali.Builder.prototype.addTo = function(/* toActor, actor_definition_array */) {
-  "use strict";
-  consoleAssert(typeof(arguments[0]) == "string", "1st argument must be name");
-
-  var i;
-
-  for(i = 1; i < arguments.length; i++) {
-    consoleAssert(typeof(arguments[1]) == "object", "2nd and other arguments must be object");
-  }
-
-  var actor;
-  if( arguments[0] == "stage" ) {
-    actor = dali.stage.getRootLayer();
-  }
-  else {
-    actor = dali.stage.getRootLayer().findChildByName( arguments[0] );
-    consoleAssert(actor, "Cannot find actor:" + arguments[0]);
-  }
-
-  for(i = 1; i < arguments.length; i++) {
-    dali.stage.add( this.createActorTree( arguments[i] ) );
-  }
-};
-
-/**
- * Adds actor defintions to stage.
- */
-dali.Builder.prototype.GetRequiredKey = function(object, name, caller) {
-  if( name in object )
-  {
-    return object[name];
-  }
-  else
-  {
-    consoleAssert(0, "Object is missing key:'" + name + "'\n" + JSON.stringify(object));
-    return false;
-  }
-};
-
-dali.Builder.prototype.image = function(dictionary) {
-  // image({name:"name"
   //
+  //  +------------------+          +---------------+
+  //  | PropertyBuffer   | *      * | Geometry      |
+  //  +------------------+ -------- +---------------+
+  //  | format:          |          | vertex:PBuf   |1      * +-----------+         +------------+
+  //  |   name:v2,name:v3|          | indices:PBuf  +---------| Renderer  |         | Actor      |
+  //  | data             |          |               |         +-----------+ *     * +------------+
+  //  +------------------+          +---------------+       * | geom      +---------| renderer(s)|
+  //                                                     +----| material  |         |            |
+  //  +-------------+ *      * +----------+ 1            |    |           |         |            |
+  //  |Sampler      +----------|Material  +--------------+    +-----------+         +------------+
+  //  +-------------+          +----------+
+  //  |uniformName  |        * |sampler(s)|
+  //  |Image        |       +--|shader    |
+  //  |Filter/wrap  |       |  |facecull  |
+  //  +-------------+       |  |blendfunc |
+  //                        |  +----------+
+  //  +-----------------+   |
+  //  |Shader           |   |
+  //  +-----------------+ 1 |
+  //  |program:vert,frag|---+
+  //  |hints            |
+  //  +-----------------+
+  //
+
+  /**
+   * Set template defintion
+   */
+  this.template = function(name, d) {
+    // Stores templates in builder
+    // template("name":{ "type": "ImageActor", property1:value, prop2,value})
+    // template("other: { "type": "TextView", property1:value, prop2,value})
+    "use strict";
+    _whenBuilder.templates[name] = d;
+    return d;
+  };
+
+  this.mergeObject = function (obj1, obj2) {
+    for (var p in obj2) {
+      try {
+        // Property in destination object set; update its value.
+        if ( obj2[p].constructor==Object ) {
+          obj1[p] = self.mergeObject(obj1[p], obj2[p]);
+
+        } else {
+          obj1[p] = obj2[p];
+
+        }
+
+      } catch(e) {
+        // Property in destination object not set; create it and set its value.
+        obj1[p] = obj2[p];
+
+      }
+    }
+
+    return obj1;
+  }
+
+  /**
+   * expands the template if d.type is a template name
+   */
+  this.expandTemplate = function(d) {
+    if(d.hasOwnProperty("type")) {
+      if(_whenBuilder.templates.hasOwnProperty(d.type)) {
+        var templateType = d.type;
+        // apparently a fast way to deep copy an object
+        var templateObject = JSON.parse(JSON.stringify(_whenBuilder.templates[d.type])) ;
+        self.mergeObject(d, templateObject);
+        if(d.type === templateType) {
+          // remove the template as a type
+          delete d.type;
+        }
+      }
+    }
+    return d;
+  };
+
+  /**
+   * Set style definition
+   */
+  this.imageBuffer = function(name, d) {
+    // stores imageBuffers (exists really to hold daliObject's)
+    // imageBuffers("buffer1", {}
+    //                         } )
+    "use strict";
+    _whenBuilder.imageBuffers[name] = d;
+    return d;
+  };
+
+  /**
+   * Set property buffer definition
+   */
+  this.propertyBuffer = function(name, d) {
+    // stores PropertyBuffers
+    // propertyBuffers("buffer1", { format: [ ["aPosition", dali.PropertyType.VECTOR2],
+    //                                       ["aTexCoord", dali.PropertyType.VECTOR2].
+    //                             data: {aPosition: [-0.5,-0.5,],
+    //                                               [+0.5,-0.5,],
+    //                                               [-0.5,+0.5,],
+    //                                               [+0.5,+0.5,],
+    //                                    aCol:      [0.0, 0.0],
+    //                                               [1.0, 0.0],
+    //                                               [0.0, 1.0],
+    //                                               [1.0, 1.0] }
+    //                           } )
+    "use strict";
+    d.type = "propertyBuffer";
+    _whenBuilder.propertyBuffers[name] = d;
+    return d;
+  };
+
+  /**
+   * Set geometry definition
+   */
+  this.geometry = function(name, d) {
+    // stores geometry meshes
+    // geometries("mesh1": { vertices: "buffer1",
+    //                       index: "index1",
+    //                       type: "TRIANGLES",
+    //                       requresDepthTest:false } )
+    "use strict";
+    d.type = "geometry";
+    _whenBuilder.geometries[name] = d;
+    return d;
+  };
+
+  /**
+   * Set sample definition
+   */
+  this.sampler = function(name, d) {
+    // stores samplers
+    // samplers("sampler1", { "minification-filter":0,
+    //                       "magnification-filter":0,
+    //                       "u-wrap":0,
+    //                       "v-wrap":0,
+    //                       "affects-transparency":false})
+    "use strict";
+    d.type = "sampler";
+    _whenBuilder.samplers[name] = d;
+    return d;
+  };
+
+  /**
+   * Set shader definition
+   */
+  this.shader = function(name, d) {
+    // stores shaders
+    // shaders("shader1", { vertex:"",
+    //                     fragment:"",
+    //                     hints:"NONE"} )
+    "use strict";
+    d.type = "shader";
+    _whenBuilder.shaders[name] = d;
+    return d;
+  };
+
+  /**
+   * Set material definition
+   */
+  this.material = function(name, d) {
+    // stores materials meshes
+    // materials({"mat1",{ textures: [
+    //                       { buffer: animage,
+    //                         uniform: "uTexture"
+    //                         sampler: asampler
+    //                        }
+    //                    ],
+    //                    shader: "shader1",
+    //                    faceCulling: "BACK",
+    //                    blend: "AUTO",
+    //                    blendFunc : {srcFactorRGBA, destFactorRGBA},
+    //                    blendEquation : "",
+    //                    blendColor : [1,0,0,1] } )
+    //
+    "use strict";
+    d.type = "material";
+    _whenBuilder.materials[name] = d;
+    return d;
+  };
+
+  /**
+   * Set renderer definition
+   */
+  this.renderer = function(name, d) {
+    // store renderer
+    // renderers("rend1",  {"geometry": "geom1",
+    //                     "material": "mat1",
+    //                     "depth-index"})
+    "use strict";
+    d.type = "renderer";
+    _whenBuilder.renderers[name] = d;
+    return d;
+  };
+
+  /**
+   * creates actor as metadata
+   */
+  this.actor = function(name, d) {
+    // actor("name", {
+    //       renderers:[]})
+    //
+    "use strict";
+    d = self.expandTemplate(d);
+    if(!d.hasOwnProperty("type")) {
+      d.type = "Actor";
+    }
+    return d;
+  };
+
+  /**
+   * creates image actor as metadata
+   */
+  this.image = function(name , d) {
+    // image("name", {
+    //       buffer:"ducks",
+    //       renderer: [""]       // optional
+    //       })
+    //
+    "use strict";
+    d = self.expandTemplate(d);
+
+    d.name = name;
+    if(!d.hasOwnProperty("type")) {
+      d.type = "Actor";
+    }
+
+    var buffer = self.GetRequiredKey(d, "buffer");
+    delete d.buffer;
+
+    if(!d.hasOwnProperty("renderer")) {
+
+      var matname = name + "_material";
+
+      if(!_whenBuilder.materials.hasOwnProperty(matname)) {
+        // create if not there
+        self.material(matname, {shader: "imageShader",
+                                textures: [ {buffer: buffer,
+                                             uniform: "sTexture",
+                                             sampler: "imageSampler"} ]});
+      }
+
+      var rendname = name + "_renderer";
+      if(!_whenBuilder.renderers.hasOwnProperty(rendname)) {
+        // create if not there
+        self.renderer(rendname, {geometry: "imageGeometry", material: matname});
+      }
+
+      var imageBufferName = d.buffer;
+      if(!_whenBuilder.imageBuffers.hasOwnProperty(imageBufferName) ) {
+        // create if not there
+        self.imageBuffer(imageBufferName, {} );
+      }
+
+      d.renderers = [rendname];
+    }
+
+    return d;
+  };
+
+  this.text = function(name , d) {
+    //   text(actorName, {pointSize: 12,
+    //                    pointFamily: "Verdana",
+    //                    textColor: [1.0, 1.0, 1.0, 1.0];
+    //                    text = ""}
+    d = self.expandTemplate(d);
+
+    d.name = name;
+    if(!d.hasOwnProperty("type")) {
+      d.type = "Actor";
+    }
+
+    var pointSize = 12;
+    if(d.hasOwnProperty("pointSize")) {
+      pointSize = d.pointSize;
+      delete d.pointSize;
+    }
+    var pointFamily = "Verdana";
+    if(d.hasOwnProperty("pointFamily")) {
+      pointFamily = d.pointFamily;
+      delete d.pointFamily;
+    }
+    var textColor = [1.0, 1.0, 1.0, 1.0];
+    if(d.hasOwnProperty("textColor")) {
+      textColor = d.textColor;
+      delete d.textColor;
+    }
+    var text = "text";
+    if(!d.hasOwnProperty("text")) {
+      text = d.text;
+      delete d.text;
+    }
+
+    // render image to canvas
+    var canvas = document.createElement("canvas");
+    var ctx = canvas.getContext("2d");
+
+    ctx.font = pointSize + "px " + pointFamily;
+
+    var metrics = ctx.measureText(d.text);
+
+    if(metrics.width <= 0) {
+      // can't have a zero width canvas and use getImageData
+      canvas.width = pointSize;
+    } else {
+      canvas.width = metrics.width;
+    }
+
+    canvas.height = pointSize;
+
+    if(!d.hasOwnProperty("size")) {
+      d.size = [canvas.width, canvas.height, 1];
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // need to reset the font as the change of canvas size also resets the context?!
+    ctx.font = pointSize + "px " + pointFamily;
+
+    ctx.fillStyle = "rgba(" + 255 * textColor[0] +
+      "," + 255 * textColor[1] +
+      "," + 255 * textColor[2] +
+      "," + textColor[3] + ")";
+
+    ctx.fillText(d.text, 0, pointSize);
+
+    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    var uInt8Array = new Uint8Array(imageData.data);
+
+    var image = new dali.BufferImage(uInt8Array, canvas.width, canvas.height, dali.PixelFormat.RGBA8888);
+
+    var imageName = name + "textImage";
+
+    _whenBuilder.imageBuffers[imageName] = {daliObject: image};
+
+    if(!d.hasOwnProperty("renderer")) {
+
+      var matname = name + "_material";
+
+      if(!_whenBuilder.materials.hasOwnProperty(matname)) {
+        // create if not there
+        self.material(matname, {shader: "imageShader",
+                                textures: [ {buffer: imageName,
+                                             uniform: "sTexture",
+                                             sampler: "imageSampler"} ]});
+      }
+
+      var rendname = name + "_renderer";
+      if(!_whenBuilder.renderers.hasOwnProperty(rendname)) {
+        // create if not there
+        self.renderer(rendname, {geometry: "imageGeometry", material: matname});
+      }
+
+      var imageBufferName = d.buffer;
+      if(!_whenBuilder.imageBuffers.hasOwnProperty(imageBufferName) ) {
+        // create if not there
+        self.imageBuffer(imageBufferName, {} );
+      }
+
+      d.renderers = [rendname];
+    }
+
+    return d;
+  };
+
+  this.createOrGetDaliPropertyBuffer = function(name) {
+    "use strict";
+    consoleAssert(name in _whenBuilder.propertyBuffers, "property buffer not defined:" + name);
+    var ret;
+    if("daliObject" in _whenBuilder.propertyBuffers[name]) {
+      ret = _whenBuilder.propertyBuffers[name].daliObject;
+    } else {
+      var data = _whenBuilder.propertyBuffers[name];
+
+      ret = dali.createPropertyBuffer(data);
+
+      _whenBuilder.propertyBuffers[name].daliObject = ret;
+    }
+    return ret;
+  };
+
+
+  // //
+  // template("listitem",
+  //     quad("background",
+  //         {
+  //             size: [100,100,1],
+  //             color:[ [1, 1, 1, 1],
+  //                     [1, 1, 1, 1],
+  //                     [0, 0, 0, 1],
+  //                     [0, 0, 0, 1] ],
+  //             actors: [
+  //                  image("picture", { buffer:"ducks",
+  //                                     anchorPoint: [0,0,0],
+  //                                     size: [50,50,1]
+  //                         }),
+  //                  text("name", { text:"",
+  //                                 anchorPoint: [0,0,0],
+  //                                 position:[20,50,0]
+  //                     }),
+  //                  text("phone", { text:"",
+  //                                 anchorPoint: [0,0,0],
+  //                                 position:[20,50,0]
+  //                     })
+  //             ]
+  //         })
+  //     );
+
+  // addTo("stage",
+  //       image({
+  //         name:"img",
+  //         image:"ducks",
+  //         size:[100,100,1]
+  //       }),
+  //       image({
+  //         name:"img2",
+  //         tag:"listitem",
+  //         image:"field",
+  //         position:[100,0,0],
+  //         size:[100,100,1]
+  //       }),
+  //       image({
+  //         name:"img3",
+  //         tag:"listitem",
+  //         image:"funnyface",
+  //         position:[100,0,0],
+  //         size:[100,100,1]
+  //       }),
+  //       image({
+  //         name:"img4",
+  //         tag:"listitem",
+  //         image:"girl1",
+  //         position:[100,0,0],
+  //         size:[100,100,1]
   //       })
-  //
-  //
-  "use strict";
-  var d = {};
-  var name = this.GetRequiredKey(dictionary, "name");
+  // );
 
-  var shaderName = "imageShader";
-  if("shader" in dictionary) {
-    shaderName = dictionary.shader;
-  }
-  var samplers = [name + "_sampler"];
-  if("samplers" in dictionary) {
-    samplers = dictionary.samplers;
-  }
 
-  var samplername = name + "_sampler";
-  d = {};
-  d[samplername] = {};
-  this.samplers(d);
+  // when("img", "touchedDown",
+  //     set("sensitive", true),
+  //     set("size", to([200,200,200])),
+  //     set("img2", "size", to([200,200,200], 0,3, "ease_in")),
+  //     set(excludeFrom(tagged("scrollitem"), "myimage"), path(0,3, "ease_in", "path0")),
+  //     endAction("Discard")
+  //     then(set("img4", "hide"),
+  //          play("anAnim"))    );
 
-  var matname = name + "_material";
-  d = {};
-  d[matname] = {shader: shaderName, textures: [ {image: this.GetRequiredKey(dictionary, "image"),
-                                                 uniform: "sTexture",
-                                                 sampler: samplername}]};
-  this.materials(d);
 
-  var rendname = name + "_renderer";
-  d = {};
-  d[rendname] = {geometry: "imageGeometry", material: matname};
-  this.renderers(d);
+  this.quad = function(name , d) {
+    //   text(actorName, {color: [[0, 0, 0, 1],
+    //                            [1, 0, 1, 1],
+    //                            [0, 1, 0, 1],
+    //                            [1, 1, 1, 1] ]
+    //                   }
+    d = self.expandTemplate(d);
+    d.name = name;
+    if(!d.hasOwnProperty("type")) {
+      d.type = "Actor";
+    }
 
-  // store imageBuffers if they are missing for image
-  // (we're only using image data from browser buffers)
-  if( !(dictionary.image in _whenBuilder.imageBuffers) ) { // add to _whenBuilder
-    d = {};
-    d[dictionary.image] = { bufferName: dictionary.image };
-    this.imageBuffers(d);
-  }
+    var color;
+    if(d.hasOwnProperty("color")) {
+      color = d.color;
+      delete d.color;
+    } else {
+      color = [ [0, 0, 0, 1],
+                [1, 0, 1, 1],
+                [0, 1, 0, 1],
+                [1, 1, 1, 1] ];
+    }
 
-  dictionary.type = "Actor";
-  dictionary.renderers = [rendname];
+    if(!d.hasOwnProperty("renderer")) {
+      var imageQuadSize = 0.5; // half quad size
+      var vertsName = name  + "_verts";
+      self.propertyBuffer(vertsName, {format: [ ["aPosition", dali.PropertyType.VECTOR3],
+                                                ["aCol", dali.PropertyType.VECTOR4] ],
+                                      data: { "aPosition": [ [-imageQuadSize, -imageQuadSize, 0.0],
+                                                             [+imageQuadSize, -imageQuadSize, 0.0],
+                                                             [-imageQuadSize, +imageQuadSize, 0.0],
+                                                             [+imageQuadSize, +imageQuadSize, 0.0]
+                                                           ],
+                                              "aCol": color
+                                            }
+                                     });
+      var geometryName = name + "_geometry";
+      self.geometry(geometryName, {vertices: [vertsName],
+                                   indices: "quadIndices",
+                                   type: "TRIANGLES",
+                                   requiresSelfDepthTest: false} );
 
-  return dictionary;
-};
+      var matname = name + "_material";
+
+      if(!_whenBuilder.materials.hasOwnProperty(matname)) {
+        // create if not there
+        self.material(matname, {shader: "quadShader" });
+      }
+
+      var rendname = name + "_renderer";
+      if(!_whenBuilder.renderers.hasOwnProperty(rendname)) {
+        // create if not there
+        self.renderer(rendname, {geometry: geometryName, material: matname});
+      }
+
+      d.renderers = [rendname];
+    }
+
+    return d;
+
+  };
+
+  this.createOrGetDaliGeometry = function(name) {
+    "use strict";
+    consoleAssert(name in _whenBuilder.geometries, "geometry not defined:" + name);
+    var ret;
+    if("daliObject" in _whenBuilder.geometries[name]) {
+      ret = _whenBuilder.geometries[name].daliObject;
+    } else {
+      var data = _whenBuilder.geometries[name];
+
+      ret = new dali.Geometry();
+
+      for(var i = 0; i < data.vertices.length; i++) {
+        ret.addVertexBuffer( self.createOrGetDaliPropertyBuffer(data.vertices[i] ) );
+      }
+
+      ret.setIndexBuffer( self.createOrGetDaliPropertyBuffer(data.indices) );
+
+      if("requiresSelfDepthTest" in data) {
+        ret.setRequiresDepthTesting(data.requiresSelfDepthTest);
+      }
+
+      _whenBuilder.geometries[name].daliObject = ret;
+    }
+    return ret;
+  };
+
+  this.createOrGetDaliShader = function(name) {
+    "use strict";
+    consoleAssert(name in _whenBuilder.shaders, "shader not defined:" + name);
+    var ret = null;
+    if("daliObject" in _whenBuilder.shaders[name]) {
+      ret = _whenBuilder.shaders[name].daliObject;
+    } else {
+      var data = _whenBuilder.shaders[name];
+
+      ret = new dali.Shader(data.vertex,
+                            data.fragment,
+                            uiShaderTab.getDaliShaderHints(data.hints));
+
+      _whenBuilder.shaders[name].daliObject = ret;
+    }
+
+    return ret;
+  };
+
+  this.createOrGetDaliImage = function(name) {
+    "use strict";
+    if(!(name in _whenBuilder.imageBuffers)) {
+      _whenBuilder.imageBuffers[name] = {};
+    }
+
+    var ret;
+    if("daliObject" in _whenBuilder.imageBuffers[name]) {
+      ret = _whenBuilder.imageBuffers[name].daliObject;
+    } else {
+      // get images from the ui buffer
+      ret = imageFromUiBuffer(name);
+      _whenBuilder.imageBuffers[name].daliObject = ret;
+    }
+    return ret;
+  };
+
+  this.createOrGetDaliSampler = function(name) {
+    "use strict";
+    consoleAssert( name in _whenBuilder.samplers, "sampler not defined:" + name);
+    var ret;
+    if("daliObject" in _whenBuilder.samplers[name]) {
+      ret = _whenBuilder.samplers[name].daliObject;
+    } else {
+      var data = _whenBuilder.samplers[name];
+      ret = new dali.Sampler();
+      _whenBuilder.samplers[name].daliObject = ret;
+    }
+    return ret;
+  };
+
+  this.createOrGetDaliMaterial = function(name) {
+    "use strict";
+    consoleAssert( name in _whenBuilder.materials, "Material not defined:" + name);
+    var ret;
+    if("daliObject" in _whenBuilder.materials[name]) {
+      ret = _whenBuilder.materials[name].daliObject;
+    } else {
+      var data = _whenBuilder.materials[name];
+
+      ret = new dali.Material(self.createOrGetDaliShader( data.shader ));
+
+      if(data.textures) {
+        for(var i = 0; i < data.textures.length; i++) {
+          ret.addTexture( self.createOrGetDaliImage(data.textures[i].buffer),
+                          data.textures[i].uniform,
+                          self.createOrGetDaliSampler(data.textures[i].sampler) );
+        }
+      }
+
+      _whenBuilder.materials[name].daliObject = ret;
+    }
+    return ret;
+  };
+
+  this.createOrGetDaliRenderer = function(name) {
+    "use strict";
+    consoleAssert( name in _whenBuilder.renderers, "Renderer not defined:" + name);
+
+    var ret;
+    if("daliObject" in _whenBuilder.renderers[name]) {
+      ret = _whenBuilder.renderers[name].daliObject;
+    } else {
+      var data = _whenBuilder.renderers[name];
+
+      ret = new dali.Renderer(self.createOrGetDaliGeometry(data.geometry),
+                              self.createOrGetDaliMaterial(data.material));
+
+      _whenBuilder.renderers[name].daliObject = ret;
+    }
+    return ret;
+  };
+
+  this.createActorTree = function(dictionary) {
+    "use strict";
+    var ret;
+    var i;
+    consoleAssert(typeof(dictionary) == "object", "createActorTree needs an object");
+
+    if("type" in dictionary) {
+      if( dictionary.type in dali ) {
+        ret = new dali[ dictionary.type ]();
+      } else if( dictionary.type in _whenBuilder.templates ) {
+        var realType = _whenBuilder.templates[ dictionary.type ].type;
+        ret = new dali[ realType ]();
+      } else {
+        consoleAssert(0, "Cannot find type to create:" + dictionary.type);
+      }
+    } else {
+      consoleAssert("render" in dictionary, "'type' or 'render needed to create dali object");
+      ret = new dali.Actor();
+    }
+
+    var tags = [];
+
+    for(var prop in dictionary) {
+      if( prop === "actors" ) {
+        var actors = dictionary[prop];
+        for(i = 0; i < actors.length; i++) {
+          ret.add( self.createActorTree( actors[i] ) );
+        }
+      } else if( prop === "tag" ) {
+        tags.push(dictionary.tag);
+      } else if( prop === "tags" ) {
+        tags.concat(dictionary.tags);
+      } else if( prop === "type" ) {
+        // ignore
+      } else if( prop === "renderers") {
+        var renderer;
+        for(i = 0; i < dictionary.renderers.length; i++) {
+          renderer = self.createOrGetDaliRenderer(dictionary.renderers[i]);
+          ret.addRenderer(renderer);
+        }
+      } else {
+        // a property set
+        ret[prop] = dictionary[prop];
+      }
+    }
+
+    if(tags) {
+      for(i = 0; i < tags.length; i++) {
+        self.tag(ret, tags[i]);
+      }
+    }
+
+    return ret;
+  };
+
+  /**
+   * Adds actor defintions to stage.
+   */
+  this.stage = function(/* actor definition array */) {
+    "use strict";
+    for(var i = 0; i < arguments.length; i++) {
+      dali.stage.add( self.createActorTree( arguments[i] ) );
+    }
+  };
+
+  /**
+   * Adds actor defintions to stage.
+   */
+  this.addTo = function(/* toActor, actor_definition_array */) {
+    "use strict";
+    consoleAssert(typeof(arguments[0]) == "string", "1st argument must be name");
+
+    var i;
+
+    for(i = 1; i < arguments.length; i++) {
+      consoleAssert(typeof(arguments[1]) == "object", "2nd and other arguments must be object");
+    }
+
+    var actor;
+    if( arguments[0] == "stage" ) {
+      actor = dali.stage.getRootLayer();
+    } else {
+      actor = dali.stage.getRootLayer().findChildByName( arguments[0] );
+      consoleAssert(actor, "Cannot find actor:" + arguments[0]);
+    }
+
+    for(i = 1; i < arguments.length; i++) {
+      dali.stage.add( self.createActorTree(  arguments[i] ) );
+    }
+  };
+
+  /**
+   * Adds actor defintions to stage.
+   */
+  this.GetRequiredKey = function(object, name, caller) {
+    if( object.hasOwnProperty(name) ) {
+      return object[name];
+    } else {
+      consoleAssert(0, "Object is missing key:'" + name + "'\n" + JSON.stringify(object));
+      return false;
+    }
+  };
+
+  this.init();
+
+}; // dali.Builder
 
 ////////////////////////////////////////////////////////////////////////////////
 //
 // dali toy Builder singleton
 //
-//
 ////////////////////////////////////////////////////////////////////////////////
 var build = new dali.Builder();
+var template = build.template;
+var quad = build.quad;
+var image = build.image;
+var actor = build.actor;
+var text = build.text;
+var expandTemplate = build.expandTemplate;
+var addTo = build.addTo;
+var tagged = build.tagged;
+var tag = build.tag;
+var unTag = build.unTag;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -3725,6 +4037,94 @@ function _stringOrRaise(value, errorMessage) {
     throw errorMessage;
   }
 }
+
+// function image(d) {
+//   var halfQuadSize = 0.5;
+//   var verts = dali.createPropertyBuffer( {format: [ ["aPosition", dali.PropertyType.VECTOR3],
+//                                                     ["aTexCoord", dali.PropertyType.VECTOR2] ],
+//                                           data: { "aPosition": [ [-halfQuadSize, -halfQuadSize, 0.0],
+//                                                                  [+halfQuadSize, -halfQuadSize, 0.0],
+//                                                                  [-halfQuadSize, +halfQuadSize, 0.0],
+//                                                                  [+halfQuadSize, +halfQuadSize, 0.0]
+//                                                                ],
+//                                                   "aTexCoord": [ [0, 0],
+//                                                                  [1, 0],
+//                                                                  [0, 1],
+//                                                                  [1, 1]
+//                                                                ]
+//                                                 }
+//                                          });
+
+//   var indices = dali.createPropertyBuffer( { format: [ ["indices", dali.PropertyType.INTEGER]],
+//                                              data: { "indices": [0, 3, 1, 0, 2, 3] } } ) ;
+//   var geometry = new dali.Geometry();
+//   geometry.addVertexBuffer(verts);
+//   geometry.setIndexBuffer(indices);
+
+//   var vertex = "" +
+//         "// atributes\n" +
+//         "attribute mediump vec3 aPosition;" +
+//         "attribute mediump vec2 aTexCoord;\n" +
+//         "// inbuilt\n" +
+//         "uniform mediump mat4 uMvpMatrix;" +
+//         "uniform mediump vec3 uSize;" +
+//         "uniform lowp vec4 uColor;" +
+//         "// varying\n" +
+//         "varying mediump vec2 vTexCoord;\n" +
+//         "" +
+//         "void main()" +
+//         "{" +
+//         "  mediump vec4 vertexPosition = vec4(aPosition, 1.0);" +
+//         "  vertexPosition.xyz *= uSize;" +
+//         "  gl_Position = uMvpMatrix * vertexPosition;" +
+//         "  vTexCoord = aTexCoord;\n" +
+//         "}";
+
+//   var fragment = "" +
+//         "uniform lowp vec4 uColor;" +
+//         "uniform sampler2D sTexture;\n" +
+//         "varying mediump vec2 vTexCoord;\n" +
+//         "\n" +
+//         "void main()" +
+//         "{" +
+//         "  gl_FragColor = texture2D(sTexture, vTexCoord) * uColor;\n" +
+//         "}";
+
+//   var shader = new dali.Shader(vertex, fragment, dali.ShaderHints.HINT_NONE);
+//   var material = new dali.Material(shader);
+
+//   var img = imageFromUiBuffer(d.image);
+
+//   var sampler = new dali.Sampler();
+//   material.addTexture(img, "sTexture", sampler);
+//   var renderer = new dali.Renderer(geometry, material);
+//   var actor = new dali.Actor();
+//   actor.addRenderer(renderer);
+
+//   // set all the other properties
+//   for(var key in d) {
+//     if( key !== "image" ) {
+//       actor[key] = d[key];
+//     }
+//   }
+
+//   return actor;
+// }
+
+// function addTo() {
+//   if(arguments.length) {
+//     var name = arguments[0];
+//     var toActor = dali.stage.getRootLayer();
+//     if(name !== "stage") {
+//       toActor = toActor.findChildByName(name);
+//     }
+//     if( toActor) {
+//       for(var i = 1; i < arguments.length; i++) {
+//         toActor.add( arguments[1] );
+//       }
+//     }
+//   }
+// }
 
 // Animate to
 //   to(value)
@@ -3843,7 +4243,7 @@ function path() {
 }
 
 // conditional animation
-// when("myimage", condition("touched", "inside", 0, 100),
+//   when("myimage", condition("touched", "inside", 0, 100),
 //
 function condition(propertyName, conditionType, arg0, arg1)
 {
@@ -3926,7 +4326,7 @@ function then()
             parameters: arguments[1]}];
 }
 
-function _actorNameList()
+function _actorList() // make list of names or ids from function/object/string
 {
   "use strict";
   var names;
@@ -3934,8 +4334,13 @@ function _actorNameList()
     var lookup = arguments[0]();
     names = lookup[0];
   } else if(typeof arguments[0] === "object") {
-    // or it can be the actual dali actor object
-    names = _actorArray(arguments[0].name);
+    if( "length" in arguments[0] ) {
+      // array of names or id's
+      names = arguments[0];
+    } else {
+      // or it can be the actual dali actor object
+      names = _actorArray(arguments[0].name);
+    }
   } else if(typeof arguments[0] === "string") {
     // or arg0,arg1 are the actor property
     names = _actorArray(arguments[0]);
@@ -4010,7 +4415,7 @@ function _makeCallback(args) {
   "use strict";
   return function(){
     var a;
-    var actors = _actorNameList( args[0] );
+    var actors = _actorList( args[0] );
     // args[1] is signal name
     for(var i = 2; i < args.length; i++) {
       var d = args[i];
@@ -4032,7 +4437,12 @@ function _makeCallback(args) {
         for(var actori = 0; actori < actors.length; actori++) {
           var actorName = actors[actori];
           var root = dali.stage.getRootLayer();
-          var actor = root.findChildByName( actorName );
+          var actor;
+          if(typeof(actorName) === "number") {
+            actor = root.findChildById( actorName );
+          } else {
+            actor = root.findChildByName( actorName );
+          }
           a = _animation(a);
           for(var animi = 0; animi < d.animation.length; animi++) {
             var anim = d.animation[animi];
@@ -4108,7 +4518,7 @@ function _makeCallback(args) {
 //     then("play", "myanim"),
 //     thenOnChild("myimage", "child", "hide"),
 //     animate("name"),
-//     animateTo("position", 
+//     animateTo("position",
 //        )
 function doNow(args) {
   "use strict";
@@ -4181,7 +4591,7 @@ function when() {
   var condition = null;
 
   // arg0 can be an actor lookup function; returning an actor array
-  actors = _actorNameList(arguments[0]);
+  actors = _actorList(arguments[0]);
 
   if(typeof arguments[1] === "string") {
     // if string then its a signal
@@ -4235,7 +4645,11 @@ function when() {
     }
 
     for(ai = 0; ai < actors.length; ai++) {
-      actor = root.findChildByName( actors[ai] );
+      if(typeof(actors[ai]) === "number") {
+        actor = root.findChildById( actors[ai] );
+      } else {
+        actor = root.findChildByName( actors[ai] );
+      }
       actor.connect( signal, f );
     }
   }
@@ -6397,18 +6811,21 @@ UIShaderTab.prototype.getDaliShaderHints = function(hintsString) {
   "use strict";
   var ret = 0;
 
-  if(hintsString.search("requiresSelfDepthTest") >= 0) {
-    ret += dali.ShaderHints.REQUIRES_SELF_DEPTH_TEST;
+  if(hintsString) {
+    if(hintsString.search("requiresSelfDepthTest") >= 0) {
+      ret += dali.ShaderHints.REQUIRES_SELF_DEPTH_TEST;
+    }
+    if(hintsString.search("outputIsTransparent") >= 0) {
+      ret += dali.ShaderHints.OUTPUT_IS_TRANSPARENT;
+    }
+    if(hintsString.search("outputIsOpaque") >= 0) {
+      ret += dali.ShaderHints.OUTPUT_IS_OPAQUE;
+    }
+    if(hintsString.search("modifiesGeometry") >= 0) {
+      ret += dali.ShaderHints.MODIFIES_GEOMETRY;
+    }
   }
-  if(hintsString.search("outputIsTransparent") >= 0) {
-    ret += dali.ShaderHints.OUTPUT_IS_TRANSPARENT;
-  }
-  if(hintsString.search("outputIsOpaque") >= 0) {
-    ret += dali.ShaderHints.OUTPUT_IS_OPAQUE;
-  }
-  if(hintsString.search("modifiesGeometry") >= 0) {
-    ret += dali.ShaderHints.MODIFIES_GEOMETRY;
-  }
+
   return ret;
 };
 
