@@ -85,66 +85,38 @@ struct ConfinementConstraint
    * @param[in] offsetOrigin (optional) Whether to offset the parent origin or not.
    * @param[in] topLeftMargin (optional) Top-Left margins (defaults to 0.0f, 0.0f)
    * @param[in] bottomRightMargin (optional) Bottom-Right margins (defaults to 0.0f, 0.0f)
-   * @param[in] flipHorizontal (optional) whether to flip Actor to the other side X if near edge, and by
-   * how much (defaults to 0.0f i.e. no flip)
-   * @param[in] flipVertical (optional) whether to flip Actor to the other side Y if near edge, and by
-   * how much (defaults to 0.0f i.e. no flip)
    */
-  ConfinementConstraint(Vector3 offsetOrigin = Vector3::ZERO, Vector2 topLeftMargin = Vector2::ZERO, Vector2 bottomRightMargin = Vector2::ZERO, bool flipHorizontal = false, bool flipVertical = false)
+  ConfinementConstraint( Vector3 offsetOrigin = Vector3::ZERO,
+                         Vector2 topLeftMargin = Vector2::ZERO,
+                         Vector2 bottomRightMargin = Vector2::ZERO )
   : mOffsetOrigin(offsetOrigin),
     mMinIndent(topLeftMargin),
-    mMaxIndent(bottomRightMargin),
-    mFlipHorizontal(flipHorizontal),
-    mFlipVertical(flipVertical)
+    mMaxIndent(bottomRightMargin)
   {
   }
 
   void operator()( Vector3& current, const PropertyInputContainer& inputs )
   {
     const Vector3& size = inputs[0]->GetVector3();
-    const Vector3 origin = inputs[1]->GetVector3();
-    const Vector3& anchor = inputs[2]->GetVector3();
-    const Vector3& referenceSize = inputs[3]->GetVector3();
+    const Vector3& referenceSize = inputs[1]->GetVector3();
+
+    std::cout << "size: " << size << "ref: " << referenceSize << std::endl;
 
     Vector3 offset(mOffsetOrigin * referenceSize);
 
     // Get actual position of Actor relative to parent's Top-Left.
-    Vector3 position(current + offset + origin * referenceSize);
+    Vector3 position(current + offset);
 
     current += offset;
 
     // if top-left corner is outside of Top-Left bounds, then push back in screen.
-    Vector3 corner(position - size * anchor - mMinIndent);
-
-    if(mFlipHorizontal && corner.x < 0.0f)
-    {
-      corner.x = 0.0f;
-      current.x += size.width;
-    }
-
-    if(mFlipVertical && corner.y < 0.0f)
-    {
-      corner.y = 0.0f;
-      current.y += size.height;
-    }
+    Vector3 corner(position - size * Vector3(0.5,0.5,0.5) - mMinIndent);
 
     current.x -= std::min(corner.x, 0.0f);
     current.y -= std::min(corner.y, 0.0f);
 
     // if bottom-right corner is outside of Bottom-Right bounds, then push back in screen.
     corner += size - referenceSize + mMinIndent + mMaxIndent;
-
-    if(mFlipHorizontal && corner.x > 0.0f)
-    {
-      corner.x = 0.0f;
-      current.x -= size.width;
-    }
-
-    if(mFlipVertical && corner.y > 0.0f)
-    {
-      corner.y = 0.0f;
-      current.y -= size.height;
-    }
 
     current.x -= std::max(corner.x, 0.0f);
     current.y -= std::max(corner.y, 0.0f);
@@ -153,8 +125,6 @@ struct ConfinementConstraint
   Vector3 mOffsetOrigin;                                ///< Manual Parent Offset Origin.
   Vector3 mMinIndent;                                   ///< Top-Left Margin
   Vector3 mMaxIndent;                                   ///< Bottom-Right Margin.
-  bool mFlipHorizontal;                                 ///< Whether to flip actor's position if exceeds horizontal screen bounds
-  bool mFlipVertical;                                   ///< Whether to flip actor's position if exceeds vertical screen bounds
 };
 
 }
@@ -225,15 +195,17 @@ public:
     mMagnifier = Toolkit::Magnifier::New();
     mMagnifier.SetSourceActor( mView );
     mMagnifier.SetSize( MAGNIFIER_SIZE * mStageSize.width );  // Size of magnifier is in relation to stage width
+    mMagnifier.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    mMagnifier.SetAnchorPoint( AnchorPoint::CENTER );
     mMagnifier.SetProperty( Toolkit::Magnifier::Property::MAGNIFICATION_FACTOR, MAGNIFICATION_FACTOR );
     mMagnifier.SetScale(Vector3::ZERO);
     overlay.Add( mMagnifier );
 
     // Apply constraint to animate the position of the magnifier.
-    Constraint constraint = Constraint::New<Vector3>( mMagnifier, Actor::Property::POSITION, ConfinementConstraint(Vector3( 0.5f, 0.5f, 0.0f ), Vector2::ONE * MAGNIFIER_INDENT, Vector2::ONE * MAGNIFIER_INDENT) );
+    Constraint constraint = Constraint::New<Vector3>( mMagnifier,
+                                                      Actor::Property::POSITION,
+                                                      ConfinementConstraint( Vector3( 0.5f, 0.5f, 0.0f ), Vector2::ONE * MAGNIFIER_INDENT, Vector2::ONE * MAGNIFIER_INDENT) );
     constraint.AddSource( LocalSource(Actor::Property::SIZE) );
-    constraint.AddSource( LocalSource(Actor::Property::PARENT_ORIGIN) );
-    constraint.AddSource( LocalSource(Actor::Property::ANCHOR_POINT) );
     constraint.AddSource( ParentSource(Actor::Property::SIZE) );
     constraint.SetRemoveAction(Constraint::Discard);
     constraint.Apply();
