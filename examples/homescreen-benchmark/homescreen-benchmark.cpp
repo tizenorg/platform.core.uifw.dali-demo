@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#define NO_LABELS
+
 using namespace Dali;
 using Dali::Toolkit::TextLabel;
 
@@ -176,6 +178,7 @@ const char* IMAGE_PATH[] = {
   NULL
 };
 
+#ifndef NO_LABELS
 /**
  * Random words used as unique application names
  */
@@ -334,6 +337,7 @@ const char* DEMO_APPS_NAMES[] =
   NULL
 };
 
+#endif
 // this code comes from command-line-options.cpp. the reason it's here is to
 // keep consistent the extra-help formatting when '--help' used
 
@@ -350,13 +354,13 @@ void PrintHelp( const char * const opt, const char * const optDescription)
 
 const float PAGE_SCALE_FACTOR_X             ( 0.95f );
 const float PAGE_SCALE_FACTOR_Y             ( 0.95f );
-const float PAGE_DURATION_SCALE_FACTOR      ( 2.0f ); // time-scale factor, larger = animation is slower
+const float PAGE_DURATION_SCALE_FACTOR      ( 10.0f ); // time-scale factor, larger = animation is slower
 
 const float DEFAULT_OPT_ROW_COUNT           ( 5 );
 const float DEFAULT_OPT_COL_COUNT           ( 4 );
 const float DEFAULT_OPT_PAGE_COUNT          ( 10 );
 const bool  DEFAULT_OPT_USETABLEVIEW        ( false );
-
+const bool  DEFAULT_OPT_BATCHINGENABLED     ( false );
 }
 
 // This example is a benchmark that mimics the paged applications list of the homescreen app
@@ -373,7 +377,8 @@ public:
       mRows( DEFAULT_OPT_ROW_COUNT ),
       mCols( DEFAULT_OPT_COL_COUNT ),
       mPageCount( DEFAULT_OPT_PAGE_COUNT ),
-      mUseTableView( DEFAULT_OPT_USETABLEVIEW )
+      mUseTableView( DEFAULT_OPT_USETABLEVIEW ),
+      mBatchingEnabled( DEFAULT_OPT_BATCHINGENABLED )
     {
     }
 
@@ -381,6 +386,7 @@ public:
     int   mCols;
     int   mPageCount;
     bool  mUseTableView;
+    bool  mBatchingEnabled;
   };
 
   // animation script data
@@ -456,6 +462,10 @@ public:
     if( mConfig.mUseTableView )
     {
       Toolkit::TableView tableView = Toolkit::TableView::New( mConfig.mRows, mConfig.mCols );
+
+      // create geometry batcher for table view
+
+
       tableView.SetBackgroundColor( Vector4( 0.0f, 0.0f, 0.0f, 0.5f ) );
       pageActor = tableView;
     }
@@ -484,11 +494,12 @@ public:
 
     // the image/label area tries to make sure the positioning will be relative to previous sibling
     const float IMAGE_AREA = 0.60f;
+#ifndef NO_LABELS
     const float LABEL_AREA = 0.50f;
+    Vector2 dpi = Stage::GetCurrent().GetDpi();
+#endif
 
     static int currentIconIndex = 0;
-
-    Vector2 dpi = Stage::GetCurrent().GetDpi();
 
     for( int y = 0; y < mConfig.mRows; ++y )
     {
@@ -512,14 +523,23 @@ public:
           iconView.SetSizeScalePolicy( SizeScalePolicy::FIT_WITH_ASPECT_RATIO );
         }
 
-        // create image view
-        Toolkit::ImageView imageView = Toolkit::ImageView::New( IMAGE_PATH[currentIconIndex] );
+        // create empty image to avoid early renderer creation
+        Toolkit::ImageView imageView = Toolkit::ImageView::New();
+
+        // enable/disable batching
+        imageView.SetProperty( Toolkit::ImageView::Property::BATCHABLE, mConfig.mBatchingEnabled );
+
+        // load image
+        imageView.SetProperty( Toolkit::ImageView::Property::RESOURCE_URL, IMAGE_PATH[currentIconIndex] );
+
         imageView.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
         imageView.SetSizeScalePolicy( SizeScalePolicy::FIT_WITH_ASPECT_RATIO );
         imageView.SetAnchorPoint( AnchorPoint::CENTER );
         imageView.SetParentOrigin( ParentOrigin::CENTER );
         imageView.SetSizeModeFactor( Vector3(IMAGE_AREA, IMAGE_AREA, 1.0f) );
 
+
+#ifndef NO_LABELS
         // create label
         Toolkit::TextLabel textLabel = Toolkit::TextLabel::New( DEMO_APPS_NAMES[currentIconIndex] );
         textLabel.SetAnchorPoint( AnchorPoint::TOP_CENTER );
@@ -530,9 +550,9 @@ public:
         textLabel.SetProperty( Toolkit::TextLabel::Property::POINT_SIZE, (((float)( ROW_HEIGHT * LABEL_AREA ) * 72.0f)  / (dpi.y))*0.25f );
         textLabel.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
         textLabel.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "TOP" );
-
-        iconView.Add( imageView );
         imageView.Add( textLabel );
+#endif
+        iconView.Add( imageView );
 
         page.Add(iconView);
 
@@ -584,10 +604,17 @@ public:
       page.SetAnchorPoint( AnchorPoint::CENTER );
       page.SetPosition( Vector3(stageSize.x*i, -0.30f*( stageSize.y-SCALED_HEIGHT ), 0.0f) );
       mScrollParent.Add( page );
+
+      if(mConfig.mUseTableView)
+      {
+        if( mConfig.mBatchingEnabled )
+          page.SetProperty(Actor::Property::BATCHING, true);
+      }
+
     }
 
-    mScrollParent.SetOpacity( 0.0f );
-    mScrollParent.SetScale( Vector3(0.0f, 0.0f, 0.0f) );
+    mScrollParent.SetOpacity( 1.0f );
+    mScrollParent.SetScale( Vector3(1.0f, 1.0f, 1.0f) );
 
     // fade in
     ShowAnimation();
@@ -625,6 +652,7 @@ public:
 
   void OnAnimationEnd( Animation& source )
   {
+
     if( source == mShowAnimation )
     {
       ScriptData& frame = mScriptFrameData[0];
@@ -641,6 +669,7 @@ public:
     {
       mApplication.Quit();
     }
+
   }
 
 private:
@@ -702,6 +731,10 @@ int main( int argc, char **argv )
     else if( arg.compare( "--use-tableview" ) == 0 )
     {
       config.mUseTableView = true;
+    }
+    else if( arg.compare( "--use-batching" ) == 0 )
+    {
+      config.mBatchingEnabled = true;
     }
     else if( arg.compare( "--help" ) == 0 )
     {

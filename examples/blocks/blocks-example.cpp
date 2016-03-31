@@ -270,6 +270,7 @@ private:
     mPaddleImage = CreateImage(PADDLE_IMAGE);
     mPaddle.Add( mPaddleHandle );
     mPaddle.Add( mPaddleImage );
+
     mPaddleHandle.SetParentOrigin( ParentOrigin::TOP_CENTER );
     mPaddleHandle.SetAnchorPoint( AnchorPoint::TOP_CENTER );
     mPaddleHandle.SetPosition( 0.0f, stageSize.width * 0.0125f );
@@ -399,6 +400,8 @@ private:
     const Vector2 offset( (stageSize.x - (columns * brickSize.width)) * 0.5f,
                            stageSize.y * 0.125f );
 
+    //mLevelContainer.SetProperty( Dali::Actor::Property::BATCHING, true );
+
     for(int j = 0; j < rows; j++)
     {
       for(int i = 0; i < columns; i++)
@@ -408,6 +411,8 @@ private:
         mBrickCount++;
       }
     }
+
+
   }
 
   /**
@@ -522,12 +527,17 @@ private:
     Vector2 stageSize(Stage::GetCurrent().GetSize());
     const Vector2 brickSize(BRICK_SIZE * Vector2(stageSize.x, stageSize.x));
 
-    Image img = ResourceImage::New( BRICK_IMAGE_PATH[type], Dali::ImageDimensions( 128, 64 ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
-    ImageView brick = ImageView::New(img);
+
+    //Image img = ResourceImage::New( BRICK_IMAGE_PATH[type], Dali::ImageDimensions( 128, 64 ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+    //ImageView brick = ImageView::New(img);
+
+    ImageView brick = ImageView::New();
     brick.SetParentOrigin(ParentOrigin::TOP_LEFT);
     brick.SetAnchorPoint(AnchorPoint::CENTER);
     brick.SetSize( brickSize );
     brick.SetPosition( Vector3( position ) );
+    brick.SetProperty( Toolkit::ImageView::Property::BATCHABLE, true );
+    brick.SetImage(BRICK_IMAGE_PATH[type], Dali::ImageDimensions( 128, 64 ));
 
     // Add a constraint on the brick between it and the ball generating a collision-property
     Property::Index property = brick.RegisterProperty(COLLISION_PROPERTY_NAME, Vector3::ZERO);
@@ -553,7 +563,10 @@ private:
    */
   ImageView CreateImage(const std::string& filename)
   {
-    ImageView actor = ImageView::New(filename);
+    ImageView actor = ImageView::New();
+
+    //actor.SetProperty( Toolkit::ImageView::Property::BATCHABLE, true );
+    actor.SetProperty( Toolkit::ImageView::Property::RESOURCE_URL, filename );
     actor.SetParentOrigin(ParentOrigin::TOP_LEFT);
     actor.SetAnchorPoint(AnchorPoint::CENTER);
     return actor;
