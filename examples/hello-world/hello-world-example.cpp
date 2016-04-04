@@ -45,9 +45,11 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
+    TextLabel textLabel = TextLabel::New( "삭제" );
+    //TextLabel textLabel = TextLabel::New( "Smart Switch Mobile 앱을 삭제합니다." );
     textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     textLabel.SetName( "helloWorldLabel" );
+    textLabel.SetProperty(Dali::Toolkit::TextLabel::Property::POINT_SIZE, 8.0f);
     stage.Add( textLabel );
 
     // Respond to a click anywhere on the stage
@@ -56,8 +58,15 @@ public:
 
   bool OnTouch( Actor actor, const TouchEvent& touch )
   {
-    // quit the application
-    mApplication.Quit();
+    Stage stage = Stage::GetCurrent();
+
+    TextLabel textLabel = TextLabel::New( "Smart Switch Mobile 앱을 삭제합니다." );
+    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    textLabel.SetProperty(Dali::Toolkit::TextLabel::Property::POINT_SIZE, 18.0f);
+    stage.Add( textLabel );
+
+    textLabel.SetY( 100.0f );
+
     return true;
   }
 
