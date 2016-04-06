@@ -153,13 +153,14 @@ public:
 
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
 
-    mMaterial = Material::New( mShader );
+    mMaterial = Material::New();
     mImage = ResourceImage::New( MATERIAL_SAMPLE );
     mMaterial.AddTexture(mImage, "sTexture");
 
     mGeometry = CreateGeometry();
 
-    mRenderer = Renderer::New( mGeometry, mMaterial );
+    mRenderer = Renderer::New( mGeometry, mShader );
+    mRenderer.SetMaterial( mMaterial );
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );

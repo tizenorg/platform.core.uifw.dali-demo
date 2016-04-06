@@ -148,15 +148,16 @@ public:
     Image image = ResourceImage::New( MATERIAL_SAMPLE2 );
 
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
-    mMaterial1 = Material::New( mShader );
+    mMaterial1 = Material::New();
     mMaterial1.AddTexture(mImage, "sTexture");
 
-    mMaterial2 = Material::New( mShader );
+    mMaterial2 = Material::New();
     mMaterial2.AddTexture(image, "sTexture");
 
     mGeometry = CreateGeometry();
 
-    mRenderer = Renderer::New( mGeometry, mMaterial1 );
+    mRenderer = Renderer::New( mGeometry, mShader );
+    mRenderer.SetMaterial( mMaterial1 );
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
@@ -169,7 +170,8 @@ public:
     mMeshActor.SetAnchorPoint( AnchorPoint::TOP_CENTER );
     stage.Add( mMeshActor );
 
-    mRenderer2 = Renderer::New( mGeometry, mMaterial2 );
+    mRenderer2 = Renderer::New( mGeometry, mShader );
+    mRenderer2.SetMaterial( mMaterial2 );
 
     mMeshActor2 = Actor::New();
     mMeshActor2.AddRenderer( mRenderer2 );

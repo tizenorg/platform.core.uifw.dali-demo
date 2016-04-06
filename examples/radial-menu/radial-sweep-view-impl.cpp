@@ -348,10 +348,9 @@ void RadialSweepViewImpl::CreateStencil( Radian initialSector )
   std::ostringstream vertexShaderStringStream;
   vertexShaderStringStream<<VERTEX_SHADER_PREFIX<<VERTEX_SHADER;
   Shader shader = Shader::New( vertexShaderStringStream.str(), FRAGMENT_SHADER );
-  Material material = Material::New( shader );
 
   // Create renderer
-  Renderer renderer = Renderer::New( meshGeometry, material );
+  Renderer renderer = Renderer::New( meshGeometry, shader );
 
   mStencilActor = Actor::New();
   mStencilActor.AddRenderer( renderer );

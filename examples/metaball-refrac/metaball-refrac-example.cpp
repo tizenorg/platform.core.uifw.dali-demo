@@ -197,7 +197,9 @@ private:
 
   Renderer          mRendererRefraction;
   Material          mMaterialRefraction;
+  Shader            mShaderRefraction;
   Material          mMaterialNormal;
+  Shader            mShaderNormal;
 
   //Animations
   Animation         mGravityAnimation[METABALL_NUMBER];
@@ -444,13 +446,12 @@ void MetaballRefracController::CreateMetaballActors()
   //With MeshData Textured
   float aspect = (float)mScreenSize.y / (float)mScreenSize.x;
 
-  //Create the shader for the metaballs
-
+  //Create the renderer for the metaballs
   Shader shader = Shader::New( METABALL_VERTEX_SHADER, METABALL_FRAG_SHADER );
-
-  Material material = Material::New( shader );
-
   Geometry metaballGeom = CreateGeometry();
+  Renderer renderer = Renderer::New( metaballGeom, shader );
+  renderer.SetProperty( Renderer::Property::BLENDING_MODE, BlendingMode::ON );
+  renderer.SetBlendFunc(BlendingFactor::ONE, BlendingFactor::ONE, BlendingFactor::ONE, BlendingFactor::ONE);
 
   //Each metaball has a different radius
   mMetaballs[0].radius = mMetaballs[0].initRadius = 0.0145f;
@@ -468,9 +469,7 @@ void MetaballRefracController::CreateMetaballActors()
     mMetaballs[i].actor.SetScale( 1.0f );
     mMetaballs[i].actor.SetParentOrigin( ParentOrigin::CENTER );
 
-    Renderer renderer = Renderer::New( metaballGeom, material );
-    renderer.SetProperty( Renderer::Property::BLENDING_MODE, BlendingMode::ON );
-    renderer.SetBlendFunc(BlendingFactor::ONE, BlendingFactor::ONE, BlendingFactor::ONE, BlendingFactor::ONE);
+
     mMetaballs[i].actor.AddRenderer( renderer );
 
     mMetaballs[i].positionIndex = mMetaballs[i].actor.RegisterProperty( "uPositionMetaball", mMetaballs[i].position );
@@ -536,18 +535,18 @@ void MetaballRefracController::AddRefractionImage()
   Geometry metaballGeom = CreateGeometryComposition();
 
   //Create Refraction shader and renderer
-  Shader shader = Shader::New( METABALL_VERTEX_SHADER, REFRACTION_FRAG_SHADER );
+  mShaderRefraction = Shader::New( METABALL_VERTEX_SHADER, REFRACTION_FRAG_SHADER );
   //Create new material
-  mMaterialRefraction = Material::New( shader );
+  mMaterialRefraction = Material::New();
 
   //Add Textures
   mMaterialRefraction.AddTexture(mBackImage, "sTexture");
   mMaterialRefraction.AddTexture(mMetaballFBO, "sEffect");
 
   //Create normal shader
-  Shader shaderNormal = Shader::New( METABALL_VERTEX_SHADER, FRAG_SHADER );
+  mShaderNormal = Shader::New( METABALL_VERTEX_SHADER, FRAG_SHADER );
   //Create new material
-  mMaterialNormal = Material::New( shaderNormal );
+  mMaterialNormal = Material::New();
 
   //Add samplers
   mMaterialNormal.AddTexture(mBackImage, "sTexture");
@@ -560,7 +559,8 @@ void MetaballRefracController::AddRefractionImage()
   mCompositionActor.SetSize(mScreenSize.x, mScreenSize.y);
 
 
-  mRendererRefraction = Renderer::New( metaballGeom, mMaterialNormal );
+  mRendererRefraction = Renderer::New( metaballGeom, mShaderNormal );
+  mRendererRefraction.SetMaterial( mMaterialNormal );
   mCompositionActor.AddRenderer( mRendererRefraction );
 
   Stage stage = Stage::GetCurrent();
@@ -744,6 +744,7 @@ void MetaballRefracController::StopAfterClickAnimations()
 void MetaballRefracController::ResetMetaballsState()
 {
   mRendererRefraction.SetMaterial(mMaterialNormal);
+  mRendererRefraction.SetShader( mShaderNormal );
 
   for (int i = 0 ; i < METABALL_NUMBER ; i++)
   {
@@ -786,7 +787,7 @@ bool MetaballRefracController::OnTouch( Actor actor, const TouchEvent& touch )
 
       //We draw with the refraction-composition shader
       mRendererRefraction.SetMaterial(mMaterialRefraction);
-
+      mRendererRefraction.SetShader( mShaderRefraction );
       mCurrentTouchPosition = point.screen;
 
       //we use the click position for the metaballs

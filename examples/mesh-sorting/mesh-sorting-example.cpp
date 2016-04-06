@@ -169,11 +169,12 @@ public:
     for( unsigned i=0; i<NUMBER_OF_SAMPLES; ++i)
     {
       Image image = ResourceImage::New( MATERIAL_SAMPLES[i] );
-      Material material = Material::New( mShader );
+      Material material = Material::New();
       material.AddTexture(image, "sTexture");
       if( i==0 ) { firstMat = material; }
 
-      Renderer renderer = Renderer::New( mGeometry, material );
+      Renderer renderer = Renderer::New( mGeometry, mShader );
+      renderer.SetMaterial( material );
       Actor meshActor = Actor::New();
       mActors[i] = meshActor;
       meshActor.AddRenderer( renderer );

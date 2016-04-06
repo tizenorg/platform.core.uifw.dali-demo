@@ -263,8 +263,9 @@ void NewWindowController::AddMeshActor( Actor& parentActor )
 
   // Create a coloured mesh
   Shader shaderColorMesh = Shader::New( VERTEX_COLOR_MESH, FRAGMENT_COLOR_MESH );
-  Material colorMeshmaterial = Material::New( shaderColorMesh );
-  Renderer colorMeshRenderer = Renderer::New( meshGeometry, colorMeshmaterial );
+  Material colorMeshmaterial = Material::New();
+  Renderer colorMeshRenderer = Renderer::New( meshGeometry, shaderColorMesh );
+  colorMeshRenderer.SetMaterial( colorMeshmaterial );
 
   Actor colorMeshActor = Actor::New();
   colorMeshActor.AddRenderer( colorMeshRenderer );
@@ -278,9 +279,10 @@ void NewWindowController::AddMeshActor( Actor& parentActor )
  // Create a textured mesh
   Image effectImage = ResourceImage::New(EFFECT_IMAGE);
   Shader shaderTextureMesh = Shader::New( VERTEX_TEXTURE_MESH, FRAGMENT_TEXTURE_MESH );
-  Material textureMeshMaterial = Material::New( shaderTextureMesh );
+  Material textureMeshMaterial = Material::New();
   textureMeshMaterial.AddTexture(effectImage, "sTexture");
-  Renderer textureMeshRenderer = Renderer::New( meshGeometry, textureMeshMaterial );
+  Renderer textureMeshRenderer = Renderer::New( meshGeometry, shaderTextureMesh );
+  textureMeshRenderer.SetMaterial( textureMeshMaterial );
 
   Actor textureMeshActor = Actor::New();
   textureMeshActor.AddRenderer( textureMeshRenderer );
