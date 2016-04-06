@@ -153,13 +153,14 @@ public:
 
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
 
-    mMaterial = Material::New( mShader );
+    mTextureSet = TextureSet::New();
     mImage = ResourceImage::New( MATERIAL_SAMPLE );
-    mMaterial.AddTexture(mImage, "sTexture");
+    mTextureSet.SetImage( 0u, mImage );
 
     mGeometry = CreateGeometry();
 
-    mRenderer = Renderer::New( mGeometry, mMaterial );
+    mRenderer = Renderer::New( mGeometry, mShader );
+    mRenderer.SetTextureSet( mTextureSet );
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
@@ -204,7 +205,7 @@ public:
   {
     Image image = ResourceImage::New( MATERIAL_SAMPLE2 );
 
-    mMaterial.SetTextureImage(0,image);
+    mTextureSet.SetImage( 0u, image );
     return false;
   }
 
@@ -226,7 +227,7 @@ private:
 
   Image    mImage;
   Shader   mShader;
-  Material mMaterial;
+  TextureSet mTextureSet;
   Geometry mGeometry;
   Renderer mRenderer;
   Actor    mMeshActor;
