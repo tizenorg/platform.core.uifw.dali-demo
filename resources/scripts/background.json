@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,47 +23,61 @@
       "text": "Hello World",
       "parentOrigin": "TOP_CENTER",
       "anchorPoint": "TOP_CENTER",
-      "position": [0, 50, 0],
-      "pointSize": 40,
-      "size": [400, 150, 1],
+      "pointSize": 20,
+      "horizontalAlignment": "CENTER",
+      "verticalAlignment": "CENTER",
+      "size": [800, 200, 1],
       "background":{
-        "color": [1, 0, 0, 1]
+        "rendererType": "color",
+        "blendColor": [1, 0, 0, 1]
        }
     },
 
-    // A container with a yellow background
+    // A control with a yellow background
     {
       "type": "Control",
       "relayoutEnabled": false,
       "parentOrigin": "CENTER",
       "anchorPoint": "BOTTOM_CENTER",
-      "size": [400, 150, 1],
+      "size": [800, 200, 1],
       "background":{
-        "color": [1, 1, 0, 1]
+        "rendererType": "color",
+        "blendColor": [1, 1, 0, 1]
       }
     },
 
-    // A container with an image
+    // A control with an image
     {
       "type": "Control",
       "relayoutEnabled": false,
       "parentOrigin": "CENTER",
       "anchorPoint": "TOP_CENTER",
-      "size": [400, 150, 1],
+      "size": [800, 200, 1],
       "background": {
-        "filename": "{DEMO_IMAGE_DIR}button-background.png"
+        "rendererType": "image",
+        "imageUrl": "{DEMO_IMAGE_DIR}button-background.png"
       }
     },
 
-    // A container with the same image blended in with a blue background
+    // A control with a gradient
     {
       "type": "Control",
       "relayoutEnabled": false,
       "parentOrigin": "BOTTOM_CENTER",
       "anchorPoint": "BOTTOM_CENTER",
-      "size": [400, 150, 1],
+      "size": [800, 200, 1],
       "background": {
-        "filename": "{DEMO_IMAGE_DIR}button-background.png"
+        "rendererType": "gradient",
+        "center": [ 0.5, 0.5 ],
+        "radius": 1.414,
+        "stopOffset": [ 0.0, 0.3, 0.6, 0.8, 1.0 ],
+        "stopColor": [
+            [ 0.5,  0.78, 0.76, 1.0  ],
+            [ 0.77, 0.78, 0.28, 0.48 ],
+            [ 0.84, 0.15, 0.55, 0.75 ],
+            [ 0.5,  0.78, 0.76, 0.59 ],
+            [ 1.0,  1.0,  0.0,  1.0  ]
+        ]
       }
     }
   ]
