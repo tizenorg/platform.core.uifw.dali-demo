@@ -90,8 +90,8 @@ public:
 
     Dali::Property::Map border;
     border.Insert( "rendererType",  "border" );
-    border.Insert( "borderColor",  Color::WHITE );
-    border.Insert( "borderSize",  1.f );
+    border.Insert( "color",  Color::WHITE );
+    border.Insert( "size",  1.f );
     photoBoxA.SetProperty( Control::Property::BACKGROUND, border );
 
     photoBoxA.SetName("photoBoxA");

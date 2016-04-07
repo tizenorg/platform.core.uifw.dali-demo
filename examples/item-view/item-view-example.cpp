@@ -864,8 +864,8 @@ public: // From ItemFactory
 
     Property::Map borderProperty;
     borderProperty.Insert( "rendererType", "border" );
-    borderProperty.Insert( "borderColor", Color::WHITE );
-    borderProperty.Insert( "borderSize", ITEM_BORDER_SIZE );
+    borderProperty.Insert( "color", Color::WHITE );
+    borderProperty.Insert( "size", ITEM_BORDER_SIZE );
     borderProperty.Insert( "antiAliasing", true );
     borderActor.SetProperty( ImageView::Property::IMAGE, borderProperty );
 
