@@ -118,9 +118,10 @@
     "text": "or the image.."
   }, {
     "name": "image",
-    "type": "ImageActor",
+    "type": "ImageView",
     "image": {
-      "filename": "{DEMO_IMAGE_DIR}gallery-large-21.jpg"
+      "rendererType": "image",
+      "imageUrl": "{DEMO_IMAGE_DIR}gallery-large-21.jpg"
     },
     "relayoutEnabled": false,
     "position": [0, 200, 0],
