@@ -63,10 +63,10 @@
       },
       "actors": [{
           "name":"gallery1",
-          "type":"ImageActor",
+          "type":"ImageView",
           "heightResizePolicy":"FILL_TO_PARENT",
           "image": {
-            "filename": "{DEMO_IMAGE_DIR}gallery-small-1.jpg"
+            "url": "{DEMO_IMAGE_DIR}gallery-small-1.jpg"
           },
           "customProperties": { // properties registered dynamically
             "cellIndex": [0,0], // property to specify the top-left cell this child occupies
@@ -75,10 +75,10 @@
           }
         },{
           "name":"gallery2",
-          "type":"ImageActor",
+          "type":"ImageView",
           "heightResizePolicy":"FILL_TO_PARENT",
           "image": {
-            "filename": "{DEMO_IMAGE_DIR}gallery-small-2.jpg"
+            "url": "{DEMO_IMAGE_DIR}gallery-small-2.jpg"
           },
           "customProperties": { // properties registered dynamically
             "cellIndex": [0,1],
@@ -86,9 +86,9 @@
           }
         },{
           "name":"gallery3",
-          "type":"ImageActor",
+          "type":"ImageView",
           "image": {
-            "filename": "{DEMO_IMAGE_DIR}gallery-small-3.jpg"
+            "url": "{DEMO_IMAGE_DIR}gallery-small-3.jpg"
           },
           "customProperties": {
             "cellIndex":[1,1],
@@ -98,21 +98,21 @@
           }
         }, {
           "name":"gallery4",
-          "type":"ImageActor",
+          "type":"ImageView",
           "widthResizePolicy":"FILL_TO_PARENT",
           "image": {
-            "filename": "{DEMO_IMAGE_DIR}gallery-small-4.jpg"
+            "url": "{DEMO_IMAGE_DIR}gallery-small-4.jpg"
           },
           "customProperties": {
             "cellIndex":[2,2]
           }
         }, {
           "name":"gallery5",
-          "type":"ImageActor",
+          "type":"ImageView",
           "widthResizePolicy":"FILL_TO_PARENT",
           "heightResizePolicy":"FILL_TO_PARENT",
           "image": {
-            "filename": "{DEMO_IMAGE_DIR}gallery-small-5.jpg"
+            "url": "{DEMO_IMAGE_DIR}gallery-small-5.jpg"
           },
           "customProperties": {
             "cellIndex":[3,2],
