@@ -22,6 +22,8 @@
 // INTERNAL INCLUDES
 #include "shared/view.h"
 
+#include <cstdio>
+#include <sstream>
 using namespace Dali;
 
 namespace
@@ -62,40 +64,23 @@ void main()
 }
 );
 
-PropertyBuffer CreateIndexBuffer( Geometry::GeometryType geometryType )
+PropertyBuffer CreateIndexBuffer()
 {
-  // Create indices
-  const unsigned int indexDataLines[]    =    { 0, 1, 1, 2, 2, 3, 3, 4, 4, 0 };
-  const unsigned int indexDataLoops[]    =    { 0, 1, 2, 3, 4 };
-  const unsigned int indexDataStrips[]   =    { 0, 1, 2, 3, 4, 0 };
 
+  const unsigned int indexDataLines[] = {
+    // LINE
+    0, 1, 2, 3, 1, 2, 4, 0, 3, 4, // range: 0, 10
+    // LINE_LOOP
+    0, 1, 2, 3, 4, // 10, 5
+    // LINE_STRIP
+    0, 1, 2, 3, 4, 0 // 15, 6
+  };
   // Create index buffer if doesn't exist
   Property::Map indexFormat;
   indexFormat["indices"] = Property::INTEGER;
   PropertyBuffer indices = PropertyBuffer::New( indexFormat );
 
-  // Update buffer
-  switch( geometryType )
-  {
-    case Geometry::LINES:
-    {
-      indices.SetData( indexDataLines, sizeof(indexDataLines)/sizeof(indexDataLines[0]) );
-      break;
-    }
-    case Geometry::LINE_LOOP:
-    {
-      indices.SetData( indexDataLoops, sizeof(indexDataLoops)/sizeof(indexDataLoops[0]) );
-      break;
-    }
-    case Geometry::LINE_STRIP:
-    {
-      indices.SetData( indexDataStrips, sizeof(indexDataStrips)/sizeof(indexDataStrips[0]) );
-      break;
-    }
-    default: // this will never happen, but compilers yells
-    {
-    }
-  }
+  indices.SetData( indexDataLines, sizeof(indexDataLines)/sizeof(indexDataLines[0]) );
 
   return indices;
 }
@@ -128,7 +113,7 @@ Geometry CreateGeometry()
   pentagonVertices.SetData(pentagonVertexData, 5);
 
   // Create indices
-  PropertyBuffer indices = CreateIndexBuffer( Geometry::LINES );
+  PropertyBuffer indices = CreateIndexBuffer();
 
   // Create the geometry object
   Geometry pentagonGeometry = Geometry::New();
@@ -173,14 +158,19 @@ public:
   {
     Stage stage = Stage::GetCurrent();
 
+    // initial settings
+    mPrimitiveType = Geometry::LINES;
+    mStartIndex = 0;
+    mCurrentIndexCount = 10;
+    mMaxIndexCount = 10;
+
     CreateRadioButtons();
 
     stage.KeyEventSignal().Connect(this, &ExampleController::OnKeyEvent);
 
     mStageSize = stage.GetSize();
 
-    // The Init signal is received once (only) during the Application lifetime
-    ReInitialise( Geometry::LINES );
+    Initialise();
 
     // Hide the indicator bar
     application.GetWindow().ShowIndicator( Dali::Window::INVISIBLE );
@@ -190,9 +180,8 @@ public:
 
   /**
    * Invoked whenever application changes the type of geometry drawn
-   * @param[in] type of geometry
    */
-  void ReInitialise( Geometry::GeometryType geometryType )
+  void Initialise()
   {
     Stage stage = Stage::GetCurrent();
 
@@ -206,6 +195,9 @@ public:
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
     mGeometry = CreateGeometry();
     mRenderer = Renderer::New( mGeometry, mShader );
+
+    mRenderer.SetIndexRange( 0, 10 ); // lines
+    mPrimitiveType = Geometry::LINES;
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
@@ -236,7 +228,7 @@ public:
   {
     Stage stage = Stage::GetCurrent();
 
-    Toolkit::TableView modeSelectTableView = Toolkit::TableView::New( 3, 1 );
+    Toolkit::TableView modeSelectTableView = Toolkit::TableView::New( 4, 1 );
     modeSelectTableView.SetParentOrigin( ParentOrigin::TOP_LEFT );
     modeSelectTableView.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     modeSelectTableView.SetFitHeight( 0 );
@@ -268,7 +260,47 @@ public:
       mButtons[i] = radio;
       modeSelectTableView.AddChild( radio, Toolkit::TableView::CellPosition( i,  0 ) );
     }
+
+    Toolkit::TableView elementCountTableView = Toolkit::TableView::New( 1, 3 );
+    elementCountTableView.SetCellPadding( Vector2( 6.0f, 0.0f ) );
+    elementCountTableView.SetScale( Vector3( 0.5f, 0.5f, 0.5f ));
+    elementCountTableView.SetParentOrigin( ParentOrigin::BOTTOM_LEFT );
+    elementCountTableView.SetAnchorPoint( AnchorPoint::BOTTOM_LEFT );
+    elementCountTableView.SetFitHeight( 0 );
+    elementCountTableView.SetFitWidth( 0 );
+    elementCountTableView.SetFitWidth( 1 );
+    elementCountTableView.SetFitWidth( 2 );
+    mMinusButton = Toolkit::PushButton::New();
+    mMinusButton.SetLabelText( "<<" );
+    mMinusButton.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    mMinusButton.SetAnchorPoint( AnchorPoint::CENTER_LEFT );
+
+    Toolkit::PushButton mPlusButton = Toolkit::PushButton::New();
+    mPlusButton.SetLabelText( ">>" );
+    mPlusButton.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    mPlusButton.SetAnchorPoint( AnchorPoint::CENTER_RIGHT );
+
+    mMinusButton.ClickedSignal().Connect( this, &ExampleController::OnButtonClicked );
+    mPlusButton.ClickedSignal().Connect( this, &ExampleController::OnButtonClicked );
+
+    mIndicesCountLabel = Toolkit::TextLabel::New();
+    mIndicesCountLabel.SetParentOrigin( ParentOrigin::CENTER );
+    mIndicesCountLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+
+    std::stringstream str;
+    str << mCurrentIndexCount;
+    mIndicesCountLabel.SetProperty( Toolkit::TextLabel::Property::TEXT, str.str() );
+    mIndicesCountLabel.SetProperty( Toolkit::TextLabel::Property::TEXT_COLOR, Vector4( 1.0, 1.0, 1.0, 1.0 ) );
+    mIndicesCountLabel.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "BOTTOM");
+    mIndicesCountLabel.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::WIDTH );
+    mIndicesCountLabel.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::HEIGHT );
+
+    elementCountTableView.AddChild( mMinusButton, Toolkit::TableView::CellPosition( 0,  0 ) );
+    elementCountTableView.AddChild( mIndicesCountLabel, Toolkit::TableView::CellPosition( 0,  1 ) );
+    elementCountTableView.AddChild( mPlusButton, Toolkit::TableView::CellPosition( 0,  2 ) );
+
     stage.Add(modeSelectTableView);
+    stage.Add(elementCountTableView);
   }
 
   /**
@@ -295,35 +327,58 @@ public:
 
   bool OnButtonPressed( Toolkit::Button button )
   {
-    const Geometry::GeometryType geomTypes[] =
-    {
-      Geometry::LINES,
-      Geometry::LINE_LOOP,
-      Geometry::LINE_STRIP
-    };
-
-    size_t index;
     if( button == mButtons[0] )
     {
-      index = 0;
+      mStartIndex = 0;
+      mCurrentIndexCount = 10;
+      mMaxIndexCount = 10;
+      mPrimitiveType = Geometry::LINES;
     }
     else if( button == mButtons[1] )
     {
-      index = 1;
+      mStartIndex = 10;
+      mCurrentIndexCount = 5;
+      mMaxIndexCount = 5;
+      mPrimitiveType = Geometry::LINE_LOOP;
     }
     else
     {
-      index = 2;
+      mStartIndex = 15;
+      mCurrentIndexCount = 6;
+      mMaxIndexCount = 6;
+      mPrimitiveType = Geometry::LINE_STRIP;
     }
 
-    PropertyBuffer indices = CreateIndexBuffer( geomTypes[ index ] );
-    mGeometry.SetIndexBuffer( indices );
-    mGeometry.SetGeometryType( geomTypes[ index ] );
+    std::stringstream str;
+    str << mCurrentIndexCount;
+    mIndicesCountLabel.SetProperty( Toolkit::TextLabel::Property::TEXT, str.str() );
 
+    mGeometry.SetGeometryType( mPrimitiveType );
+    mRenderer.SetIndexRange( mStartIndex, mCurrentIndexCount );
     return true;
   }
 
+  bool OnButtonClicked( Toolkit::Button button )
+  {
+    int maxIndices = 10;
 
+    if( button == mMinusButton )
+    {
+      if (--mCurrentIndexCount < 2 )
+        mCurrentIndexCount = 2;
+    }
+    else
+    {
+      if (++mCurrentIndexCount > maxIndices )
+        mCurrentIndexCount = mMaxIndexCount;
+    }
+
+    std::stringstream str;
+    str << mCurrentIndexCount;
+    mIndicesCountLabel.SetProperty( Toolkit::TextLabel::Property::TEXT, str.str() );
+    mRenderer.SetIndexRange( mStartIndex, mCurrentIndexCount );
+    return true;
+  }
 
 private:
 
@@ -334,7 +389,14 @@ private:
   Geometry mGeometry;
   Renderer mRenderer;
   Actor    mMeshActor;
-  Toolkit::RadioButton mButtons[3];
+  Toolkit::RadioButton  mButtons[3];
+  Toolkit::PushButton   mMinusButton;
+  Toolkit::PushButton   mPlusButton;
+  Toolkit::TextLabel    mIndicesCountLabel;
+  Geometry::GeometryType mPrimitiveType;
+  int      mCurrentIndexCount;
+  int      mStartIndex;
+  int      mMaxIndexCount;
 };
 
 void RunTest( Application& application )
