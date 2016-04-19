@@ -62,40 +62,23 @@ void main()
 }
 );
 
-PropertyBuffer CreateIndexBuffer( Geometry::GeometryType geometryType )
+PropertyBuffer CreateIndexBuffer()
 {
-  // Create indices
-  const unsigned int indexDataLines[]    =    { 0, 1, 1, 2, 2, 3, 3, 4, 4, 0 };
-  const unsigned int indexDataLoops[]    =    { 0, 1, 2, 3, 4 };
-  const unsigned int indexDataStrips[]   =    { 0, 1, 2, 3, 4, 0 };
 
+  const unsigned int indexDataLines[]    =    {
+    // LINE
+    0, 1, 1, 2, 2, 3, 3, 4, 4, 0, // range: 0, 10
+    // LINE_LOOP
+    0, 1, 2, 3, 4, // 10, 5
+    // LINE_STRIP
+    0, 1, 2, 3, 4, 0 // 15, 6
+                                              };
   // Create index buffer if doesn't exist
   Property::Map indexFormat;
   indexFormat["indices"] = Property::INTEGER;
   PropertyBuffer indices = PropertyBuffer::New( indexFormat );
 
-  // Update buffer
-  switch( geometryType )
-  {
-    case Geometry::LINES:
-    {
-      indices.SetData( indexDataLines, sizeof(indexDataLines)/sizeof(indexDataLines[0]) );
-      break;
-    }
-    case Geometry::LINE_LOOP:
-    {
-      indices.SetData( indexDataLoops, sizeof(indexDataLoops)/sizeof(indexDataLoops[0]) );
-      break;
-    }
-    case Geometry::LINE_STRIP:
-    {
-      indices.SetData( indexDataStrips, sizeof(indexDataStrips)/sizeof(indexDataStrips[0]) );
-      break;
-    }
-    default: // this will never happen, but compilers yells
-    {
-    }
-  }
+  indices.SetData( indexDataLines, sizeof(indexDataLines)/sizeof(indexDataLines[0]) );
 
   return indices;
 }
@@ -128,7 +111,7 @@ Geometry CreateGeometry()
   pentagonVertices.SetData(pentagonVertexData, 5);
 
   // Create indices
-  PropertyBuffer indices = CreateIndexBuffer( Geometry::LINES );
+  PropertyBuffer indices = CreateIndexBuffer();
 
   // Create the geometry object
   Geometry pentagonGeometry = Geometry::New();
@@ -206,6 +189,8 @@ public:
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
     mGeometry = CreateGeometry();
     mRenderer = Renderer::New( mGeometry, mShader );
+
+    mRenderer.SetIndicesRange( 0, 10 ); // lines
 
     mMeshActor = Actor::New();
     mMeshActor.AddRenderer( mRenderer );
@@ -295,31 +280,29 @@ public:
 
   bool OnButtonPressed( Toolkit::Button button )
   {
-    const Geometry::GeometryType geomTypes[] =
-    {
-      Geometry::LINES,
-      Geometry::LINE_LOOP,
-      Geometry::LINE_STRIP
-    };
-
-    size_t index;
+    size_t index, count;
+    Geometry::GeometryType type;
     if( button == mButtons[0] )
     {
       index = 0;
+      count = 10;
+      type = Geometry::LINES;
     }
     else if( button == mButtons[1] )
     {
-      index = 1;
+      index = 10;
+      count = 5;
+      type = Geometry::LINE_LOOP;
     }
     else
     {
-      index = 2;
+      index = 15;
+      count = 6;
+      type = Geometry::LINE_STRIP;
     }
 
-    PropertyBuffer indices = CreateIndexBuffer( geomTypes[ index ] );
-    mGeometry.SetIndexBuffer( indices );
-    mGeometry.SetGeometryType( geomTypes[ index ] );
-
+    mGeometry.SetGeometryType( type );
+    mRenderer.SetIndicesRange( index, count );
     return true;
   }
 
