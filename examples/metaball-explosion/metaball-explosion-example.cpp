@@ -466,7 +466,7 @@ void MetaballExplosionController::CreateMetaballActors()
 
   Geometry metaballGeom = CreateGeometry();
   Renderer renderer = Renderer::New( metaballGeom, shader );
-  renderer.SetProperty( Renderer::Property::BLENDING_MODE, BlendingMode::ON );
+  renderer.SetProperty( Renderer::Property::BLEND_MODE, BlendingMode::ON );
   renderer.SetBlendFunc(BlendingFactor::ONE, BlendingFactor::ONE, BlendingFactor::ONE, BlendingFactor::ONE);
   //Initialization of each of the metaballs
   for( int i = 0; i < METABALL_NUMBER; i++ )
