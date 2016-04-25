@@ -209,7 +209,7 @@ public:
    */
   bool OnChangeLightingClicked(Toolkit::Button button)
   {
-    if( mIlluminationShader == Model3dView::DIFFUSE_WITH_NORMAL_MAP )
+    if( mIlluminationShader == Model3dView::DIFFUSE_WITH_TEXTURE_AND_NORMAL_MAP )
     {
       mModel3dView.SetProperty(Model3dView::Property::ILLUMINATION_TYPE, Model3dView::DIFFUSE_WITH_TEXTURE);
       mIlluminationShader = Model3dView::IlluminationType(mModel3dView.GetProperty<int>(Model3dView::Property::ILLUMINATION_TYPE));
@@ -221,7 +221,7 @@ public:
    }
     else if( mIlluminationShader == Model3dView::DIFFUSE )
     {
-      mModel3dView.SetProperty(Model3dView::Property::ILLUMINATION_TYPE, Model3dView::DIFFUSE_WITH_NORMAL_MAP);
+      mModel3dView.SetProperty(Model3dView::Property::ILLUMINATION_TYPE, Model3dView::DIFFUSE_WITH_TEXTURE_AND_NORMAL_MAP);
       mIlluminationShader = Model3dView::IlluminationType(mModel3dView.GetProperty<int>(Model3dView::Property::ILLUMINATION_TYPE));
    }
 
