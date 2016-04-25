@@ -54,7 +54,7 @@ const float BALL_VELOCITY = 300.0f;                                         ///<
 const float MAX_VELOCITY = 500.0f;                                          ///< Max. velocity in pixels/second.
 const Vector3 PADDLE_COLLISION_MARGIN(0.0f, 0.0f, 0.0f);                    ///< Collision margin for ball-paddle detection.
 const Vector3 BRICK_COLLISION_MARGIN(0.0f, 0.0f, 0.0f);                     ///< Collision margin for ball-brick detection.
-const Vector3 INITIAL_BALL_DIRECTION(1.0f, 1.0f, 0.0f);                     ///< Initial ball direction.
+const Vector3 INITIAL_BALL_DIRECTION(1.0f, 1.0f, 0.1f);                     ///< Initial ball direction.
 
 const std::string WOBBLE_PROPERTY_NAME("wobbleProperty");                  ///< Wobble property name.
 const std::string COLLISION_PROPERTY_NAME("collisionProperty");            ///< Collision property name.
