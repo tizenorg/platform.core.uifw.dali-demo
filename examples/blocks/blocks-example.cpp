@@ -270,6 +270,7 @@ private:
     mPaddleImage = CreateImage(PADDLE_IMAGE);
     mPaddle.Add( mPaddleHandle );
     mPaddle.Add( mPaddleImage );
+
     mPaddleHandle.SetParentOrigin( ParentOrigin::TOP_CENTER );
     mPaddleHandle.SetAnchorPoint( AnchorPoint::TOP_CENTER );
     mPaddleHandle.SetPosition( 0.0f, stageSize.width * 0.0125f );
@@ -405,11 +406,12 @@ private:
     Vector2 stageSize(Stage::GetCurrent().GetSize());
     const Vector2 brickSize(BRICK_SIZE * stageSize.width);
 
-    const int columns = (0.85f * stageSize.width) / brickSize.width; // 85 percent of the width of the screen covered with bricks.
-    const int rows = (0.3f * stageSize.height) / brickSize.height;   // 30 percent of the height of the screen covered with bricks.
+    int columns = (0.85f * stageSize.width) / brickSize.width; // 85 percent of the width of the screen covered with bricks.
+    int rows = (0.3f * stageSize.height) / brickSize.height;   // 30 percent of the height of the screen covered with bricks.
     const Vector2 offset( (stageSize.x - (columns * brickSize.width)) * 0.5f,
                            stageSize.y * 0.125f );
 
+    mLevelContainer.SetProperty( Dali::Actor::Property::BATCH_PARENT, true );
     for(int j = 0; j < rows; j++)
     {
       for(int i = 0; i < columns; i++)
@@ -419,6 +421,8 @@ private:
         mBrickCount++;
       }
     }
+
+
   }
 
   /**
@@ -430,10 +434,11 @@ private:
     const Vector2 brickSize(BRICK_SIZE * stageSize.width);
 
     const int columns = (0.85f * stageSize.width) / brickSize.width; // 85 percent of the width of the screen covered with bricks.
-    const int rows = (0.3f * stageSize.height) / brickSize.height;   // 30 percent of the height of the screen covered with bricks.
+     int rows = (0.3f * stageSize.height) / brickSize.height;   // 30 percent of the height of the screen covered with bricks.
     const Vector2 offset( (stageSize.x - (columns * brickSize.width)) * 0.5f,
                            stageSize.y * 0.125f );
 
+    rows = 1;
     for(int j = 0; j < rows; j++)
     {
       for(int i = 0; i < columns; i++)
@@ -530,7 +535,10 @@ private:
    */
   Actor CreateBrick( const Vector2& position, int type )
   {
+
     mBrickImageMap["url"] = BRICK_IMAGE_PATH[type];
+    mBrickImageMap["batchingEnabled"] = true;
+
     ImageView brick = ImageView::New();
     brick.SetProperty( ImageView::Property::IMAGE, mBrickImageMap );
     brick.SetParentOrigin(ParentOrigin::TOP_LEFT);
@@ -561,7 +569,10 @@ private:
    */
   ImageView CreateImage(const std::string& filename)
   {
-    ImageView actor = ImageView::New(filename);
+    ImageView actor = ImageView::New();
+
+    //actor.SetProperty( Toolkit::ImageView::Property::BATCHABLE, true );
+    actor.SetProperty( Toolkit::ImageView::Property::RESOURCE_URL, filename );
     actor.SetParentOrigin(ParentOrigin::TOP_LEFT);
     actor.SetAnchorPoint(AnchorPoint::CENTER);
     return actor;
@@ -767,6 +778,8 @@ private:
     brick.RemoveConstraints();
 
     // fade brick (destroy)
+    //brick.SetProperty( Toolkit::ImageView::Property::BATCHABLE, false );
+
     Animation destroyAnimation = Animation::New(0.5f);
     destroyAnimation.AnimateTo( Property( brick, Actor::Property::COLOR_ALPHA ), 0.0f, AlphaFunction::EASE_IN );
     destroyAnimation.Play();
