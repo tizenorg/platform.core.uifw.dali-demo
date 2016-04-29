@@ -109,6 +109,7 @@ extern "C"
 #endif
 
 #define DALI_DEMO_STR_TITLE_TILT_SENSOR "Tilt Sensor"
+#define DALI_DEMO_STR_TITLE_WATCH "Watch"
 
 
 #ifdef __cplusplus
