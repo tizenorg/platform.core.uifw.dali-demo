@@ -20,6 +20,14 @@ BuildRequires:  pkgconfig(dlog)
 BuildRequires:  gettext-tools
 BuildRequires:  pkgconfig(dali-core)
 BuildRequires:  pkgconfig(dali-toolkit)
+BuildRequires:  pkgconfig(capi-appfw-watch-application)
+
+
+BuildRequires:  pkgconfig(pepper-dali)
+BuildRequires:  pkgconfig(ecore)
+BuildRequires:  pkgconfig(elementary)
+BuildRequires:  pkgconfig(widget_viewer_dali)
+BuildRequires:  pkgconfig(appcore-watch)
 
 #need libtzplatform-config for directory if tizen version is 3.x
 %if "%{tizen_version_major}" == "3"
