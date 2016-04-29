@@ -75,7 +75,9 @@ INSTALL(FILES ${LOCAL_STYLE_DIR}/demo-theme.json DESTINATION ${STYLE_DIR})
 
 SET(PKG_LIST dali-core
              dali-adaptor
-             dali-toolkit)
+             dali-toolkit
+             capi-appfw-watch-application
+             appcore-watch)
 
 INCLUDE(FindPkgConfig)
 pkg_check_modules(REQUIRED_PKGS REQUIRED ${PKG_LIST})

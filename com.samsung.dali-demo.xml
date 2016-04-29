@@ -5,6 +5,9 @@
 	<label>Dali Demo</label>
 	<author email="jonghyun.ho@samsung.com" href="www.samsung.com">Jonghyun Ho</author>
 	<description>DALi demo Application</description>
+	<privileges>
+		<privilege>http://tizen.org/privilege/alarm.set</privilege>
+	</privileges>
 
 	<ui-application appid="com.samsung.dali-demo" exec="/usr/apps/com.samsung.dali-demo/bin/dali-demo" nodisplay="false" multiple="false" type="c++app" taskmanage="true">
 		<icon>/usr/share/icons/com.samsung.dali-demo.png</icon>
@@ -142,6 +145,11 @@
 	<ui-application appid="tilt.example" exec="/usr/apps/com.samsung.dali-demo/bin/tilt.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Tilt sensor</label>
 	</ui-application>
+
+	<watch-application appid="watch.example" exec="/usr/apps/com.samsung.dali-demo/bin/watch.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Watch demo</label>
+	</watch-application>
+
 	<ui-application appid="effects-view.example" exec="/usr/apps/com.samsung.dali-demo/bin/effects-view.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Effects View</label>
 	</ui-application>
