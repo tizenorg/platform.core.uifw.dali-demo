@@ -25,6 +25,15 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include "shared/view.h"
 
+//ssong. test.
+//#include <dlog.h>
+//#undef LOG_TAG
+//#define LOG_TAG "DALI"
+#include <dali/integration-api/debug.h>
+
+	
+
+
 using namespace Dali;
 using namespace Dali::Toolkit;
 using namespace DemoHelper;
@@ -595,6 +604,11 @@ private:
         mDragAnimation.AnimateTo( Property(mDragActor, Actor::Property::SCALE), Vector3(1.1f, 1.1f, 1.0f), AlphaFunction::EASE_OUT);
         mDragAnimation.AnimateTo( Property(mPaddleHandle, Actor::Property::COLOR), Vector4(1.0f, 1.0f, 1.0f, 0.0f), AlphaFunction::EASE_OUT);
         mDragAnimation.Play();
+
+	//ssong. test.
+      //dlog_print(DLOG_INFO, LOG_TAG, "[touch extra] radius=%f, radiusX=%f, pressure=%f, angle=%f \n", point.radius, point.radiusX, point.pressure, point.angle);
+	DALI_LOG_ERROR("OnTouchPaddle() radius=%f, radiusX=%f, pressure=%f, angle=%f \n", point.radius, point.radiusX, point.pressure, point.angle);
+		
       }
     }
     return false;
@@ -614,6 +628,8 @@ private:
       {
         Vector3 position(point.screen.x, point.screen.y, 0.0f);
         mPaddle.SetPosition( position - mRelativeDragPoint );
+
+		DALI_LOG_ERROR("OnTouchLayer() radius=%f, radiusX=%f, pressure=%f, angle=%f \n", point.radius, point.radiusX, point.pressure, point.angle);
 
         if(point.state==TouchPoint::Up) // Stop dragging
         {
