@@ -99,6 +99,10 @@ private:
 
     stage.KeyEventSignal().Connect(this, &BubbleEffectExample::OnKeyEvent);
 
+    Dali::Window winHandle = app.GetWindow();
+    winHandle.ShowIndicator( Dali::Window::VISIBLE );
+    winHandle.SetIndicatorBgOpacity(Dali::Window::OPAQUE);
+
     // Creates a default view with a default tool bar.
     // The view is added to the stage.
     Toolkit::ToolBar toolBar;

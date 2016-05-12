@@ -93,6 +93,10 @@ class ButtonsController: public ConnectionTracker
     // Respond to key events
     Stage::GetCurrent().KeyEventSignal().Connect(this, &ButtonsController::OnKeyEvent);
 
+    Dali::Window winHandle = application.GetWindow();
+    winHandle.ShowIndicator( Dali::Window::AUTO );
+    winHandle.SetIndicatorBgOpacity(Dali::Window::OPAQUE);
+
     // Creates a default view with a default tool bar.
     // The view is added to the stage.
     mContentLayer = DemoHelper::CreateView( application,

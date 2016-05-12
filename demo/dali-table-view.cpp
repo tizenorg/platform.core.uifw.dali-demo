@@ -299,7 +299,8 @@ void DaliTableView::Initialize( Application& application )
   unsigned int degrees = 0;
   Rotate( degrees );
 
-  winHandle.ShowIndicator( Dali::Window::INVISIBLE );
+  winHandle.ShowIndicator( Dali::Window::VISIBLE );
+  winHandle.SetIndicatorBgOpacity(Dali::Window::TRANSLUCENT);
 
   // Background animation
   mAnimationTimer = Timer::New( BACKGROUND_ANIMATION_DURATION );
