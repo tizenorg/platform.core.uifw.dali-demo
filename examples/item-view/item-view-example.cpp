@@ -300,6 +300,10 @@ public:
     // Set the title and icon to the current layout
     SetLayoutTitle();
     SetLayoutImage();
+
+    mLongPressDetector = LongPressGestureDetector::New();
+    mLongPressDetector.Attach( mItemView );
+    mLongPressDetector.DetectedSignal().Connect( this, &ItemViewExample::OnLongPress );
   }
 
   Actor OnKeyboardPreFocusChange( Actor current, Actor proposed, Control::KeyboardFocus::Direction direction )
@@ -537,6 +541,30 @@ public:
     if( tick )
     {
       tick.SetVisible( !tick.IsVisible() );
+    }
+  }
+
+  void OnLongPress( Actor actor, const LongPressGesture& gesture )
+  {
+    switch( gesture.state )
+    {
+      case Gesture::Started:
+      {
+        ItemRange range( 0u, 0u );
+        mItemView.GetItemsRange( range );
+        mItemView.ScrollToItem( range.end, 5.f );
+        break;
+      }
+      case Gesture::Finished:
+      {
+        Property::Map attributes;
+        mItemView.DoAction( "stopScrolling", attributes );
+        break;
+      }
+      default:
+      {
+        break;
+      }
     }
   }
 
@@ -954,6 +982,8 @@ private:
   Toolkit::PushButton mDeleteButton;
   Toolkit::PushButton mInsertButton;
   Toolkit::PushButton mReplaceButton;
+
+  LongPressGestureDetector mLongPressDetector;
 };
 
 void RunTest(Application& app)
