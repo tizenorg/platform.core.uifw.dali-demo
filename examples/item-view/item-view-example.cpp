@@ -21,6 +21,8 @@
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 
+#include <iostream>
+
 using namespace Dali;
 using namespace Dali::Toolkit;
 
@@ -300,6 +302,10 @@ public:
     // Set the title and icon to the current layout
     SetLayoutTitle();
     SetLayoutImage();
+
+    mLongPressDetector = LongPressGestureDetector::New();
+    mLongPressDetector.Attach( mItemView );
+    mLongPressDetector.DetectedSignal().Connect( this, &ItemViewExample::OnLongPress );
   }
 
   Actor OnKeyboardPreFocusChange( Actor current, Actor proposed, Control::KeyboardFocus::Direction direction )
@@ -406,6 +412,7 @@ public:
       {
         ExitRemoveMode();
         mMode = MODE_REMOVE_MANY;
+        std::cout << "  MODE_REMOVE_MANY" << std::endl;
         EnterRemoveManyMode();
         break;
       }
@@ -414,6 +421,7 @@ public:
       {
         ExitRemoveManyMode();
         mMode = MODE_INSERT;
+        std::cout << "  MODE_INSERT" << std::endl;
         EnterInsertMode();
         break;
       }
@@ -422,6 +430,7 @@ public:
       {
         ExitInsertMode();
         mMode = MODE_INSERT_MANY;
+        std::cout << "  MODE_INSERT_MANY" << std::endl;
         EnterInsertManyMode();
         break;
       }
@@ -430,6 +439,7 @@ public:
       {
         ExitInsertManyMode();
         mMode = MODE_REPLACE;
+        std::cout << "  MODE_REPLACE" << std::endl;
         EnterReplaceMode();
         break;
       }
@@ -438,6 +448,7 @@ public:
       {
         ExitReplaceMode();
         mMode = MODE_REPLACE_MANY;
+        std::cout << "  MODE_REPLACE_MANY" << std::endl;
         EnterReplaceManyMode();
         break;
       }
@@ -446,6 +457,7 @@ public:
       {
         ExitReplaceManyMode();
         mMode = MODE_NORMAL;
+        std::cout << "  MODE_NORMAL" << std::endl;
         SetLayoutTitle();
         break;
       }
@@ -454,6 +466,7 @@ public:
       default:
       {
         mMode = MODE_REMOVE;
+        std::cout << "  MODE_REMOVE" << std::endl;
         EnterRemoveMode();
         break;
       }
@@ -537,6 +550,30 @@ public:
     if( tick )
     {
       tick.SetVisible( !tick.IsVisible() );
+    }
+  }
+
+  void OnLongPress( Actor actor, const LongPressGesture& gesture )
+  {
+    switch( gesture.state )
+    {
+      case Gesture::Started:
+      {
+        ItemRange range( 0u, 0u );
+        mItemView.GetItemsRange( range );
+        mItemView.ScrollToItem( range.end, 5.f );
+        break;
+      }
+      case Gesture::Finished:
+      {
+        Property::Map attributes;
+        mItemView.DoAction( "stopScrolling", attributes );
+        break;
+      }
+      default:
+      {
+        break;
+      }
     }
   }
 
@@ -954,6 +991,8 @@ private:
   Toolkit::PushButton mDeleteButton;
   Toolkit::PushButton mInsertButton;
   Toolkit::PushButton mReplaceButton;
+
+  LongPressGestureDetector mLongPressDetector;
 };
 
 void RunTest(Application& app)
