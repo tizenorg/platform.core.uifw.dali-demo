@@ -228,6 +228,10 @@ public:
   {
     Stage::GetCurrent().KeyEventSignal().Connect(this, &ExampleController::OnKeyEvent);
 
+    Dali::Window winHandle = application.GetWindow();
+    winHandle.ShowIndicator( Dali::Window::VISIBLE );
+    winHandle.SetIndicatorBgOpacity(Dali::Window::TRANSPARENT);
+
     // Creates a default view with a default tool bar.
     // The view is added to the stage.
     Toolkit::ToolBar toolBar;
