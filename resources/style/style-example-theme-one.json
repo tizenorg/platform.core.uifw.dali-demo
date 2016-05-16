@@ -1,0 +1,12 @@
+{
+  "Styles":
+  {
+    "title":{
+      "textColor":"#0000ff",
+      "background", "#ffffff"
+    }
+    "tableview":{
+      "backgroundColor", "#ffffff"
+    }
+  }
+}
