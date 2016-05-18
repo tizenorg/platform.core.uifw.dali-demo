@@ -154,4 +154,7 @@
 	<ui-application appid="flex-container.example" exec="/usr/apps/com.samsung.dali-demo/bin/flex-container.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Flex Container</label>
 	</ui-application>
+	<watch-application appid="watch.example" exec="/usr/apps/com.samsung.dali-demo/bin/watch.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+		<label>Watch demo</label>
+	</watch-application>
 </manifest>
