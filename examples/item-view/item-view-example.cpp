@@ -866,6 +866,7 @@ public: // From ItemFactory
   {
     // Create an image view for this item
     ImageView actor = ImageView::New( IMAGE_PATHS[ itemId % NUM_IMAGES ] );
+    actor.SetProperty( ImageView::Property::SYNCHRONOUS_RESOURCE_LOADING, true );
     actor.SetZ( 0.0f );
     actor.SetPosition( INITIAL_OFFSCREEN_POSITION );
 

@@ -133,6 +133,7 @@ public:
     desktop.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     desktop.SetResizePolicy( ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS );
     desktop.SetSize( mTargetActorSize );
+    desktop.SetProperty( ImageView::Property::SYNCHRONOUS_RESOURCE_LOADING, true  );
 
     rootActor.Add( desktop ); // Add desktop (content) to offscreen actor
 
