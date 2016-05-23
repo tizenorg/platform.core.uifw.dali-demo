@@ -18,7 +18,7 @@
 #include "shared/view.h"
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
-#include <dali-toolkit/devel-api/controls/slider/slider.h>
+#include <dali-toolkit/public-api/controls/slider/slider.h>
 
 using namespace Dali;
 
