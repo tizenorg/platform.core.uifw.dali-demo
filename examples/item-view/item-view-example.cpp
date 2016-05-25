@@ -18,6 +18,8 @@
 #include <sstream>
 #include "shared/view.h"
 
+#include <stdio.h>
+
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 
@@ -26,6 +28,10 @@ using namespace Dali::Toolkit;
 
 namespace
 {
+
+const unsigned int KEY_M = 58;
+const unsigned int KEY_T = 28;
+const unsigned int KEY_B = 56;
 
 enum AllImagesLayouts
 {
@@ -63,38 +69,10 @@ const char* IMAGE_PATHS[] = {
     DEMO_IMAGE_DIR "gallery-medium-24.jpg",
     DEMO_IMAGE_DIR "gallery-medium-25.jpg",
     DEMO_IMAGE_DIR "gallery-medium-26.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-27.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-28.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-29.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-30.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-31.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-32.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-33.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-34.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-35.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-36.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-37.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-38.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-39.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-40.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-41.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-42.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-43.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-44.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-45.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-46.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-47.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-48.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-49.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-50.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-51.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-52.jpg",
-    DEMO_IMAGE_DIR "gallery-medium-53.jpg",
 };
 
 const unsigned int NUM_IMAGES = sizeof(IMAGE_PATHS) / sizeof(char*);
 
-const char* BACKGROUND_IMAGE( "" );
 const char* TOOLBAR_IMAGE( DEMO_IMAGE_DIR "top-bar.png" );
 const char* EDIT_IMAGE( DEMO_IMAGE_DIR "icon-edit.png" );
 const char* EDIT_IMAGE_SELECTED( DEMO_IMAGE_DIR "icon-edit-selected.png" );
@@ -198,18 +176,9 @@ public:
     Stage stage = Dali::Stage::GetCurrent();
     stage.KeyEventSignal().Connect(this, &ItemViewExample::OnKeyEvent);
     stage.GetRootLayer().SetBehavior(Layer::LAYER_3D);
+    //stage.SetBackgroundColor( Color::WHITE );
 
     Vector2 stageSize = Stage::GetCurrent().GetSize();
-
-    // Creates a default view with a default tool bar.
-    // The view is added to the stage.
-
-    Layer contents = DemoHelper::CreateView( mApplication,
-                                             mView,
-                                             mToolBar,
-                                             BACKGROUND_IMAGE,
-                                             TOOLBAR_IMAGE,
-                                             "" );
 
     // Create an edit mode button. (left of toolbar)
     Toolkit::PushButton editButton = Toolkit::PushButton::New();
@@ -217,7 +186,7 @@ public:
     editButton.SetSelectedImage( EDIT_IMAGE_SELECTED );
     editButton.ClickedSignal().Connect( this, &ItemViewExample::OnModeButtonClicked);
     editButton.SetLeaveRequired( true );
-    mToolBar.AddControl( editButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
+    //mToolBar.AddControl( editButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalLeft, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
 
     // Create a layout toggle button. (right of toolbar)
     mLayoutButton = Toolkit::PushButton::New();
@@ -225,7 +194,7 @@ public:
     mLayoutButton.SetSelectedImage(SPIRAL_LAYOUT_IMAGE_SELECTED );
     mLayoutButton.ClickedSignal().Connect( this, &ItemViewExample::OnLayoutButtonClicked);
     mLayoutButton.SetLeaveRequired( true );
-    mToolBar.AddControl( mLayoutButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
+    //mToolBar.AddControl( mLayoutButton, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarButtonPercentage, Toolkit::Alignment::HorizontalRight, DemoHelper::DEFAULT_MODE_SWITCH_PADDING  );
 
     // Create a delete button (bottom right of screen)
     mDeleteButton = Toolkit::PushButton::New();
@@ -306,6 +275,16 @@ public:
     mLongPressDetector = LongPressGestureDetector::New();
     mLongPressDetector.Attach( mItemView );
     mLongPressDetector.DetectedSignal().Connect( this, &ItemViewExample::OnLongPress );
+
+	// FIXME
+	mScrollBar = ScrollBar::New(Toolkit::ScrollBar::Vertical);
+	mScrollBar.SetParentOrigin(ParentOrigin::TOP_RIGHT);
+	mScrollBar.SetAnchorPoint(AnchorPoint::TOP_RIGHT);
+	mScrollBar.SetResizePolicy(Dali::ResizePolicy::FILL_TO_PARENT, Dali::Dimension::HEIGHT);
+	mScrollBar.SetResizePolicy(Dali::ResizePolicy::FIT_TO_CHILDREN, Dali::Dimension::WIDTH);
+	//mScrollBar.SetIndicatorHeightPolicy(Toolkit::ScrollBar::Fixed);
+	//mScrollBar.SetIndicatorFixedHeight(60.0f);
+	mItemView.Add(mScrollBar);
   }
 
   Actor OnKeyboardPreFocusChange( Actor current, Actor proposed, Control::KeyboardFocus::Direction direction )
@@ -945,7 +924,7 @@ private:
     {
       mTitleActor = DemoHelper::CreateToolBarLabel( "" );
       // Add title to the tool bar.
-      mToolBar.AddControl( mTitleActor, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarTitlePercentage, Alignment::HorizontalCenter );
+      //mToolBar.AddControl( mTitleActor, DemoHelper::DEFAULT_VIEW_STYLE.mToolBarTitlePercentage, Alignment::HorizontalCenter );
     }
 
     mTitleActor.SetProperty( TextLabel::Property::TEXT, title );
@@ -958,7 +937,57 @@ private:
   {
     if(event.state == KeyEvent::Down)
     {
-      if( IsKey( event, DALI_KEY_ESCAPE) || IsKey( event, DALI_KEY_BACK ) )
+      printf( "%d\n", event.keyCode );
+
+      if( KEY_M == event.keyCode )
+      {
+        float minHeight = mScrollBar.GetProperty<float>( ScrollBar::Property::INDICATOR_MINIMUM_HEIGHT );
+
+        if( event.IsShiftModifier() )
+        {
+          minHeight = (minHeight >= 1.0f) ? minHeight - 1.0f : minHeight;
+        }
+        else
+        {
+          minHeight += 1.0f;
+        }
+
+        printf( "INDICATOR_MINIMUM_HEIGHT %f\n", minHeight );
+        mScrollBar.SetProperty( ScrollBar::Property::INDICATOR_MINIMUM_HEIGHT, minHeight );
+      }
+      else if( KEY_T == event.keyCode )
+      {
+        float minHeight = mScrollBar.GetProperty<float>( ScrollBar::Property::INDICATOR_TOP_PADDING );
+
+        if( event.IsShiftModifier() )
+        {
+          minHeight = (minHeight >= 1.0f) ? minHeight - 1.0f : minHeight;
+        }
+        else
+        {
+          minHeight += 1.0f;
+        }
+
+        printf( "INDICATOR_TOP_PADDING %f\n", minHeight );
+        mScrollBar.SetProperty( ScrollBar::Property::INDICATOR_TOP_PADDING, minHeight );
+      }
+      else if( KEY_B == event.keyCode )
+      {
+        float minHeight = mScrollBar.GetProperty<float>( ScrollBar::Property::INDICATOR_BOTTOM_PADDING );
+
+        if( event.IsShiftModifier() )
+        {
+          minHeight = (minHeight >= 1.0f) ? minHeight - 1.0f : minHeight;
+        }
+        else
+        {
+          minHeight += 1.0f;
+        }
+
+        printf( "INDICATOR_BOTTOM_PADDING %f\n", minHeight );
+        mScrollBar.SetProperty( ScrollBar::Property::INDICATOR_BOTTOM_PADDING, minHeight );
+      }
+      else if( IsKey( event, DALI_KEY_ESCAPE) || IsKey( event, DALI_KEY_BACK ) )
       {
         mApplication.Quit();
       }
@@ -991,6 +1020,8 @@ private:
   Toolkit::PushButton mReplaceButton;
 
   LongPressGestureDetector mLongPressDetector;
+
+  ScrollBar mScrollBar;
 };
 
 void RunTest(Application& app)
