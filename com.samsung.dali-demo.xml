@@ -157,4 +157,7 @@
 	<ui-application appid="text-editor.example" exec="/usr/apps/com.samsung.dali-demo/bin/text-editor.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Text Editor</label>
 	</ui-application>
+  <ui-application appid="shared-mesh-renderer.example" exec="/usr/apps/com.samsung.dali-demo/bin/shared-mesh-renderer.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+    <label>Shared Mesh Renderer</label>
+  </ui-application>
 </manifest>
