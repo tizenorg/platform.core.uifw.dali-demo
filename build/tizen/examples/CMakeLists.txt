@@ -1,4 +1,5 @@
 SET(EXAMPLES_SRC_DIR ${ROOT_SRC_DIR}/examples)
+SET(SHARED_SRC_DIR ${ROOT_SRC_DIR}/shared)
 
 # Get all subdirectory names from EXAMPLES_SRC_DIR
 MACRO(SUBDIRLIST result curdir)
@@ -13,9 +14,13 @@ MACRO(SUBDIRLIST result curdir)
 ENDMACRO()
 SUBDIRLIST(SUBDIRS ${EXAMPLES_SRC_DIR})
 
+ADD_LIBRARY(SHARED_SRC_DIR "${SHARED_SRC_DIR}/color-picker.cpp"
+                           "${SHARED_SRC_DIR}/color-picker-impl.cpp" )
+
 FOREACH(EXAMPLE ${SUBDIRS})
   FILE(GLOB SRCS "${EXAMPLES_SRC_DIR}/${EXAMPLE}/*.cpp")
   ADD_EXECUTABLE(${EXAMPLE}.example ${SRCS})
   TARGET_LINK_LIBRARIES(${EXAMPLE}.example ${REQUIRED_PKGS_LDFLAGS} -pie)
+  target_link_libraries (${EXAMPLE}.example SHARED_SRC_DIR)
   INSTALL(TARGETS ${EXAMPLE}.example DESTINATION ${BINDIR})
 ENDFOREACH(EXAMPLE)
