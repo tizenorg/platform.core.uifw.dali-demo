@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include "dali-table-view.h"
+#include "dali-demo-launcher.h"
 #include "shared/dali-demo-strings.h"
 
 using namespace Dali;
@@ -78,6 +79,7 @@ int DALI_EXPORT_API main(int argc, char **argv)
   demo.AddExample(Example("tilt.example", DALI_DEMO_STR_TITLE_TILT_SENSOR));
   demo.AddExample(Example("effects-view.example", DALI_DEMO_STR_TITLE_EFFECTS_VIEW));
   demo.AddExample(Example("native-image-source.example", DALI_DEMO_STR_TITLE_NATIVE_IMAGE_SOURCE));
+  demo.AddExample(Example("shared-mesh-renderer.example", DALI_DEMO_STR_TITLE_SHARED_MESH_RENDERER));
 
   demo.SortAlphabetically( true );
 
