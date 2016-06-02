@@ -47,6 +47,10 @@ namespace
   const float MODEL_SCALE = 0.75f;
   const int NUM_MESHES = 3;
 
+  //Used to identify what is being panned.
+  const int PAN_MODEL = 0;
+  const int PAN_LIGHT = 1;
+
 } //End namespace
 
 class MeshRendererController : public ConnectionTracker
@@ -109,6 +113,7 @@ public:
       mContainers[i] = Actor::New();
       mContainers[i].SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
       mContainers[i].RegisterProperty( "Tag", Property::Value( i ) ); //Used to identify the actor and index into the model.
+      mContainers[i].RegisterProperty( "Pan", Property::Value( PAN_MODEL ) ); //Used to differentiate between pan-able objects.
 
       //Position each container on screen
       if( i == 0 )
@@ -169,7 +174,7 @@ public:
     Toolkit::PushButton modelButton = Toolkit::PushButton::New();
     modelButton.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
     modelButton.ClickedSignal().Connect( this, &MeshRendererController::OnChangeModelClicked );
-    modelButton.SetParentOrigin( Vector3( 0.1, 0.95, 0.5 ) ); //Offset from bottom left
+    modelButton.SetParentOrigin( Vector3( 0.05, 0.95, 0.5 ) ); //Offset from bottom left
     modelButton.SetAnchorPoint( AnchorPoint::BOTTOM_LEFT );
     modelButton.SetLabelText( "Change Model" );
     layer.Add( modelButton );
@@ -178,10 +183,51 @@ public:
     Toolkit::PushButton shaderButton = Toolkit::PushButton::New();
     shaderButton.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
     shaderButton.ClickedSignal().Connect( this, &MeshRendererController::OnChangeShaderClicked );
-    shaderButton.SetParentOrigin( Vector3( 0.9, 0.95, 0.5 ) ); //Offset from bottom right
+    shaderButton.SetParentOrigin( Vector3( 0.95, 0.95, 0.5 ) ); //Offset from bottom right
     shaderButton.SetAnchorPoint( AnchorPoint::BOTTOM_RIGHT );
     shaderButton.SetLabelText( "Change Shader" );
     layer.Add( shaderButton );
+
+    //Create button for pausing animations
+    Toolkit::PushButton pauseButton = Toolkit::PushButton::New();
+    pauseButton.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+    pauseButton.ClickedSignal().Connect( this, &MeshRendererController::OnPauseClicked );
+    pauseButton.SetParentOrigin( Vector3( 0.5, 0.95, 0.5 ) ); //Offset from bottom center
+    pauseButton.SetAnchorPoint( AnchorPoint::BOTTOM_CENTER );
+    pauseButton.SetLabelText( " || " );
+    layer.Add( pauseButton );
+
+    //Create control to act as light source of scene.
+    mLightSource = Control::New();
+    mLightSource.SetResizePolicy( ResizePolicy::FIT_TO_CHILDREN, Dimension::WIDTH );
+    mLightSource.SetResizePolicy( ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT );
+
+    //Set position relative to top left, as the light source property is also relative to the top left.
+    mLightSource.SetParentOrigin( ParentOrigin::TOP_LEFT );
+    mLightSource.SetAnchorPoint( AnchorPoint::CENTER );
+    //mLightSource.SetPositionInheritanceMode( DONT_INHERIT_POSITION );
+    mLightSource.SetPosition( Stage::GetCurrent().GetSize().x * 0.5f, Stage::GetCurrent().GetSize().y * 0.1f );
+
+    Property::Map lightMap;
+    lightMap.Insert( "rendererType", "color" );
+    lightMap.Insert( "mixColor", Color::WHITE );
+    mLightSource.SetProperty( Control::Property::BACKGROUND, Property::Value( lightMap ) );
+
+    TextLabel lightLabel = TextLabel::New( "Light" );
+    lightLabel.SetResizePolicy( ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS );
+    lightLabel.SetParentOrigin( ParentOrigin::CENTER );
+    lightLabel.SetAnchorPoint( AnchorPoint::CENTER );
+    float padding = 5.0f;
+    lightLabel.SetPadding( Padding( padding, padding, padding, padding ) );
+    mLightSource.Add( lightLabel );
+
+    mLightSource.RegisterProperty( "Pan", Property::Value( PAN_LIGHT ) ); //Used to differentiate between pan-able objects.
+    mPanGestureDetector.Attach( mLightSource );
+
+    layer.Add( mLightSource );
+
+    //Calling this sets the light position of each model to that of the light source control.
+    UpdateLight();
   }
 
   //Updates the displayed models to account for parameter changes.
@@ -202,52 +248,85 @@ public:
     }
   }
 
-  //Rotates the panned model based on the gesture.
+  //Updates the light position for each model to account for changes in the source on screen.
+  void UpdateLight()
+  {
+    //Set light position to the x and y of the light control, offset out of the screen.
+    Vector3 controlPosition = mLightSource.GetCurrentPosition();
+    Vector3 lightPosition = Vector3( controlPosition.x, controlPosition.y, Stage::GetCurrent().GetSize().x * 2 );
+
+    for( int i = 0; i < NUM_MESHES; ++i )
+    {
+      mModels[i].control.RegisterProperty( "uLightPosition", lightPosition, Property::ANIMATABLE );
+    }
+  }
+
   void OnPan( Actor actor, const PanGesture& gesture )
   {
-    switch( gesture.state )
+    //Determine what is being panned.
+    int panned;
+    actor.GetProperty( actor.GetPropertyIndex( "Pan" ) ).Get( panned );
+
+    if( panned == PAN_MODEL )
     {
-      case Gesture::Started:
+      //Rotate the model.
+      switch( gesture.state )
       {
-        //Find out which model has been selected
-        actor.GetProperty( actor.GetPropertyIndex( "Tag" ) ).Get( mSelectedModelIndex );
+        case Gesture::Started:
+        {
+          //Find out which model has been selected
+          actor.GetProperty( actor.GetPropertyIndex( "Tag" ) ).Get( mSelectedModelIndex );
 
-        //Pause current animation, as the gesture will be used to manually rotate the model
-        mModels[mSelectedModelIndex].rotationAnimation.Pause();
+          //Pause current animation, as the gesture will be used to manually rotate the model
+          mModels[mSelectedModelIndex].rotationAnimation.Pause();
 
-        break;
+          break;
+        }
+        case Gesture::Continuing:
+        {
+          //Rotate based off the gesture.
+          mModels[mSelectedModelIndex].rotation.x -= gesture.displacement.y / X_ROTATION_DISPLACEMENT_FACTOR; // Y displacement rotates around X axis
+          mModels[mSelectedModelIndex].rotation.y += gesture.displacement.x / Y_ROTATION_DISPLACEMENT_FACTOR; // X displacement rotates around Y axis
+          Quaternion rotation = Quaternion( Radian( mModels[mSelectedModelIndex].rotation.x ), Vector3::XAXIS) *
+                                Quaternion( Radian( mModels[mSelectedModelIndex].rotation.y ), Vector3::YAXIS);
+
+          mModels[mSelectedModelIndex].control.SetOrientation( rotation );
+
+          break;
+        }
+        case Gesture::Finished:
+        {
+          //Return to automatic animation
+          if( !mPaused )
+          {
+            mModels[mSelectedModelIndex].rotationAnimation.Play();
+          }
+
+          break;
+        }
+        case Gesture::Cancelled:
+        {
+          //Return to automatic animation
+          if( !mPaused )
+          {
+            mModels[mSelectedModelIndex].rotationAnimation.Play();
+          }
+
+          break;
+        }
+        default:
+        {
+          //We can ignore other gestures and gesture states.
+          break;
+        }
       }
-      case Gesture::Continuing:
-      {
-        //Rotate based off the gesture.
-        mModels[mSelectedModelIndex].rotation.x -= gesture.displacement.y / X_ROTATION_DISPLACEMENT_FACTOR; // Y displacement rotates around X axis
-        mModels[mSelectedModelIndex].rotation.y += gesture.displacement.x / Y_ROTATION_DISPLACEMENT_FACTOR; // X displacement rotates around Y axis
-        Quaternion rotation = Quaternion( Radian( mModels[mSelectedModelIndex].rotation.x ), Vector3::XAXIS) *
-                              Quaternion( Radian( mModels[mSelectedModelIndex].rotation.y ), Vector3::YAXIS);
-
-        mModels[mSelectedModelIndex].control.SetOrientation( rotation );
-
-        break;
-      }
-      case Gesture::Finished:
-      {
-        //Return to automatic animation
-        mModels[mSelectedModelIndex].rotationAnimation.Play();
-
-        break;
-      }
-      case Gesture::Cancelled:
-      {
-        //Return to automatic animation
-        mModels[mSelectedModelIndex].rotationAnimation.Play();
-
-        break;
-      }
-      default:
-      {
-        //We can ignore other gestures and gesture states.
-        break;
-      }
+    }
+    else if( panned == PAN_LIGHT )
+    {
+      float currentX = actor.GetCurrentPosition().x;
+      float currentY = actor.GetCurrentPosition().y;
+      actor.SetPosition( currentX + 2 * gesture.displacement.x, currentY + 2 * gesture.displacement.y );
+      UpdateLight();
     }
   }
 
@@ -271,6 +350,37 @@ public:
     return true;
   }
 
+  //Pause all animations, and keep them paused even after user panning.
+  //This button is a toggle, so pressing again will start the animations again.
+  bool OnPauseClicked( Toolkit::Button button )
+  {
+    //If animations are currently running, pause them and keep them paused.
+    if( !mPaused )
+    {
+      mPaused = true;
+
+      for( int i = 0; i < NUM_MESHES ; ++i )
+      {
+        mModels[i].rotationAnimation.Pause();
+      }
+
+      button.SetLabelText( " > ");
+    }
+    else //Unpause all animations again.
+    {
+      mPaused = false;
+
+      for( int i = 0; i < NUM_MESHES ; ++i )
+      {
+        mModels[i].rotationAnimation.Play();
+      }
+
+      button.SetLabelText( " || ");
+    }
+
+    return true;
+  }
+
   //If escape or the back button is pressed, quit the application (and return to the launcher)
   void OnKeyEvent( const KeyEvent& event )
   {
@@ -290,12 +400,16 @@ private:
   Model mModels[NUM_MESHES];
   Actor mContainers[NUM_MESHES];
 
+  //Acts as a global light source.
+  Control mLightSource;
+
   //Used to detect panning to rotate the selected model.
   PanGestureDetector mPanGestureDetector;
 
   int mModelIndex; //Index of model to load.
   int mShaderIndex; //Index of shader type to use.
   int mSelectedModelIndex; //Index of model selected on screen.
+  bool mPaused; //If true, all animations are paused and should stay so.
 };
 
 void RunTest( Application& application )
