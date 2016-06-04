@@ -1,0 +1,19 @@
+{
+  "styles":
+  {
+    "textlabel":
+    { 
+      "pointSize" : 5,
+      "anchorPoint" : "TOP_LEFT",
+      "parentOrigin" :"TOP_LEFT"
+    },
+    "myStyledTextLabel":
+    {
+      "pointSize" : 12,
+      "verticalAlignment" : "CENTER",
+      "horizontalAlignment" : "CENTER",
+      "backgroundColor" : [0.26, 0.71, 0.78, 1.0],
+      "color" : [ 1.0, 1.0, 1.0, 1.0 ]
+    }
+  }
+}
