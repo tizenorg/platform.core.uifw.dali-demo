@@ -16,6 +16,8 @@
  */
 
 #include <dali/dali.h>
+#include <dali/devel-api/rendering/renderer.h>
+#include <dali/devel-api/rendering/frame-buffer.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
@@ -23,7 +25,86 @@ using namespace Toolkit;
 
 namespace
 {
-  const std::string JPG_FILENAME = DEMO_IMAGE_DIR "gallery-medium-4.jpg";
+
+struct VertexWithTexture
+{
+  Vector2 position;
+  Vector2 texCoord;
+};
+
+VertexWithTexture gQuadWithTexture[] = {
+                                        { Vector2( -0.5f, -0.5f ), Vector2( 0.0f, 0.0f ) },
+                                        { Vector2(  0.5f, -0.5f ), Vector2( 1.0f, 0.0f ) },
+                                        { Vector2( -0.5f,  0.5f ), Vector2( 0.0f, 1.0f ) },
+                                        { Vector2(  0.5f,  0.5f ), Vector2( 1.0f, 1.0f ) }
+};
+
+const char* VERTEX_SHADER_TEXTURE = DALI_COMPOSE_SHADER(
+    attribute mediump vec2 aPosition;\n
+    attribute mediump vec2 aTexCoord;\n
+    uniform mediump mat4 uMvpMatrix;\n
+    uniform mediump vec3 uSize;\n
+    varying mediump vec2 vTexCoord;\n
+    void main()\n
+    {\n
+      vec4 position = vec4(aPosition,0.0,1.0)*vec4(uSize,1.0);\n
+      gl_Position = uMvpMatrix * position;\n
+      vTexCoord = aTexCoord;\n
+    }\n
+);
+
+const char* FRAGMENT_SHADER_TEXTURE = DALI_COMPOSE_SHADER(
+    uniform lowp vec4 uColor;\n
+    uniform sampler2D sTexture;\n
+    varying mediump vec2 vTexCoord;\n
+
+    void main()\n
+    {\n
+      gl_FragColor = texture2D( sTexture, vTexCoord ) * uColor;\n
+    }\n
+);
+
+
+Geometry& QuadMesh()
+{
+  static Geometry mesh;
+  if( !mesh )
+  {
+    PropertyBuffer vertexBuffer;
+    Property::Map vertexFormat;
+    vertexFormat["aPosition"] = Property::VECTOR2;
+    vertexFormat["aTexCoord"] = Property::VECTOR2;
+
+    //Create a vertex buffer for vertex positions and texture coordinates
+    vertexBuffer = PropertyBuffer::New( vertexFormat );
+    vertexBuffer.SetData( gQuadWithTexture, 4u );
+
+    //Create the geometry
+    mesh = Geometry::New();
+    mesh.AddVertexBuffer( vertexBuffer );
+    mesh.SetGeometryType(Geometry::TRIANGLE_STRIP );
+  }
+
+  return mesh;
+}
+
+Actor CreateImageView( Texture texture )
+{
+  Actor actor = Actor::New();
+
+  //Create the renderer
+  Shader shader = Shader::New( VERTEX_SHADER_TEXTURE, FRAGMENT_SHADER_TEXTURE );
+
+  TextureSet textureSet = TextureSet::New();
+  textureSet.SetTexture( 0u, texture );
+  Renderer renderer = Renderer::New( QuadMesh(), shader );
+  renderer.SetTextures( textureSet );
+  actor.AddRenderer( renderer );
+  actor.SetSize( texture.GetWidth(), texture.GetHeight() );
+  return actor;
+}
+
+const std::string JPG_FILENAME = DEMO_IMAGE_DIR "gallery-medium-4.jpg";
 }
 
 // This example shows how to create and use a NativeImageSource as the target of the render task.
@@ -85,6 +166,8 @@ public:
     // Create the native image source
     NativeImageSourcePtr nativeImageSourcePtr = NativeImageSource::New( imageSize.width, imageSize.height, NativeImageSource::COLOR_DEPTH_DEFAULT );
 
+
+
     // Create a image view as source actor to be renderer to the native image source
     Actor sourceActor = ImageView::New(JPG_FILENAME);
     sourceActor.SetParentOrigin( ParentOrigin::CENTER);
@@ -102,8 +185,11 @@ public:
     animation.SetLooping(true);
     animation.Play();
 
+
     // create a offscreen renderer task to render content into the native image source
-    FrameBufferImage targetBuffer = FrameBufferImage::New( *nativeImageSourcePtr );
+    Texture nativeTexture = Texture::New( *nativeImageSourcePtr );
+    FrameBuffer targetBuffer = FrameBuffer::New( nativeTexture.GetWidth(), nativeTexture.GetHeight(), FrameBuffer::COLOR );
+    targetBuffer.AttachColorTexture( nativeTexture );
 
     CameraActor cameraActor = CameraActor::New(imageSize);
     cameraActor.SetParentOrigin(ParentOrigin::TOP_CENTER);
@@ -118,12 +204,11 @@ public:
     mOffscreenRenderTask.SetClearEnabled(true);
     mOffscreenRenderTask.SetCameraActor(cameraActor);
     mOffscreenRenderTask.GetCameraActor().SetInvertYAxis(true);
-    mOffscreenRenderTask.SetTargetFrameBuffer( targetBuffer );
+    mOffscreenRenderTask.SetFrameBuffer( targetBuffer );
     mOffscreenRenderTask.SetRefreshRate( RenderTask::REFRESH_ALWAYS );
 
     // Display the native image on the screen
-    NativeImage nativeImage = NativeImage::New( *nativeImageSourcePtr );
-    ImageView nativeImageView = ImageView::New( nativeImage );
+    Actor nativeImageView = CreateImageView( nativeTexture );
     nativeImageView.SetParentOrigin( ParentOrigin::BOTTOM_CENTER );
     nativeImageView.SetAnchorPoint( AnchorPoint::BOTTOM_CENTER );
     stage.Add( nativeImageView );
