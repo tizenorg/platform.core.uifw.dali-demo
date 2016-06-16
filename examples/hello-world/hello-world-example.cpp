@@ -16,6 +16,7 @@
  */
 
 #include <dali-toolkit/dali-toolkit.h>
+#include <sstream>
 
 using namespace Dali;
 using Dali::Toolkit::TextLabel;
@@ -45,24 +46,53 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
+    textLabel = TextLabel::New( "Hello World" );
+    textLabel.SetAnchorPoint( AnchorPoint::CENTER_LEFT );
+    textLabel.SetParentOrigin( AnchorPoint::CENTER_LEFT );
     textLabel.SetName( "helloWorldLabel" );
     stage.Add( textLabel );
 
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchSignal().Connect( this, &HelloWorldController::OnTouch );
+
+    Stage::GetCurrent().KeyEventSignal().Connect(this, &HelloWorldController::OnKeyEvent);
   }
 
   bool OnTouch( Actor actor, const TouchData& touch )
   {
+    float pressure = touch.GetPressure(0);
+    float radius = touch.GetRadius(0);
+    const Vector2& ellipseRadius = touch.GetEllipseRadius(0);
+    Degree angle = touch.GetAngle(0);
+
+    std::ostringstream output;
+    output << "Pressure(" << pressure << ") ";
+    output << "Radius(" << radius << ") ";
+    output << "EllipseRadius(" << ellipseRadius << ") ";
+    output << "Angle(" << angle.degree << ")";
+
+    textLabel.SetProperty( TextLabel::Property::TEXT, output.str().c_str() );
+
     // quit the application
-    mApplication.Quit();
+    //mApplication.Quit();
     return true;
+  }
+
+  // Process Key events to Quit on back-key
+  void OnKeyEvent( const KeyEvent& event )
+  {
+    if( event.state == KeyEvent::Down )
+    {
+      if( IsKey( event, Dali::DALI_KEY_ESCAPE ) || IsKey( event, Dali::DALI_KEY_BACK ) )
+      {
+        mApplication.Quit();
+      }
+    }
   }
 
 private:
   Application&  mApplication;
+  TextLabel textLabel;
 };
 
 void RunTest( Application& application )
