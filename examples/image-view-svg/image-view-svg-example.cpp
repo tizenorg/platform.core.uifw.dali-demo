@@ -124,9 +124,10 @@ public:
   bool OnChangeButtonClicked( Toolkit::Button button )
   {
     mIndex = (mIndex+4) % NUM_SVG_IMAGES;
-    for( unsigned int i=0; i<4u; i++)
+    ImageDimensions dimension( uint32_t( mActorSize.width ), uint32_t( mActorSize.height ) );
+    for( unsigned int i = 0; i < 4u; i++ )
     {
-      mSvgActor[i].SetImage(SVG_IMAGES[mIndex+i]);
+      mSvgActor[i].SetImage(SVG_IMAGES[mIndex+i], dimension );
     }
 
     return true;
