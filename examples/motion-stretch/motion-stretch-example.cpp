@@ -390,8 +390,10 @@ public:
       mCurrentImage = 0;
     }
 
-    Image stretchImage = ResourceImage::New( MOTION_STRETCH_ACTOR_IMAGES[mCurrentImage] );
-    mMotionStretchImageView.SetImage(stretchImage);
+    Property::Map map;
+    map["url"] = MOTION_STRETCH_ACTOR_IMAGES[mCurrentImage];
+    map.Merge( mMotionStretchEffect );
+    mMotionStretchImageView.SetProperty( Toolkit::ImageView::Property::IMAGE, map );
   }
 
 
