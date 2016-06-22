@@ -187,8 +187,7 @@ void NewWindowController::Create( Application& app )
                                           "Context recovery" );
 
   Size stageSize = stage.GetSize();
-  Image backgroundImage = ResourceImage::New( BACKGROUND_IMAGE, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
-  ImageView backgroundActor = ImageView::New( backgroundImage );
+  ImageView backgroundActor = ImageView::New( BACKGROUND_IMAGE, Dali::ImageDimensions( stageSize.x, stageSize.y ) );
   backgroundActor.SetParentOrigin( ParentOrigin::CENTER );
   mContentLayer.Add(backgroundActor);
 
@@ -212,16 +211,15 @@ void NewWindowController::Create( Application& app )
   logoLayoutActor.SetScale(0.5f);
   backgroundActor.Add(logoLayoutActor);
 
-  Image image = ResourceImage::New(LOGO_IMAGE);
-  ImageView imageView = ImageView::New(image);
+  ImageView imageView = ImageView::New( LOGO_IMAGE );
   imageView.SetName("daliLogo");
   imageView.SetParentOrigin(ParentOrigin::CENTER);
   imageView.SetAnchorPoint(AnchorPoint::BOTTOM_CENTER);
   logoLayoutActor.Add(imageView);
 
   ImageView mirrorImageView = CreateBlurredMirrorImage(LOGO_IMAGE);
-  mirrorImageView.SetParentOrigin(ParentOrigin::CENTER);
-  mirrorImageView.SetAnchorPoint(AnchorPoint::TOP_CENTER);
+  mirrorImageView.SetParentOrigin(ParentOrigin::TOP_CENTER);
+  mirrorImageView.SetAnchorPoint(AnchorPoint::BOTTOM_CENTER);
   logoLayoutActor.Add(mirrorImageView);
 
   AddBubbles( backgroundActor, stage.GetSize());
@@ -320,8 +318,7 @@ void NewWindowController::AddBlendingImageActor( Actor& parentActor )
   Property::Map map;
   map[ "shader" ] = customShader;
 
-  Image baseImage = ResourceImage::New(BASE_IMAGE);
-  ImageView blendActor = ImageView::New( baseImage );
+  ImageView blendActor = ImageView::New( BASE_IMAGE );
   blendActor.SetProperty( ImageView::Property::IMAGE, map );
   blendActor.RegisterProperty( "alpha", 0.5f );
 

@@ -390,8 +390,7 @@ public:
       mCurrentImage = 0;
     }
 
-    Image stretchImage = ResourceImage::New( MOTION_STRETCH_ACTOR_IMAGES[mCurrentImage] );
-    mMotionStretchImageView.SetImage(stretchImage);
+    mMotionStretchImageView.SetImage( MOTION_STRETCH_ACTOR_IMAGES[mCurrentImage] );
   }
 
 
