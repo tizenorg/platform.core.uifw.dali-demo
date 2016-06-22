@@ -23,6 +23,8 @@
 
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
+#include <dali/devel-api/images/atlas.h>
 #include <dali-toolkit/devel-api/transition-effects/cube-transition-effect.h>
 #include <dali-toolkit/devel-api/transition-effects/cube-transition-cross-effect.h>
 #include <dali-toolkit/devel-api/transition-effects/cube-transition-fold-effect.h>
@@ -106,10 +108,17 @@ const int VIEWINGTIME = 2000; // 2 seconds
  * and filter mode BOX_THEN_LINEAR to sample the image with
  * maximum quality.
  */
-ResourceImage LoadStageFillingImage( const char * const imagePath )
+Atlas LoadStageFillingImage( const char* imagePath )
 {
   Size stageSize = Stage::GetCurrent().GetSize();
-  return ResourceImage::New( imagePath, ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+  BitmapLoader loader = BitmapLoader::New( imagePath, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+  loader.Load();
+  PixelData pixelData = loader.GetPixelData();
+
+  Atlas image  = Atlas::New( pixelData.GetWidth(), pixelData.GetHeight(), pixelData.GetPixelFormat() );
+  image.Upload( pixelData, 0u, 0u );
+
+  return image;
 }
 
 } // namespace
@@ -147,7 +156,7 @@ private:
    * Start the transition
    * @param[in] image The image content of the imageActor for transition
    */
-  void OnImageLoaded(ResourceImage image);
+  void OnImageLoaded(Image image);
   /**
    * Main key event handler
    */
@@ -185,8 +194,8 @@ private:
 
   Vector2                         mViewSize;
 
-  ResourceImage                   mCurrentImage;
-  ResourceImage                   mNextImage;
+  Image                           mCurrentImage;
+  Image                           mNextImage;
   unsigned int                    mIndex;
   bool                            mIsImageLoading;
 
@@ -324,19 +333,11 @@ void CubeTransitionApp::GoToNextImage()
 {
   mNextImage = LoadStageFillingImage( IMAGES[ mIndex ] );
   mCurrentEffect.SetTargetImage( mNextImage );
-  if( mNextImage.GetLoadingState() == ResourceLoadingSucceeded )
-  {
-    mIsImageLoading = false;
-    OnImageLoaded( mNextImage );
-  }
-  else
-  {
-    mIsImageLoading = true;
-    mNextImage.LoadingFinishedSignal().Connect( this, &CubeTransitionApp::OnImageLoaded );
-  }
+  mIsImageLoading = false;
+  OnImageLoaded( mNextImage );
 }
 
-void CubeTransitionApp::OnImageLoaded(ResourceImage image)
+void CubeTransitionApp::OnImageLoaded(Image image)
 {
    mIsImageLoading = false;
    mCurrentEffect.StartTransition( mPanPosition, mPanDisplacement );

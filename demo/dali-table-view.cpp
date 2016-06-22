@@ -790,8 +790,7 @@ void DaliTableView::GenerateCircle( const Size& size, std::vector< unsigned char
 
 ImageView DaliTableView::CreateLogo( std::string imagePath )
 {
-  Image image = ResourceImage::New( imagePath );
-  ImageView logo = ImageView::New( image );
+  ImageView logo = ImageView::New( imagePath );
 
   logo.SetAnchorPoint( AnchorPoint::CENTER );
   logo.SetParentOrigin( ParentOrigin::CENTER );

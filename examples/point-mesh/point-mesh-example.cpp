@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
 
 // INTERNAL INCLUDES
 #include "shared/view.h"
@@ -109,6 +110,21 @@ Geometry CreateGeometry()
   return polyhedraGeometry;
 }
 
+Texture LoadTexture( const char* imagePath )
+{
+  BitmapLoader loader = BitmapLoader::New( imagePath );
+  loader.Load();
+  PixelData pixelData = loader.GetPixelData();
+
+  Texture texture  = Texture::New( TextureType::TEXTURE_2D,
+                                   pixelData.GetPixelFormat(),
+                                   pixelData.GetWidth(),
+                                   pixelData.GetHeight() );
+  texture.Upload( pixelData );
+
+  return texture;
+}
+
 } // anonymous namespace
 
 // This example shows how to use a simple mesh
@@ -152,14 +168,14 @@ public:
     // Hide the indicator bar
     application.GetWindow().ShowIndicator( Dali::Window::INVISIBLE );
 
-    Image image0 = ResourceImage::New( MATERIAL_SAMPLE );
-    Image image1 = ResourceImage::New( MATERIAL_SAMPLE2 );
+    Texture texture0 = LoadTexture( MATERIAL_SAMPLE );
+    Texture texture1 = LoadTexture( MATERIAL_SAMPLE2 );
 
     Shader shader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
 
     TextureSet textureSet = TextureSet::New();
-    textureSet.SetImage( 0u, image0 );
-    textureSet.SetImage( 1u, image1 );
+    textureSet.SetTexture( 0u, texture0 );
+    textureSet.SetTexture( 1u, texture1 );
 
     Geometry geometry = CreateGeometry();
 

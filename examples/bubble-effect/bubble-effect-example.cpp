@@ -18,6 +18,8 @@
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/controls/bubble-effect/bubble-emitter.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
+#include <dali/devel-api/images/atlas.h>
 #include "shared/view.h"
 
 using namespace Dali;
@@ -54,17 +56,34 @@ const Vector2 DEFAULT_BUBBLE_SIZE( 10.f, 30.f );
 const unsigned int DEFAULT_NUMBER_OF_BUBBLES( 1000 );
 
 /**
- * @brief Load an image, scaled-down to no more than the stage dimensions.
+ * @brief Load an image.
  *
- * Uses image scaling mode FittingMode::SCALE_TO_FILL to resize the image at
+ * If it is required to scaled-down to no more than the stage dimensions,
+ * uses image scaling mode FittingMode::SCALE_TO_FILL to resize the image at
  * load time to cover the entire stage with pixels with no borders,
  * and filter mode BOX_THEN_LINEAR to sample the image with
  * maximum quality.
  */
-ResourceImage LoadStageFillingImage( const char * const imagePath )
+Atlas LoadImage( const char* imagePath, bool StageFilling = false )
 {
-  Size stageSize = Stage::GetCurrent().GetSize();
-  return ResourceImage::New( imagePath, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+  BitmapLoader loader;
+  if( StageFilling )
+  {
+    Size stageSize = Stage::GetCurrent().GetSize();
+    loader = BitmapLoader::New( imagePath, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+  }
+  else
+  {
+    loader = BitmapLoader::New( imagePath );
+  }
+  loader.Load();
+  PixelData pixelData = loader.GetPixelData();
+
+  Atlas image  = Atlas::New( pixelData.GetWidth(), pixelData.GetHeight(), pixelData.GetPixelFormat() );
+  image.Upload( pixelData, 0u, 0u );
+
+  return image;
+
 }
 
 }// end LOCAL_STUFF
@@ -130,10 +149,10 @@ private:
 
     // Create and initialize the BubbleEmitter object
     mBubbleEmitter = Toolkit::BubbleEmitter::New( stageSize,
-                                                  ResourceImage::New( BUBBLE_SHAPE_IMAGES[mCurrentBubbleShapeImageId] ),
+                                                  LoadImage( BUBBLE_SHAPE_IMAGES[mCurrentBubbleShapeImageId] ),
                                                   DEFAULT_NUMBER_OF_BUBBLES,
                                                   DEFAULT_BUBBLE_SIZE);
-    mBackgroundImage = LoadStageFillingImage( BACKGROUND_IMAGES[mCurrentBackgroundImageId] );
+    mBackgroundImage = LoadImage( BACKGROUND_IMAGES[mCurrentBackgroundImageId], true );
     mBubbleEmitter.SetBackground( mBackgroundImage, mHSVDelta );
 
     // Get the root actor of all bubbles, and add it to stage.
@@ -253,7 +272,7 @@ private:
   {
     if(button == mChangeBackgroundButton)
     {
-      mBackgroundImage = LoadStageFillingImage( BACKGROUND_IMAGES[ ++mCurrentBackgroundImageId % NUM_BACKGROUND_IMAGES  ] );
+      mBackgroundImage = LoadImage( BACKGROUND_IMAGES[ ++mCurrentBackgroundImageId % NUM_BACKGROUND_IMAGES  ], true );
 
       mBubbleEmitter.SetBackground( mBackgroundImage, mHSVDelta );
 
@@ -261,7 +280,7 @@ private:
     }
     else if( button == mChangeBubbleShapeButton )
     {
-      mBubbleEmitter.SetShapeImage( ResourceImage::New( BUBBLE_SHAPE_IMAGES[ ++mCurrentBubbleShapeImageId % NUM_BUBBLE_SHAPE_IMAGES ] ) );
+      mBubbleEmitter.SetShapeImage( LoadImage( BUBBLE_SHAPE_IMAGES[ ++mCurrentBubbleShapeImageId % NUM_BUBBLE_SHAPE_IMAGES ] ) );
     }
     return true;
   }

@@ -19,6 +19,7 @@
 #include <dali/dali.h>
 #include <dali/devel-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
 
 #include <fstream>
 #include <sstream>
@@ -80,10 +81,20 @@ struct LightOffsetConstraint
  * load time to cover the entire stage with pixels with no borders,
  * and filter mode BOX_THEN_LINEAR to sample the image with maximum quality.
  */
-ResourceImage LoadStageFillingImage( const char * const imagePath )
+Texture LoadStageFillingTexture( const char * const imagePath )
 {
   Size stageSize = Stage::GetCurrent().GetSize();
-  return ResourceImage::New( imagePath, ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+  BitmapLoader loader = BitmapLoader::New( imagePath, ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+  loader.Load();
+  PixelData pixelData = loader.GetPixelData();
+
+  Texture texture  = Texture::New( TextureType::TEXTURE_2D,
+                                   pixelData.GetPixelFormat(),
+                                   pixelData.GetWidth(),
+                                   pixelData.GetHeight() );
+  texture.Upload( pixelData );
+
+  return texture;
 }
 
 /**
@@ -280,9 +291,9 @@ private:
     mShaderFlat = Shader::New( VERTEX_SHADER_FLAT, FRAGMENT_SHADER_FLAT );
     mGeometry = CreateGeometry( MESH_FILES[mCurrentMeshId] );
 
-    Image texture = LoadStageFillingImage( TEXTURE_IMAGES[mCurrentTextureId] );
+    Texture texture = LoadStageFillingTexture( TEXTURE_IMAGES[mCurrentTextureId] );
     mTextureSet = TextureSet::New();
-    mTextureSet.SetImage( 0u, texture );
+    mTextureSet.SetTexture( 0u, texture );
 
     mRenderer = Renderer::New( mGeometry, mShaderFlat );
     mRenderer.SetTextures( mTextureSet );
@@ -343,8 +354,8 @@ private:
   bool OnChangeTexture( Toolkit::Button button )
   {
     mCurrentTextureId = ( mCurrentTextureId + 1 ) % NUM_TEXTURE_IMAGES;
-    Image texture = LoadStageFillingImage( TEXTURE_IMAGES[mCurrentTextureId] );
-    mTextureSet.SetImage( 0u, texture );
+    Texture texture = LoadStageFillingTexture( TEXTURE_IMAGES[mCurrentTextureId] );
+    mTextureSet.SetTexture( 0u, texture );
     return true;
   }
 

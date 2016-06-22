@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
 
 // INTERNAL INCLUDES
 #include "shared/view.h"
@@ -89,6 +90,21 @@ Geometry CreateGeometry()
   return texturedQuadGeometry;
 }
 
+Texture LoadTexture( const char* imagePath )
+{
+  BitmapLoader loader = BitmapLoader::New( imagePath );
+  loader.Load();
+  PixelData pixelData = loader.GetPixelData();
+
+  Texture texture  = Texture::New( TextureType::TEXTURE_2D,
+                                   pixelData.GetPixelFormat(),
+                                   pixelData.GetWidth(),
+                                   pixelData.GetHeight() );
+  texture.Upload( pixelData );
+
+  return texture;
+}
+
 /**
  * Sinusoidal curve starting at zero with 2 cycles
  */
@@ -140,15 +156,15 @@ public:
     // Hide the indicator bar
     application.GetWindow().ShowIndicator( Dali::Window::INVISIBLE );
 
-    mImage = ResourceImage::New( MATERIAL_SAMPLE );
-    Image image = ResourceImage::New( MATERIAL_SAMPLE2 );
+    Texture texture1 = LoadTexture( MATERIAL_SAMPLE );
+    Texture texture2 = LoadTexture( MATERIAL_SAMPLE2 );
 
     mShader = Shader::New( VERTEX_SHADER, FRAGMENT_SHADER );
     mTextureSet1 = TextureSet::New();
-    mTextureSet1.SetImage( 0u, mImage );
+    mTextureSet1.SetTexture( 0u, texture1 );
 
     mTextureSet2 = TextureSet::New();
-    mTextureSet2.SetImage( 0u, image );
+    mTextureSet2.SetTexture( 0u, texture2 );
 
     mGeometry = CreateGeometry();
 
@@ -258,7 +274,6 @@ private:
   Application&  mApplication;                             ///< Application instance
   Vector3 mStageSize;                                     ///< The size of the stage
 
-  Image    mImage;
   Shader   mShader;
   TextureSet mTextureSet1;
   TextureSet mTextureSet2;

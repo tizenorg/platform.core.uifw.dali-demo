@@ -21,6 +21,7 @@
 #include <dali/public-api/common/dali-common.h>
 #include <dali/integration-api/resource-policies.h>
 #include <dali/integration-api/debug.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
 #include <iostream>
 
 using namespace Dali;
@@ -214,6 +215,21 @@ unsigned int gColumnsPerPage(15);
 unsigned int gPageCount(10);
 float gDuration(10.0f);
 
+Texture LoadTexture( const char* imagePath )
+{
+  BitmapLoader loader = BitmapLoader::New( imagePath );
+  loader.Load();
+  PixelData pixelData = loader.GetPixelData();
+
+  Texture texture  = Texture::New( TextureType::TEXTURE_2D,
+                                   pixelData.GetPixelFormat(),
+                                   pixelData.GetWidth(),
+                                   pixelData.GetHeight() );
+  texture.Upload( pixelData );
+
+  return texture;
+}
+
 Renderer CreateRenderer( unsigned int index )
 {
 
@@ -225,10 +241,10 @@ Renderer CreateRenderer( unsigned int index )
     Shader shader = Shader::New( VERTEX_SHADER_TEXTURE, FRAGMENT_SHADER_TEXTURE );
 
     const char* imagePath = !gNinePatch ? IMAGE_PATH[index] : NINEPATCH_IMAGE_PATH[index];
-    Image image = ResourceImage::New( imagePath );
+    Texture texture = LoadTexture( imagePath );
 
     TextureSet textureSet = TextureSet::New();
-    textureSet.SetImage( 0u, image );
+    textureSet.SetTexture( 0u, texture );
     renderers[index] = Renderer::New( QuadMesh(), shader );
     renderers[index].SetTextures( textureSet );
     renderers[index].SetProperty( Renderer::Property::BLEND_MODE, BlendMode::OFF );

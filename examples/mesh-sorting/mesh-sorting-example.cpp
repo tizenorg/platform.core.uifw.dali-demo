@@ -18,6 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/rendering/renderer.h>
 #include <dali-toolkit/dali-toolkit.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
 #include <stdio.h>
 #include <sstream>
 #include <cstring>
@@ -112,6 +113,21 @@ Geometry CreateGeometry()
   return texturedQuadGeometry;
 }
 
+Texture LoadTexture( const char* imagePath )
+{
+  BitmapLoader loader = BitmapLoader::New( imagePath );
+  loader.Load();
+  PixelData pixelData = loader.GetPixelData();
+
+  Texture texture  = Texture::New( TextureType::TEXTURE_2D,
+                                   pixelData.GetPixelFormat(),
+                                   pixelData.GetWidth(),
+                                   pixelData.GetHeight() );
+  texture.Upload( pixelData );
+
+  return texture;
+}
+
 } // anonymous namespace
 
 // This example shows how to use a simple mesh
@@ -164,9 +180,9 @@ public:
 
     for( unsigned i=0; i<NUMBER_OF_SAMPLES; ++i)
     {
-      Image image = ResourceImage::New( IMAGES[i] );
+      Texture texture = LoadTexture( IMAGES[i] );
       TextureSet textureSet = TextureSet::New();
-      textureSet.SetImage( 0u, image );
+      textureSet.SetTexture( 0u, texture );
       if( i==0 ) { firstTextureSet = textureSet; }
 
       Renderer renderer = Renderer::New( mGeometry, mShader );

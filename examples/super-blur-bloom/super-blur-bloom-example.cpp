@@ -18,6 +18,8 @@
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-toolkit/devel-api/controls/super-blur-view/super-blur-view.h>
 #include <dali-toolkit/devel-api/controls/bloom-view/bloom-view.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
+#include <dali/devel-api/images/atlas.h>
 #include "shared/view.h"
 
 using namespace Dali;
@@ -42,7 +44,6 @@ const char* BACKGROUND_IMAGES[]=
   DEMO_IMAGE_DIR "background-magnifier.jpg",
 };
 const unsigned int NUM_BACKGROUND_IMAGES( sizeof( BACKGROUND_IMAGES ) / sizeof( BACKGROUND_IMAGES[0] ) );
-}
 
 /**
  * @brief Load an image, scaled-down to no more than the stage dimensions.
@@ -52,10 +53,19 @@ const unsigned int NUM_BACKGROUND_IMAGES( sizeof( BACKGROUND_IMAGES ) / sizeof( 
  * and filter mode BOX_THEN_LINEAR to sample the image with
  * maximum quality.
  */
-ResourceImage LoadStageFillingImage( const char * const imagePath )
+Atlas LoadStageFillingImage( const char* imagePath )
 {
   Size stageSize = Stage::GetCurrent().GetSize();
-  return ResourceImage::New( imagePath, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+  BitmapLoader loader = BitmapLoader::New( imagePath, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+  loader.Load();
+  PixelData pixelData = loader.GetPixelData();
+
+  Atlas image  = Atlas::New( pixelData.GetWidth(), pixelData.GetHeight(), pixelData.GetPixelFormat() );
+  image.Upload( pixelData, 0u, 0u );
+
+  return image;
+}
+
 }
 
 class BlurExample : public ConnectionTracker
