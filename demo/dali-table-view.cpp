@@ -484,13 +484,13 @@ Actor DaliTableView::CreateTile( const std::string& name, const std::string& tit
 
 Toolkit::ImageView DaliTableView::NewStencilImage()
 {
-  Toolkit::ImageView stencil = ImageView::New( TILE_BACKGROUND_ALPHA );
-
+  Toolkit::ImageView stencil = ImageView::New();
   stencil.SetParentOrigin( ParentOrigin::CENTER );
   stencil.SetAnchorPoint( AnchorPoint::CENTER );
   stencil.SetDrawMode( DrawMode::STENCIL );
 
   Property::Map shaderEffect = CreateAlphaDiscardEffect();
+  shaderEffect["url"] = TILE_BACKGROUND_ALPHA;
   stencil.SetProperty( Toolkit::ImageView::Property::IMAGE, shaderEffect );
 
   return stencil;
@@ -710,13 +710,16 @@ void DaliTableView::AddBackgroundActors( Actor layer, int count, BufferImage dis
   for( int i = 0; i < count; ++i )
   {
     float randSize = Random::Range( 10.0f, 400.0f );
-    ImageView dfActor = ImageView::New( distanceField );
+    ImageView dfActor = ImageView::New();
     dfActor.SetSize( Vector2( randSize, randSize ) );
     dfActor.SetParentOrigin( ParentOrigin::CENTER );
 
     Dali::Property::Map effect = Toolkit::CreateDistanceFieldEffect();
+    effect["rendererType"] = "image";
     dfActor.SetProperty( Toolkit::ImageView::Property::IMAGE, effect );
     dfActor.SetColor( BUBBLE_COLOR[ i%NUMBER_OF_BUBBLE_COLOR ] );
+    dfActor.SetImage( distanceField );
+
     layer.Add( dfActor );
   }
 
@@ -790,8 +793,7 @@ void DaliTableView::GenerateCircle( const Size& size, std::vector< unsigned char
 
 ImageView DaliTableView::CreateLogo( std::string imagePath )
 {
-  Image image = ResourceImage::New( imagePath );
-  ImageView logo = ImageView::New( image );
+  ImageView logo = ImageView::New( imagePath );
 
   logo.SetAnchorPoint( AnchorPoint::CENTER );
   logo.SetParentOrigin( ParentOrigin::CENTER );
