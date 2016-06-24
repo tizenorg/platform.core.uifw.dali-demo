@@ -16,9 +16,41 @@
  */
 
 #include <dali-toolkit/dali-toolkit.h>
-
+#include <cstdio>
 using namespace Dali;
 using Dali::Toolkit::TextLabel;
+
+namespace
+{
+Image LoadImageSynchronously(const std::string& path, ImageDimensions dimensions = ImageDimensions(0, 0), FittingMode::Type fittingMode = FittingMode::DEFAULT)
+{
+  EncodedBufferImage image;
+  FILE *fp = fopen(path.c_str(), "r");
+  if( fp )
+  {
+    fseek(fp, 0L, SEEK_END);
+    long int fileSize = ftell(fp);
+    if (fileSize == -1L) {
+      fclose(fp);
+      return image;
+    }
+    fseek(fp, 0L, SEEK_SET);
+    uint8_t* memblock = new uint8_t[fileSize];
+    size_t read = fread(memblock, sizeof(uint8_t), fileSize, fp);
+    fclose(fp);
+    if(read)
+    {
+      image = EncodedBufferImage::New(memblock, fileSize, dimensions, fittingMode, SamplingMode::DEFAULT, Image::UNUSED);
+    }
+    delete[] memblock;
+  }
+  return image;
+}
+
+const int kWidth = 360;
+const int kHeight = 640;
+}
+
 
 // This example shows how to create and display Hello World! using a simple TextActor
 //
@@ -27,7 +59,8 @@ class HelloWorldController : public ConnectionTracker
 public:
 
   HelloWorldController( Application& application )
-  : mApplication( application )
+  : mApplication( application ),
+    mIndex(0)
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect( this, &HelloWorldController::Create );
@@ -45,24 +78,38 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Color::WHITE );
 
-    TextLabel textLabel = TextLabel::New( "Hello World" );
-    textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
-    textLabel.SetName( "helloWorldLabel" );
-    stage.Add( textLabel );
-
+    mImageView = Toolkit::ImageView::New();
+    mImageView.SetParentOrigin( ParentOrigin::CENTER);
+    mImageView.SetAnchorPoint( AnchorPoint::CENTER);
+    stage.Add( mImageView );
+    mImageView.SetSize( kWidth, kHeight, 1.0f );
+    mImageView.SetPosition( 0.0f, 0.0, 0.0f );
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchSignal().Connect( this, &HelloWorldController::OnTouch );
+
   }
 
   bool OnTouch( Actor actor, const TouchData& touch )
   {
-    // quit the application
-    mApplication.Quit();
+    if ( touch.GetState(0) == PointState::DOWN )
+    {
+      // quit the application
+      //mApplication.Quit();
+      char cpath[256];
+      sprintf(cpath, "/tmp/bg/gallery-%d.jpg", mIndex);
+      std::string path(cpath);
+      ImageDimensions dimensions( kWidth, kHeight );
+      Image image = LoadImageSynchronously(path, dimensions, FittingMode::SCALE_TO_FILL );
+      mImageView.SetImage( image );
+      mIndex ++;
+    }
     return true;
   }
 
 private:
-  Application&  mApplication;
+  Application&            mApplication;
+  Toolkit::ImageView      mImageView;
+  int mIndex;
 };
 
 void RunTest( Application& application )
