@@ -15,11 +15,124 @@
  *
  */
 
+#include <dali/dali.h>
+#include <dali/devel-api/rendering/renderer.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
+
+
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
 using Dali::Toolkit::TextLabel;
 
+namespace
+{
+
+static const char* VERTEX_SHADER_TEXTURE = DALI_COMPOSE_SHADER(
+    attribute mediump vec2 aPosition;\n
+    attribute mediump vec2 aTexCoord;\n
+    uniform mediump mat4 uMvpMatrix;\n
+    uniform mediump vec3 uSize;\n
+    varying mediump vec2 vTexCoord;\n
+    void main()\n
+    {\n
+      vec4 position = vec4(aPosition,0.0,1.0)*vec4(uSize,1.0);\n
+      gl_Position = uMvpMatrix * position;\n
+      vTexCoord = aTexCoord;\n
+    }\n
+);
+
+static const char* FRAGMENT_SHADER_TEXTURE = DALI_COMPOSE_SHADER(
+    uniform lowp vec4 uColor;\n
+    uniform sampler2D sTexture;\n
+    varying mediump vec2 vTexCoord;\n
+
+    void main()\n
+    {\n
+      gl_FragColor = texture2D( sTexture, vTexCoord ) * uColor;\n
+    }\n
+);
+/**
+ * @brief Creates a quad with texture coordinates
+ * @return A geometry
+ */
+Geometry CreateQuadGeometry()
+{
+  struct Vertex
+  {
+    Vector2 position;
+    Vector2 texCoord;
+  };
+
+  static const Vertex gQuadWithTexture[] = {{ Vector2( -0.5f, -0.5f ), Vector2( 0.0f, 0.0f ) },
+                                            { Vector2(  0.5f, -0.5f ), Vector2( 1.0f, 0.0f ) },
+                                            { Vector2( -0.5f,  0.5f ), Vector2( 0.0f, 1.0f ) },
+                                            { Vector2(  0.5f,  0.5f ), Vector2( 1.0f, 1.0f ) }};
+  PropertyBuffer vertexBuffer;
+  Property::Map vertexFormat;
+  vertexFormat["aPosition"] = Property::VECTOR2;
+  vertexFormat["aTexCoord"] = Property::VECTOR2;
+
+  //Create a vertex buffer for vertex positions and texture coordinates
+  vertexBuffer = PropertyBuffer::New( vertexFormat );
+  vertexBuffer.SetData( gQuadWithTexture, 4u );
+
+  //Create the geometry
+  Geometry geometry = Geometry::New();
+  geometry.AddVertexBuffer( vertexBuffer );
+  geometry.SetGeometryType(Geometry::TRIANGLE_STRIP );
+
+  return geometry;
+}
+
+
+/**
+ * @brief Creates an actor to render a native image
+ * @param[in] texture The texture creates from a native image
+ * @param[in] nativeImageInterface The native image interface used to create the texture
+ * @return An actor that renders the texture
+ */
+Actor CreateNativeImageActor( Texture texture )
+{
+  Actor actor = Actor::New();
+  Geometry geometry = CreateQuadGeometry();
+  Shader shader = Shader::New(VERTEX_SHADER_TEXTURE, FRAGMENT_SHADER_TEXTURE);
+  Renderer renderer = Renderer::New( geometry, shader );
+  TextureSet textureSet = TextureSet::New();
+  textureSet.SetTexture( 0u, texture );
+  renderer.SetTextures( textureSet );
+
+  actor.AddRenderer( renderer );
+  actor.SetSize( texture.GetWidth(), texture.GetHeight() );
+  return actor;
+}
+
+Dali::PixelData LoadPixelData( const char*imagePath, bool fillStage )
+{
+  Dali::BitmapLoader loader;
+  if( fillStage )
+  {
+    Dali::Vector2 stageSize = Dali::Stage::GetCurrent().GetSize();
+    loader = Dali::BitmapLoader::New( imagePath, Dali::ImageDimensions( stageSize.x, stageSize.y ), Dali::FittingMode::SCALE_TO_FILL, Dali::SamplingMode::BOX_THEN_LINEAR );
+  }
+  else
+  {
+    loader = Dali::BitmapLoader::New( imagePath );
+  }
+  loader.Load();
+
+  return loader.GetPixelData();
+}
+
+Texture LoadTexture( const char* url )
+{
+  PixelData pixelData = LoadPixelData( url, false );
+  Texture texture = Texture::New( TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight() );
+  texture.Upload( pixelData );
+  return texture;
+}
+
+}
 // This example shows how to create and display Hello World! using a simple TextActor
 //
 class HelloWorldController : public ConnectionTracker
@@ -49,6 +162,14 @@ public:
     textLabel.SetAnchorPoint( AnchorPoint::TOP_LEFT );
     textLabel.SetName( "helloWorldLabel" );
     stage.Add( textLabel );
+
+    //Texture texture = LoadTexture( DEMO_IMAGE_DIR "gallery-large-4.astc");
+    Texture texture = LoadTexture( DEMO_IMAGE_DIR "tx-etc1.ktx");
+    Actor actor = CreateNativeImageActor(texture);
+    actor.SetSize( 400.0f, 400.0f );
+    actor.SetAnchorPoint( AnchorPoint::CENTER);
+    actor.SetParentOrigin( ParentOrigin::CENTER );
+    stage.Add( actor );
 
     // Respond to a click anywhere on the stage
     stage.GetRootLayer().TouchSignal().Connect( this, &HelloWorldController::OnTouch );
