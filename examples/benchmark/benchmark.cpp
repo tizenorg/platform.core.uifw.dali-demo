@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,9 @@
  *
  */
 
-#include <dali-toolkit/dali-toolkit.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
 #include <dali/devel-api/rendering/renderer.h>
-#include <dali/public-api/common/dali-common.h>
-#include <dali/integration-api/resource-policies.h>
-#include <dali/integration-api/debug.h>
-#include <iostream>
+#include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
 using namespace Dali::Toolkit;
@@ -224,9 +221,13 @@ Renderer CreateRenderer( unsigned int index )
     Shader shader = Shader::New( VERTEX_SHADER_TEXTURE, FRAGMENT_SHADER_TEXTURE );
 
     const char* imagePath = !gNinePatch ? IMAGE_PATH[index] : NINEPATCH_IMAGE_PATH[index];
-    Image image = ResourceImage::New(imagePath);
+    Dali::BitmapLoader loader = Dali::BitmapLoader::New( imagePath );
+    loader.Load();
+    PixelData pixelData = loader.GetPixelData();
+    Texture texture = Texture::New( TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight() );
+    texture.Upload( pixelData );
     TextureSet textureSet = TextureSet::New();
-    textureSet.SetImage( 0u, image );
+    textureSet.SetTexture( 0u, texture );
     renderers[index] = Renderer::New( QuadMesh(), shader );
     renderers[index].SetTextures( textureSet );
     renderers[index].SetProperty( Renderer::Property::BLEND_MODE, BlendMode::OFF );
