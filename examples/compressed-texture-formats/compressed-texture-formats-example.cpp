@@ -15,15 +15,109 @@
  *
  */
 
+#include <dali/dali.h>
+#include <dali/devel-api/rendering/renderer.h>
+#include <dali/devel-api/adaptor-framework/bitmap-loader.h>
+
 #include <dali-toolkit/dali-toolkit.h>
 
 using namespace Dali;
 using Dali::Toolkit::TextLabel;
 
+namespace
+{
+
 const char* IMAGE_FILENAME_ETC         =        DEMO_IMAGE_DIR "tx-etc1.ktx";
 const char* IMAGE_FILENAME_ASTC_LINEAR =        DEMO_IMAGE_DIR "tx-astc-4x4-linear.ktx";
 const char* IMAGE_FILENAME_ASTC_LINEAR_NATIVE = DEMO_IMAGE_DIR "tx-astc-4x4-linear-native.astc";
 
+/**
+ * @brief Create a renderer to render an image and adds it to an actor
+ * @param[in] actor The actor that will be used to render the image
+ * @param[in] imagePath The path where the image file is located
+ */
+void AddImage( Actor& actor, const char*imagePath )
+{
+  //Create the shader
+  static Shader shader;
+  if( !shader )
+  {
+    static const char* VERTEX_SHADER_TEXTURE = DALI_COMPOSE_SHADER(
+        attribute mediump vec2 aPosition;\n
+        attribute mediump vec2 aTexCoord;\n
+        uniform mediump mat4 uMvpMatrix;\n
+        uniform mediump vec3 uSize;\n
+        varying mediump vec2 vTexCoord;\n
+        void main()\n
+        {\n
+          vec4 position = vec4(aPosition,0.0,1.0)*vec4(uSize,1.0);\n
+          gl_Position = uMvpMatrix * position;\n
+          vTexCoord = aTexCoord;\n
+        }\n
+    );
+
+    static const char* FRAGMENT_SHADER_TEXTURE = DALI_COMPOSE_SHADER(
+        uniform lowp vec4 uColor;\n
+        uniform sampler2D sTexture;\n
+        varying mediump vec2 vTexCoord;\n
+
+        void main()\n
+        {\n
+          gl_FragColor = texture2D( sTexture, vTexCoord ) * uColor;\n
+        }\n
+    );
+
+    shader = Shader::New(VERTEX_SHADER_TEXTURE, FRAGMENT_SHADER_TEXTURE);
+  }
+
+  //Create the geometry
+  static Geometry geometry;
+  if( !geometry )
+  {
+    struct Vertex
+    {
+      Vector2 position;
+      Vector2 texCoord;
+    };
+
+    static const Vertex gQuadWithTexture[] = {{ Vector2( -0.5f, -0.5f ), Vector2( 0.0f, 0.0f ) },
+                                              { Vector2(  0.5f, -0.5f ), Vector2( 1.0f, 0.0f ) },
+                                              { Vector2( -0.5f,  0.5f ), Vector2( 0.0f, 1.0f ) },
+                                              { Vector2(  0.5f,  0.5f ), Vector2( 1.0f, 1.0f ) }};
+    PropertyBuffer vertexBuffer;
+    Property::Map vertexFormat;
+    vertexFormat["aPosition"] = Property::VECTOR2;
+    vertexFormat["aTexCoord"] = Property::VECTOR2;
+
+    //Create a vertex buffer for vertex positions and texture coordinates
+    vertexBuffer = PropertyBuffer::New( vertexFormat );
+    vertexBuffer.SetData( gQuadWithTexture, 4u );
+
+    //Create the geometry
+    geometry = Geometry::New();
+    geometry.AddVertexBuffer( vertexBuffer );
+    geometry.SetGeometryType(Geometry::TRIANGLE_STRIP );
+  }
+
+  //Load the texture
+  Dali::BitmapLoader loader = Dali::BitmapLoader::New( imagePath );
+  loader.Load();
+  PixelData pixelData = loader.GetPixelData();
+  Texture texture = Texture::New( TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight() );
+  texture.Upload( pixelData );
+  TextureSet textureSet = TextureSet::New();
+  textureSet.SetTexture( 0u, texture );
+
+  //Create the renderer
+  Renderer renderer = Renderer::New( geometry, shader );
+  renderer.SetTextures( textureSet );
+
+  //Set actor size and add the renderer
+  actor.SetSize( texture.GetWidth(), texture.GetHeight() );
+  actor.AddRenderer( renderer );
+}
+
+}
 /**
  * @brief This example shows 3 images, each of a different compressed texture type.
  * If built and run on a OpenGL ES 3.1 compatable target, then all 3 images will display.
@@ -90,20 +184,26 @@ public:
     table.SetCellAlignment( Toolkit::TableView::CellPosition( 2u, 0u ), HorizontalAlignment::LEFT, VerticalAlignment::CENTER );
 
     // Add images.
-    Toolkit::ImageView imageView = Toolkit::ImageView::New( ResourceImage::New( IMAGE_FILENAME_ETC ) );
-    imageView.SetAnchorPoint( AnchorPoint::CENTER );
-    imageView.SetParentOrigin( ParentOrigin::CENTER );
-    table.AddChild( imageView, Toolkit::TableView::CellPosition( 0u, 1u ) );
+    Actor actor = Actor::New();
+    actor.SetAnchorPoint( AnchorPoint::CENTER );
+    actor.SetParentOrigin( ParentOrigin::CENTER );
+    AddImage( actor, IMAGE_FILENAME_ETC );
+    table.AddChild( actor, Toolkit::TableView::CellPosition( 0u, 1u ) );
+    table.SetCellAlignment( Toolkit::TableView::CellPosition( 0u, 1u ), HorizontalAlignment::CENTER, VerticalAlignment::CENTER );
 
-    imageView = Toolkit::ImageView::New( ResourceImage::New( IMAGE_FILENAME_ASTC_LINEAR ) );
-    imageView.SetAnchorPoint( AnchorPoint::CENTER );
-    imageView.SetParentOrigin( ParentOrigin::CENTER );
-    table.AddChild( imageView, Toolkit::TableView::CellPosition( 1u, 1u ) );
+    actor = Actor::New();
+    actor.SetAnchorPoint( AnchorPoint::CENTER );
+    actor.SetParentOrigin( ParentOrigin::CENTER );
+    AddImage( actor, IMAGE_FILENAME_ASTC_LINEAR );
+    table.AddChild( actor, Toolkit::TableView::CellPosition( 1u, 1u ) );
+    table.SetCellAlignment( Toolkit::TableView::CellPosition( 1u, 1u ), HorizontalAlignment::CENTER, VerticalAlignment::CENTER );
 
-    imageView = Toolkit::ImageView::New( ResourceImage::New( IMAGE_FILENAME_ASTC_LINEAR_NATIVE ) );
-    imageView.SetAnchorPoint( AnchorPoint::CENTER );
-    imageView.SetParentOrigin( ParentOrigin::CENTER );
-    table.AddChild( imageView, Toolkit::TableView::CellPosition( 2u, 1u ) );
+    actor = Actor::New();
+    actor.SetAnchorPoint( AnchorPoint::CENTER );
+    actor.SetParentOrigin( ParentOrigin::CENTER );
+    AddImage( actor, IMAGE_FILENAME_ASTC_LINEAR_NATIVE );
+    table.AddChild( actor, Toolkit::TableView::CellPosition( 2u, 1u ) );
+    table.SetCellAlignment( Toolkit::TableView::CellPosition( 2u, 1u ), HorizontalAlignment::CENTER, VerticalAlignment::CENTER );
 
     stage.Add( table );
 
