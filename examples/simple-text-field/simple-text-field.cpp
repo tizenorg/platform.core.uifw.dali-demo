@@ -55,6 +55,7 @@ public:
     Stage stage = Stage::GetCurrent();
     stage.SetBackgroundColor( Vector4( 0.04f, 0.345f, 0.392f, 1.0f ) );
 
+/**/
     TextField field = TextField::New();
     field.SetParentOrigin( ParentOrigin::CENTER );
     field.SetSize( 300.f, 60.f );
@@ -64,8 +65,27 @@ public:
     field.SetProperty( TextField::Property::TEXT_COLOR, Color::BLACK );
     field.SetProperty( TextField::Property::PLACEHOLDER_TEXT, "Unnamed folder" );
     field.SetProperty( TextField::Property::PLACEHOLDER_TEXT_FOCUSED, "Enter folder name." );
+    field.SetProperty( TextField::Property::ENABLE_MARKUP, true );
+
+    field.SetProperty( TextField::Property::TEXT, "\xF0\x9F\x98\x81\xF0\x9F\x98\x82\xF0\x9F\x98\x85<font size='25'>\xF0\x9F\x98\x89\xF0\x9F\x98\xA0\xF0\x9F\x98\x8C</font>" );
 
     stage.Add( field );
+/**/
+
+    TextLabel label = TextLabel::New();
+    label.SetParentOrigin( ParentOrigin::CENTER );
+    label.SetSize( 300.f, 200.f );
+    label.SetBackgroundColor( Color::WHITE );
+    label.SetPosition( 0.f, -200.f, 0.f );
+
+    label.SetProperty( TextLabel::Property::TEXT_COLOR, Color::BLACK );
+    label.SetProperty( TextLabel::Property::MULTI_LINE, true );
+    label.SetProperty( TextLabel::Property::ENABLE_MARKUP, true );
+
+    label.SetProperty( TextField::Property::TEXT, "\xF0\x9F\x98\x81\xF0\x9F\x98\x82\xF0\x9F\x98\x85\xF0\x9F\x98\x89\xF0\x9F\x98\xA0\xF0\x9F\x98\x8C\n   Hello world" );
+    label.SetProperty( TextField::Property::TEXT, "\xF0\x9F\x98\x81\xF0\x9F\x98\x82\xF0\x9F\x98\x85\xF0\x9F\x98\x89\xF0\x9F\x98\xA0\xF0\x9F\x98\x8C\n   Hello world\n   <font size='25'>\xF0\x9F\x98\x81\xF0\x9F\x98\x82\xF0\x9F\x98\x85\xF0\x9F\x98\x89\xF0\x9F\x98\xA0\xF0\x9F\x98\x8C</font>" );
+
+    stage.Add( label );
   }
 
 private:
