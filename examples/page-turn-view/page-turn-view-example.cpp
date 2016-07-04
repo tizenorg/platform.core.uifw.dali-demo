@@ -83,21 +83,28 @@ class PortraitPageFactory : public PageFactory
    * @param[in] pageId The ID of the page to create.
    * @return An image, or an uninitialized pointer if the ID is out of range.
    */
-  virtual Image NewPage( unsigned int pageId )
+  virtual Texture NewPage( unsigned int pageId )
   {
-    Image page;
+    if( mImageSize.GetWidth() == 0u || mImageSize.GetHeight() == 0u )
+    {
+      mImageSize = ResourceImage::GetImageSize(BOOK_COVER_PORTRAIT);
+    }
 
+    ImageAtlas atlas = ImageAtlas::New( mImageSize.GetWidth(), mImageSize.GetHeight(), Pixel::RGB888 );
+    Vector4 textureRect;
     if( pageId == 0 )
     {
-      page = ResourceImage::New( BOOK_COVER_PORTRAIT );
+      atlas.Upload( textureRect, BOOK_COVER_PORTRAIT, mImageSize );
     }
     else
     {
-      page = ResourceImage::New( PAGE_IMAGES_PORTRAIT[ (pageId-1) % NUMBER_OF_PORTRAIT_IMAGE ] );
+      atlas.Upload( textureRect, PAGE_IMAGES_PORTRAIT[ (pageId-1) % NUMBER_OF_PORTRAIT_IMAGE ], mImageSize );
     }
 
-    return page;
+    return atlas.GetAtlas();
   }
+
+  ImageDimensions mImageSize;
 };
 
 class LandscapePageFactory : public PageFactory
@@ -116,7 +123,7 @@ class LandscapePageFactory : public PageFactory
    * @param[in] pageId The ID of the page to create.
    * @return An image, or an uninitialized pointer if the ID is out of range.
    */
-  virtual Image NewPage( unsigned int pageId )
+  virtual Texture NewPage( unsigned int pageId )
   {
     if( mImageSize.GetWidth() == 0u || mImageSize.GetHeight() == 0u )
     {
