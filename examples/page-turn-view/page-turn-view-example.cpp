@@ -68,7 +68,7 @@ const char* PAGE_IMAGES_LANDSCAPE[] =
 };
 const unsigned int NUMBER_OF_LANDSCAPE_IMAGE( sizeof(PAGE_IMAGES_LANDSCAPE) / sizeof(PAGE_IMAGES_LANDSCAPE[0]) );
 
-Atlas LoadImages( const char*imagePath1, const char* imagePath2 )
+Texture LoadImages( const char*imagePath1, const char* imagePath2 )
 {
   PixelData pixelData1 = DemoHelper::LoadPixelData( imagePath1, ImageDimensions(), FittingMode::DEFAULT, SamplingMode::DEFAULT );
   PixelData pixelData2 = DemoHelper::LoadPixelData( imagePath2, ImageDimensions(), FittingMode::DEFAULT, SamplingMode::DEFAULT );
@@ -76,11 +76,11 @@ Atlas LoadImages( const char*imagePath1, const char* imagePath2 )
   unsigned int width = pixelData1.GetWidth()+pixelData2.GetWidth();
   unsigned int height = pixelData1.GetHeight() > pixelData2.GetHeight() ? pixelData1.GetHeight() : pixelData2.GetHeight();
 
-  Atlas image  = Atlas::New( width, height );
-  image.Upload( pixelData1, 0u, 0u );
-  image.Upload( pixelData2, pixelData1.GetWidth(), 0u );
+  Texture texture  = Texture::New( TextureType::TEXTURE_2D, pixelData1.GetPixelFormat(), width, height );
+  texture.Upload( pixelData1, 0u, 0u, 0u, 0u, pixelData1.GetWidth(), pixelData1.GetHeight() );
+  texture.Upload( pixelData2, 0u, 0u, pixelData1.GetWidth(), 0u, pixelData2.GetWidth(), pixelData2.GetHeight() );
 
-  return image;
+  return texture;
 }
 
 }// end LOCAL STUFF
@@ -100,17 +100,17 @@ class PortraitPageFactory : public PageFactory
    * @param[in] pageId The ID of the page to create.
    * @return An image, or an uninitialized pointer if the ID is out of range.
    */
-  virtual Image NewPage( unsigned int pageId )
+  virtual Texture NewPage( unsigned int pageId )
   {
-    Atlas page;
+    Texture page;
 
     if( pageId == 0 )
     {
-      page = DemoHelper::LoadImage( BOOK_COVER_PORTRAIT );
+      page = DemoHelper::LoadTexture( BOOK_COVER_PORTRAIT );
     }
     else
     {
-      page = DemoHelper::LoadImage( PAGE_IMAGES_PORTRAIT[ (pageId-1) % NUMBER_OF_PORTRAIT_IMAGE ] );
+      page = DemoHelper::LoadTexture( PAGE_IMAGES_PORTRAIT[ (pageId-1) % NUMBER_OF_PORTRAIT_IMAGE ] );
     }
 
     return page;
@@ -133,10 +133,9 @@ class LandscapePageFactory : public PageFactory
    * @param[in] pageId The ID of the page to create.
    * @return An image, or an uninitialized pointer if the ID is out of range.
    */
-  virtual Image NewPage( unsigned int pageId )
+  virtual Texture NewPage( unsigned int pageId )
   {
-
-    Atlas page;
+    Texture page;
     if( pageId == 0 )
     {
       page = LoadImages( BOOK_COVER_LANDSCAPE, BOOK_COVER_BACK_LANDSCAPE );
