@@ -85,6 +85,8 @@ ENDFOREACH(flag)
 SET(DEMO_STYLE_IMAGE_DIR ${IMAGES_DIR})
 CONFIGURE_FILE( ${LOCAL_STYLE_DIR}/demo-theme.json.in ${LOCAL_STYLE_DIR}/demo-theme.json )
 INSTALL(FILES ${LOCAL_STYLE_DIR}/demo-theme.json DESTINATION ${STYLE_DIR})
+CONFIGURE_FILE( ${LOCAL_SCRIPTS_DIR}/simple-image-wall.js.in ${LOCAL_SCRIPTS_DIR}/simple-image-wall.js )
+INSTALL(FILES ${LOCAL_SCRIPTS_DIR}/simple-image-wall.js DESTINATION ${SCRIPTS_DIR})
 
 SET(PKG_LIST dali-core
              dali-adaptor
