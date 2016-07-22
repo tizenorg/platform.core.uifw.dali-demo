@@ -90,7 +90,11 @@ INSTALL(FILES ${LOCAL_SCRIPTS_DIR}/simple-image-wall.js DESTINATION ${SCRIPTS_DI
 
 SET(PKG_LIST dali-core
              dali-adaptor
-             dali-toolkit )
+             dali-toolkit
+             libtbm
+             ecore
+             ecore-wayland
+)
 
 INCLUDE(FindPkgConfig)
 pkg_check_modules(REQUIRED_PKGS REQUIRED ${PKG_LIST})
