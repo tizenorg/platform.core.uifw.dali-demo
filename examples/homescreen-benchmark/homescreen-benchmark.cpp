@@ -336,7 +336,6 @@ const char* DEMO_APPS_NAMES[] =
 
 // this code comes from command-line-options.cpp. the reason it's here is to
 // keep consistent the extra-help formatting when '--help' used
-
 void PrintHelp( const char * const opt, const char * const optDescription)
 {
   const std::ios_base::fmtflags flags = std::cout.flags();
@@ -350,13 +349,13 @@ void PrintHelp( const char * const opt, const char * const optDescription)
 
 const float PAGE_SCALE_FACTOR_X             ( 0.95f );
 const float PAGE_SCALE_FACTOR_Y             ( 0.95f );
-const float PAGE_DURATION_SCALE_FACTOR      ( 2.0f ); // time-scale factor, larger = animation is slower
+const float PAGE_DURATION_SCALE_FACTOR      ( 10.0f ); // time-scale factor, larger = animation is slower
 
 const float DEFAULT_OPT_ROW_COUNT           ( 5 );
 const float DEFAULT_OPT_COL_COUNT           ( 4 );
 const float DEFAULT_OPT_PAGE_COUNT          ( 10 );
-const bool  DEFAULT_OPT_USETABLEVIEW        ( false );
-
+const bool  DEFAULT_OPT_USETABLEVIEW        ( true );
+const bool  DEFAULT_OPT_BATCHINGENABLED     ( true );
 }
 
 // This example is a benchmark that mimics the paged applications list of the homescreen app
@@ -373,7 +372,8 @@ public:
       mRows( DEFAULT_OPT_ROW_COUNT ),
       mCols( DEFAULT_OPT_COL_COUNT ),
       mPageCount( DEFAULT_OPT_PAGE_COUNT ),
-      mUseTableView( DEFAULT_OPT_USETABLEVIEW )
+      mUseTableView( DEFAULT_OPT_USETABLEVIEW ),
+      mBatchingEnabled( DEFAULT_OPT_BATCHINGENABLED )
     {
     }
 
@@ -381,6 +381,7 @@ public:
     int   mCols;
     int   mPageCount;
     bool  mUseTableView;
+    bool  mBatchingEnabled;
   };
 
   // animation script data
@@ -456,6 +457,8 @@ public:
     if( mConfig.mUseTableView )
     {
       Toolkit::TableView tableView = Toolkit::TableView::New( mConfig.mRows, mConfig.mCols );
+
+      // create geometry batcher for table view
       tableView.SetBackgroundColor( Vector4( 0.0f, 0.0f, 0.0f, 0.5f ) );
       pageActor = tableView;
     }
@@ -485,10 +488,9 @@ public:
     // the image/label area tries to make sure the positioning will be relative to previous sibling
     const float IMAGE_AREA = 0.60f;
     const float LABEL_AREA = 0.50f;
+    Vector2 dpi = Stage::GetCurrent().GetDpi();
 
     static int currentIconIndex = 0;
-
-    Vector2 dpi = Stage::GetCurrent().GetDpi();
 
     for( int y = 0; y < mConfig.mRows; ++y )
     {
@@ -512,8 +514,15 @@ public:
           iconView.SetSizeScalePolicy( SizeScalePolicy::FIT_WITH_ASPECT_RATIO );
         }
 
-        // create image view
-        Toolkit::ImageView imageView = Toolkit::ImageView::New( IMAGE_PATH[currentIconIndex] );
+        // create empty image to avoid early renderer creation
+        Toolkit::ImageView imageView = Toolkit::ImageView::New();
+
+        // enable/disable batching
+        Property::Map map;
+        map[ "url" ] = IMAGE_PATH[currentIconIndex];
+        map[ "batchingEnabled" ] = mConfig.mBatchingEnabled;
+
+        imageView.SetProperty( Toolkit::ImageView::Property::IMAGE, map );
         imageView.SetResizePolicy( ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS );
         imageView.SetSizeScalePolicy( SizeScalePolicy::FIT_WITH_ASPECT_RATIO );
         imageView.SetAnchorPoint( AnchorPoint::CENTER );
@@ -530,9 +539,8 @@ public:
         textLabel.SetProperty( Toolkit::TextLabel::Property::POINT_SIZE, (((float)( ROW_HEIGHT * LABEL_AREA ) * 72.0f)  / (dpi.y))*0.25f );
         textLabel.SetProperty( Toolkit::TextLabel::Property::HORIZONTAL_ALIGNMENT, "CENTER" );
         textLabel.SetProperty( Toolkit::TextLabel::Property::VERTICAL_ALIGNMENT, "TOP" );
-
-        iconView.Add( imageView );
         imageView.Add( textLabel );
+        iconView.Add( imageView );
 
         page.Add(iconView);
 
@@ -584,10 +592,22 @@ public:
       page.SetAnchorPoint( AnchorPoint::CENTER );
       page.SetPosition( Vector3(stageSize.x*i, -0.30f*( stageSize.y-SCALED_HEIGHT ), 0.0f) );
       mScrollParent.Add( page );
+      if( mConfig.mUseTableView )
+      {
+        if( mConfig.mBatchingEnabled )
+        {
+          page.SetProperty( Actor::Property::BATCH_PARENT, true );
+        }
+      }
+      else
+      {
+        // batching only when using table view
+        mConfig.mBatchingEnabled = false;
+      }
     }
 
-    mScrollParent.SetOpacity( 0.0f );
-    mScrollParent.SetScale( Vector3(0.0f, 0.0f, 0.0f) );
+    mScrollParent.SetOpacity( 1.0f );
+    mScrollParent.SetScale( Vector3(1.0f, 1.0f, 1.0f) );
 
     // fade in
     ShowAnimation();
@@ -625,6 +645,7 @@ public:
 
   void OnAnimationEnd( Animation& source )
   {
+
     if( source == mShowAnimation )
     {
       ScriptData& frame = mScriptFrameData[0];
@@ -641,6 +662,7 @@ public:
     {
       mApplication.Quit();
     }
+
   }
 
 private:
@@ -668,7 +690,8 @@ void RunTest( Application& application, const HomescreenBenchmark::Config& confi
     PrintHelp( "c<num>", " Number of columns");
     PrintHelp( "r<num>", " Number of rows");
     PrintHelp( "p<num>", " Number of pages ( must be greater than 1 )");
-    PrintHelp( "-use-tableview", " Uses TableView for layouting");
+    PrintHelp( "-no-tableview", " Turns using TableView off for layouting");
+    PrintHelp( "-no-batching", " Turns using geometry batching off");
     return;
   }
 
@@ -699,15 +722,18 @@ int DALI_EXPORT_API main( int argc, char **argv )
     {
       config.mPageCount = atoi( arg.substr( 2 ).c_str() );
     }
-    else if( arg.compare( "--use-tableview" ) == 0 )
+    else if( arg.compare( "--no-tableview" ) == 0 )
     {
-      config.mUseTableView = true;
+      config.mUseTableView = false;
+    }
+    else if( arg.compare( "--no-batching" ) == 0 )
+    {
+      config.mBatchingEnabled = false;
     }
     else if( arg.compare( "--help" ) == 0 )
     {
       printHelpAndExit = true;
     }
-
   }
 
   Application application = Application::New( &argc, &argv );
