@@ -24,6 +24,9 @@ BuildRequires:  pkgconfig(dali-toolkit)
 #need libtzplatform-config for directory if tizen version is 3.x
 %if "%{tizen_version_major}" == "3"
 BuildRequires:  pkgconfig(libtzplatform-config)
+BuildRequires:  pkgconfig(libtbm)
+BuildRequires:  pkgconfig(ecore)
+BuildRequires:  pkgconfig(ecore-wayland)
 %endif
 
 # DALi C++ applications always run on dali-adaptor.
