@@ -160,4 +160,7 @@
 	<ui-application appid="video-view.example" exec="/usr/apps/com.samsung.dali-demo/bin/video-view.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
 		<label>Video View</label>
 	</ui-application>
+	<ui-application appid="offscreen-render-surface.example" exec="/usr/apps/com.samsung.dali-demo/bin/offscreen-render-surface.example" nodisplay="true" multiple="false" type="c++app" taskmanage="true">
+                <label>OffScreen render</label>
+        </ui-application>
 </manifest>
