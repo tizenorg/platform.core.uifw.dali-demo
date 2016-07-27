@@ -373,7 +373,7 @@ private:
   Toolkit::PushButton   mMinusButton;
   Toolkit::PushButton   mPlusButton;
   Toolkit::TextLabel    mIndicesCountLabel;
-  Geometry::GeometryType mPrimitiveType;
+  Geometry::Type mPrimitiveType;
   int      mCurrentIndexCount;
   int      mMaxIndexCount;
 };
