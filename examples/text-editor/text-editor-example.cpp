@@ -62,7 +62,6 @@ const unsigned int NUMBER_OF_COLORS = sizeof( COLORS ) / sizeof( Vector4 );
 class TextEditorExample : public ConnectionTracker
 {
 public:
-
   TextEditorExample( Application& application )
   : mApplication( application )
   {
@@ -152,7 +151,15 @@ public:
                          "Asšúm sapěret usu ůť.\n"
                          "Síť ut apeirián laboramúš percipitur, sůas hařum ín éos?\n" );
 
+    mEditor.InputStyleChangedSignal().Connect( this, &TextEditorExample::OnTextInputStyleChanged );
+
     contents.Add( mEditor );
+
+    // Will call the OnTextEditorRelayout() callback after the text editor is relaid-out.
+    // This callback addds an iddle callback to the application which may trigger a
+    // TextEditor::InputStyleChangedSignal() if the input style changed as a result of
+    // moving the cursor position.
+    mEditor.OnRelayoutSignal().Connect( this, &TextEditorExample::OnTextEditorRelayout );
   }
 
   void CreateButtonContainer()
@@ -222,16 +229,45 @@ public:
   {
     const std::string& name = button.GetName();
 
+    Vector4 color;
     if( "color" == name.substr( 0u, 5u ) )
     {
       const unsigned int index = strtoul( name.substr( 5u, 1u ).c_str(), NULL, 10u );
-      mEditor.SetProperty( TextEditor::Property::INPUT_COLOR, COLORS[index] );
+      color = COLORS[index];
+      mEditor.SetProperty( TextEditor::Property::INPUT_COLOR, color );
     }
+
+    mColorButtonOption.SetProperty( Button::Property::UNSELECTED_COLOR, color );
+    mColorButtonOption.SetProperty( Button::Property::SELECTED_COLOR, color );
 
     mButtonContainer.SetVisible( false );
     mButtonContainer.SetSensitive( false );
 
     return true;
+  }
+
+  void OnTextInputStyleChanged( TextEditor editor, TextEditor::InputStyle::Mask mask )
+  {
+    if( TextEditor::InputStyle::NONE != static_cast<TextEditor::InputStyle::Mask>( mask & TextEditor::InputStyle::COLOR ) )
+    {
+      const Vector4 color = editor.GetProperty( TextEditor::Property::INPUT_COLOR ).Get<Vector4>();
+
+      mColorButtonOption.SetProperty( Button::Property::UNSELECTED_COLOR, color );
+      mColorButtonOption.SetProperty( Button::Property::SELECTED_COLOR, color );
+    }
+
+    editor.Reset();
+  }
+
+  void OnTextEditorRelayout( Actor actor )
+  {
+    mApplication.AddIdle( MakeCallback( this, &TextEditorExample::OnApplicationIddle ) );
+  }
+
+  void OnApplicationIddle()
+  {
+    std::cout << "OnApplicationIddle" << std::endl;
+    mEditor.ApplicationIddleSignal().Emit();
   }
 
 private:
