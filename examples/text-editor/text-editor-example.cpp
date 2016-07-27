@@ -152,6 +152,8 @@ public:
                          "Asšúm sapěret usu ůť.\n"
                          "Síť ut apeirián laboramúš percipitur, sůas hařum ín éos?\n" );
 
+    mEditor.InputStyleChangedSignal().Connect( this, &TextEditorExample::OnTextInputStyleChanged );
+
     contents.Add( mEditor );
   }
 
@@ -222,16 +224,32 @@ public:
   {
     const std::string& name = button.GetName();
 
+    Vector4 color;
     if( "color" == name.substr( 0u, 5u ) )
     {
       const unsigned int index = strtoul( name.substr( 5u, 1u ).c_str(), NULL, 10u );
-      mEditor.SetProperty( TextEditor::Property::INPUT_COLOR, COLORS[index] );
+      color = COLORS[index];
+      mEditor.SetProperty( TextEditor::Property::INPUT_COLOR, color );
     }
+
+    mColorButtonOption.SetProperty( Button::Property::UNSELECTED_COLOR, color );
+    mColorButtonOption.SetProperty( Button::Property::SELECTED_COLOR, color );
 
     mButtonContainer.SetVisible( false );
     mButtonContainer.SetSensitive( false );
 
     return true;
+  }
+
+  void OnTextInputStyleChanged( TextEditor editor, TextEditor::InputStyleMask mask )
+  {
+    if( TextEditor::NONE != static_cast<TextEditor::InputStyleMask>( mask & TextEditor::INPUT_COLOR ) )
+    {
+      const Vector4 color = editor.GetProperty( TextEditor::Property::INPUT_COLOR ).Get<Vector4>();
+
+      mColorButtonOption.SetProperty( Button::Property::UNSELECTED_COLOR, color );
+      mColorButtonOption.SetProperty( Button::Property::SELECTED_COLOR, color );
+    }
   }
 
 private:
