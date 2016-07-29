@@ -215,7 +215,7 @@ class VideoViewController: public ConnectionTracker
     mCustomShader.Insert( "shader", customShader );
 
     Property::Map defaultShader;
-    customShader.Insert( "fragmentShader", DEFAULT_FRAGMENT_SHADER );
+    defaultShader.Insert( "fragmentShader", DEFAULT_FRAGMENT_SHADER );
     mDefaultShader.Insert( "rendererType", "IMAGE" );
     mDefaultShader.Insert( "shader", defaultShader );
 
