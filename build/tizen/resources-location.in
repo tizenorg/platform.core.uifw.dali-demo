@@ -1,0 +1,7 @@
+/**
+ * This file defines the location dali-demo resources 
+ */
+
+#include <cstdlib>
+
+int dali_demo_RESOURCE_DIR = setenv("DALI_APPLICATION_PACKAGE",  "@APP_DATA_DIR@" , 1);
