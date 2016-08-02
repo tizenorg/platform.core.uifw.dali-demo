@@ -131,19 +131,64 @@ public:
 
     mEditor.SetBackgroundColor( TEXT_EDITOR_BACKGROUND_COLOR );
 
+    const Size boundingBoxSize( stageSize * TEXT_EDITOR_RELATIVE_SIZE.GetVectorXY() );
+    Rect<int> boundingBox( 0,
+                           static_cast<int>( toolBarHeight ),
+                           static_cast<int>( boundingBoxSize.width ),
+                           static_cast<int>( boundingBoxSize.height - toolBarHeight ) );
+    // Rect<int> boundingBox( 0,
+    //                        0,
+    //                        static_cast<int>( boundingBoxSize.width ),
+    //                        static_cast<int>( boundingBoxSize.height ) );
+
+    mEditor.SetProperty( TextEditor::Property::DECORATION_BOUNDING_BOX, boundingBox );
     mEditor.SetProperty( TextEditor::Property::TEXT_COLOR, Color::BLACK );
+    mEditor.SetProperty( TextEditor::Property::ENABLE_MARKUP, true );
     mEditor.SetProperty( TextEditor::Property::TEXT,
                          "Lorem ipsum dolor sit amet, aeque definiebas ea mei, posse iracundia ne cum.\n"
                          "Usu ne nisl maiorum iudicabit, veniam epicurei oporteat eos an.\n"
-                         "Ne nec nulla regione albucius, mea doctus delenit ad!\n"
+                         "Ne nעכעec nulla <font size='30'>regעכעione</font> albucius, mea <font size='8'>doctus delenit ad!\n"
                          "Et everti blandit adversarium mei, eam porro neglegentur suscipiantur an.\n"
                          "Quidam corpora at duo. An eos possim scripserit?\n\n"
-                         "Aťqui dicant sěnťenťíae aň vel!\n"
+                         "Aťqui dicant sěnťenעכעťíae aň vel!\n</font>"
                          "Vis viris médiocrem elaboraret ét, verear civibus moderatius ex duo!\n"
                          "Án veri laborě iňtěgré quó, mei aď poššit lobortis, mei prompťa čonsťitůťó eů.\n"
-                         "Aliquip sanctůs delicáta quí ěá, et natum aliquam est?\n"
+                         "<font size='8'>Aliquip sanctůs delicáta quí ěá, et natum aliquam est?\n"
                          "Asšúm sapěret usu ůť.\n"
-                         "Síť ut apeirián laboramúš percipitur, sůas hařum ín éos?\n" );
+                         "Síť ut apeirián laboramúš percipitur, sůas hařum ín éos?\n"
+                         "An mei nibh molestie, sale ådhuc accusåmus nam ut!\n"
+                         "Ad reque graece pro, ius possit commune consequuntur ex, sit ex åperiåm labores ælbucius.\n</font>"
+                         "Qui no æliquip nøluisse detraxit, pri døming expetenda intellegåt te, novum fastidii fabellås eæ mea.\n"
+                         "Dolore æperiåm æd cum, audire fåcilis facilisi ea nåm, pri ex åeterno omittåm voluptua!\n"
+                         "Aeterno invidunt tincidunt mei ei, pri te quis torquatøs, in consul putant ædversarium vis?\n"
+                         "Amet dèlectus êu qùi, et véniam oçurrérêt dùô, stét melïoré vivêndum nô êst.\n"
+                         "Iriuré âliqùîp aperîam nœ nam, lâorëët oportëre usu éx, ne pér ludus argûmentum.\n"
+                         "An mei lorèm altërum commûnê. Për rîdens làbïtur dèfînitiones cù, prô tè illum pércipïtur dissentîunt.\n"
+                         "Nam éù împedit menandrî nomînatï, mea id reqùé jùsto phaêdrùm?\n"
+                         "Et dîçât mînïm pri, déniqùe deseruîsse posidœniùm èûm nê?\n"
+                         "Qúo vitáe copíosae ea. Nam homéró éxpéténdis adversariűm te, cú tractatös expeténda consulatú eum?\n"
+                         "Té vix evertí pröpriáe, ratiónibus vitupérata nec ea.\n"
+                         "Dissentiúnt delicatissimi nő nec, tale malis id nec, ei hínc decóré sea!\n"
+                         "At eüm atqui díssentiét, cú cűm luciliüs repudiare!\n"
+                         "खण्ड वातावरण स्थापित निर्माता हमारी. औषधिक कुशलता तकरीबन सोफ़्टवेर होने अधिकार लचकनहि अनुवाद बलवान उसके बिना\n"
+                         "बिन्दुओ कार्यलय सीमित? असक्षम यन्त्रालय ध्येय जाता! दिये उपलब्ध वर्णित पहोचाना ढांचा डाले। आवश्यक उपलब्ध पत्रिका एकएस!\n"
+                         "प्राण करते प्रमान ज्यादा मुश्किले पुर्व मुख्यतह ढांचामात्रुभाषा यधपि? बनाकर भारत परस्पर वेबजाल विभाजन अधिकार विकसित\n"
+                         "भेदनक्षमता देते कराना परिवहन सुस्पश्ट शीघ्र गएआप?\n"
+                         "عل النفط ديسمبر الإمداد بال, بين وترك شعار هو. لمّ من المبرمة بعتادهم بالسيطرة, أم يتم تحرّك وبغطاء, عدم في لإعادة وإقامة رجوعهم.\n"
+                         "سياسة أدولف الحيلولة أي عرض. إذ إيو الضروري والعتاد التنازلي, أمّا لبولندا لم حرب. عرض هو أفاق الأرض والفلبين, فعل بزمام الإقتصادية ان,\n"
+                         "قائمة إحتلال التحالف قد جهة.\n"
+                         "원질이 할지라도 인간의 가치를 듣는다. 행복스럽고 그들에게 자신과 보는 천하를 운다. 투명하되 불어 뼈 전인 부패뿐이다.\n"
+                         "끝까지 그들의 이상은 피는 눈에 고행을 ? 우는 든 인도하겠다는 뿐이다. 끝까지 아니한 꽃 일월과 칼이다.\n"
+                         "그러므로 얼마나 이것을 찾아 ? 인생을 눈이 청춘이 구하지 뭇 가는 품에 것이다. 보내는 가지에 갑 그리하였는가?\n"
+                         "이성은 우리 위하여서, 것이다. 무한한 할지라도 무엇을 우는 어디 수 굳세게 같이, 있다. 곳이 끓는 오직 트고, 때문이다.\n"
+                         "\n"
+                         "\n"
+                         "\n"
+                         "\n"
+                         "\n"
+                         "\n"
+                         "\n"
+                         "\n" );
 
     contents.Add( mEditor );
   }
